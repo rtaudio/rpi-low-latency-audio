@@ -40,3 +40,8 @@ systemd-timesync:::
 systemd-network:::
 systemd-bus-proxy:::
 systemd-resolve:::
+systemd-journal-upload:!!::
+systemd-journal-remote:!!::
+git:!::
+dnsmasq:!::
+realtime:!::

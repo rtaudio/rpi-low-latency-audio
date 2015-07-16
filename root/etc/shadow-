@@ -12,3 +12,6 @@ systemd-timesync:x:14871::::::
 systemd-network:x:14871::::::
 systemd-bus-proxy:x:14871::::::
 systemd-resolve:x:14871::::::
+systemd-journal-upload:!!:16619::::::
+systemd-journal-remote:!!:16619::::::
+

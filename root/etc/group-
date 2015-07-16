@@ -40,3 +40,7 @@ systemd-timesync:x:192:
 systemd-network:x:193:
 systemd-bus-proxy:x:194:
 systemd-resolve:x:195:
+systemd-journal-upload:x:998:
+systemd-journal-remote:x:999:
+dnsmasq:x:996:
+realtime:x:1000:

@@ -42,3 +42,5 @@ systemd-bus-proxy:x:194:
 systemd-resolve:x:195:
 systemd-journal-upload:x:999:
 systemd-journal-remote:x:998:
+dnsmasq:x:996:
+realtime:x:1000:root
