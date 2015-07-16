@@ -1,0 +1,3 @@
+infodir=usr/share/info
+filelist=(libgomp.info libquadmath.info)
+

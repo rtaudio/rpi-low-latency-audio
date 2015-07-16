@@ -1,0 +1,36 @@
+%NAME%
+licenses
+
+%VERSION%
+20140629-1
+
+%DESC%
+The standard licenses distribution package
+
+%URL%
+https://www.archlinux.org/
+
+%ARCH%
+any
+
+%BUILDDATE%
+1404270862
+
+%INSTALLDATE%
+1435888540
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu0@archlinuxarm.org>
+
+%SIZE%
+514048
+
+%GROUPS%
+base
+
+%LICENSE%
+custom:none
+
+%VALIDATION%
+sha256
+

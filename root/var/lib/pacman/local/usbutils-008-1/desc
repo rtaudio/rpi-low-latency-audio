@@ -1,0 +1,44 @@
+%NAME%
+usbutils
+
+%VERSION%
+008-1
+
+%DESC%
+USB Device Utilities
+
+%URL%
+http://linux-usb.sourceforge.net/
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1415782275
+
+%INSTALLDATE%
+1435888554
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu5@archlinuxarm.org>
+
+%SIZE%
+204800
+
+%GROUPS%
+base
+
+%LICENSE%
+GPL
+
+%VALIDATION%
+sha256
+
+%DEPENDS%
+libusb
+hwids
+
+%OPTDEPENDS%
+python2: for lsusb.py usage
+coreutils: for lsusb.py usage
+

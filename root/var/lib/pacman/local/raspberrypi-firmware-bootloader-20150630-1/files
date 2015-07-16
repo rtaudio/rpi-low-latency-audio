@@ -1,0 +1,12 @@
+%FILES%
+boot/
+boot/bootcode.bin
+boot/fixup.dat
+boot/fixup_cd.dat
+boot/fixup_db.dat
+boot/overlays/
+boot/overlays/README
+boot/start.elf
+boot/start_cd.elf
+boot/start_db.elf
+

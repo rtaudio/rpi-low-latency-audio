@@ -1,0 +1,36 @@
+%NAME%
+pambase
+
+%VERSION%
+20130928-1
+
+%DESC%
+Base PAM configuration for services
+
+%URL%
+http://www.archlinux.org
+
+%ARCH%
+any
+
+%BUILDDATE%
+1380678555
+
+%INSTALLDATE%
+1435888530
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+odroid1@archlinuxarm.org>
+
+%SIZE%
+14336
+
+%REASON%
+1
+
+%LICENSE%
+GPL
+
+%VALIDATION%
+sha256
+

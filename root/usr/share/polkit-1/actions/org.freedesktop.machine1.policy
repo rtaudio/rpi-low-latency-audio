@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+        "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+
+        <vendor>The systemd Project</vendor>
+        <vendor_url>http://www.freedesktop.org/wiki/Software/systemd</vendor_url>
+
+        <action id="org.freedesktop.machine1.login">
+                <description>Log into a local container</description>
+                <description xml:lang="be">Увайсці ў лакальны кантэйнер</description>
+                <description xml:lang="be@latin">Uvajsci ŭ lakaĺny kantejnier</description>
+                <description xml:lang="de">In einem lokalen Container anmelden</description>
+                <description xml:lang="es">Conectarse a un contenedor local</description>
+                <description xml:lang="fr">Connexion dans un conteneur local</description>
+                <description xml:lang="hu">Bejelentkezés helyi konténerbe</description>
+                <description xml:lang="it">Accedi in un container locale</description>
+                <description xml:lang="pl">Logowanie do lokalnego kontenera</description>
+                <description xml:lang="pt_BR">Conectar a um contêiner local</description>
+                <description xml:lang="ru">Зайти в локальный контейнер</description>
+                <description xml:lang="sv">Logga till en lokal behållare</description>
+                <description xml:lang="zh_TW">登入到本機容器</description>
+                <message>Authentication is required to log into a local container.</message>
+                <message xml:lang="be">Неабходна аўтэнтыфікацыя для ўваходу ў лакальны кантэйнер.</message>
+                <message xml:lang="be@latin">Nieabchodna aŭtentyfikacyja dlia ŭvachodu ŭ lakaĺny kantejnier.</message>
+                <message xml:lang="es">Se requiere autenticación para conectarse a un contenedor local.</message>
+                <message xml:lang="fr">Authentification requise pour permettre la connexion dans un conteneur local.</message>
+                <message xml:lang="it">Autenticazione richiesta per accedere in un container locale.</message>
+                <message xml:lang="pl">Wymagane jest uwierzytelnienie, aby zalogować się do lokalnego kontenera.</message>
+                <message xml:lang="ru">Чтобы зайти в локальный контейнер, необходимо пройти аутентификацию.</message>
+                <message xml:lang="sv">Autentisering krävs för att logga till en lokal behållare</message>
+                <message xml:lang="zh_TW">登入到本機容器需要驗證。</message>
+                <defaults>
+                        <allow_any>auth_admin</allow_any>
+                        <allow_inactive>auth_admin</allow_inactive>
+                        <allow_active>auth_admin_keep</allow_active>
+                </defaults>
+        </action>
+
+        <action id="org.freedesktop.machine1.manage-machines">
+                <description>Manage local virtual machines and containers</description>
+                <description xml:lang="be">Кіраваць лакальнымі віртуальнымі машынамі або кантэйнерамі</description>
+                <description xml:lang="be@latin">Kiravać lakaĺnymi virtuaĺnymi mašynami abo kantejnierami</description>
+                <description xml:lang="es">Administrar máquinas virtuales y contenedores locales</description>
+                <description xml:lang="fr">Gérer les machines virtuelles (VM) et conteneurs locaux</description>
+                <description xml:lang="it">Gestisci le virtual machine e i container locali</description>
+                <description xml:lang="pl">Zarządzanie lokalnymi maszynami wirtualnymi i kontenerami</description>
+                <description xml:lang="ru">Управление виртуальными машинами и контейнерами</description>
+                <description xml:lang="sv">Hantera lokala virtuella maskiner och behållare</description>
+                <description xml:lang="zh_TW">管理本機虛擬機器及容器</description>
+                <message>Authentication is required to manage local virtual machines and containers.</message>
+                <message xml:lang="be">Неабходна аўтэнтыфікацыя для кіравання лакальнымі віртуальнымі машынамі і кантэйнерамі.</message>
+                <message xml:lang="be@latin">Nieabchodna aŭtentyfikacyja dlia kiravannia lakaĺnymi virtuaĺnymi mašynami i kantejnierami.</message>
+                <message xml:lang="es">Se requiere autenticación para administrar las máquinas virtuales y los contenedores locales.</message>
+                <message xml:lang="fr">Authentification requise pour gérer les machines virtuelles (VM) et les conteneurs locaux.</message>
+                <message xml:lang="it">Autenticazione richiesta per gestire le virtual machine e i container locali.</message>
+                <message xml:lang="pl">Wymagane jest uwierzytelnienie, aby zarządzać lokalnymi maszynami wirtualnymi i kontenerami.</message>
+                <message xml:lang="ru">Для управления виртуальными машинами и контейнерами, необходимо пройти аутентификацию.</message>
+                <message xml:lang="sv">Autentisering krävs för att hantera lokala virtuella maskiner och behållare.</message>
+                <message xml:lang="zh_TW">管理本機虛擬機器及容器需要驗證。</message>
+                <defaults>
+                        <allow_any>auth_admin</allow_any>
+                        <allow_inactive>auth_admin</allow_inactive>
+                        <allow_active>auth_admin_keep</allow_active>
+                </defaults>
+        </action>
+
+        <action id="org.freedesktop.machine1.manage-images">
+                <description>Manage local virtual machine and container images</description>
+                <description xml:lang="be">Кіраваць вобразамі лакальных віртуальных машын і кантэйнераў</description>
+                <description xml:lang="be@latin">Kiravać vobrazami lakaĺnych virtuaĺnych mašyn i kantejnieraŭ</description>
+                <description xml:lang="es">Administrar imágenes de máquina virtual y de contenedor locales</description>
+                <description xml:lang="fr">Gérer les images locales de machines virtuelles (VM) et de conteneurs</description>
+                <description xml:lang="it">Gestisci le immagini locali delle virtual machine e dei container</description>
+                <description xml:lang="pl">Zarządzanie lokalnymi obrazami maszyn wirtualnych i kontenerów</description>
+                <description xml:lang="ru">Управление образами виртуальных машин и контейнеров</description>
+                <description xml:lang="sv">Hantera lokala virtuella maskin- och behållaravbildningar</description>
+                <description xml:lang="zh_TW">管理本機虛擬機器及容器映像</description>
+                <message>Authentication is required to manage local virtual machine and container images.</message>
+                <message xml:lang="be">Неабходна аўтэнтыфікацыя для кіравання вобразамі лакальных віртуальных машын і кантэйнераў.</message>
+                <message xml:lang="be@latin">Nieabchodna aŭtentyfikacyja dlia kiravannia vobrazami lakaĺnych virtuaĺnych mašyn i kantejnieraŭ.</message>
+                <message xml:lang="es">Se requiere autenticación para administrar las imágenes de máquina virtual y de contenedor locales.</message>
+                <message xml:lang="fr">Authentification requise pour gérer les images locales de machines virtuelles (VM) et de conteneurs.</message>
+                <message xml:lang="it">Autenticazione richiesta per gestire le immagini delle virtual machine e dei container locali.</message>
+                <message xml:lang="pl">Wymagane jest uwierzytelnienie, aby zarządzać lokalnymi obrazami maszyn wirtualnych i kontenerów.</message>
+                <message xml:lang="ru">Для управления образами виртуальных машин и контейнеров, необходимо пройти аутентификацию.</message>
+                <message xml:lang="sv">Autentisering krävs för att hantera lokala virtuella maskin- och behållaravbildningar.</message>
+                <message xml:lang="zh_TW">管理本機虛擬機器及容器映像需要驗證。</message>
+                <defaults>
+                        <allow_any>auth_admin</allow_any>
+                        <allow_inactive>auth_admin</allow_inactive>
+                        <allow_active>auth_admin_keep</allow_active>
+                </defaults>
+        </action>
+
+</policyconfig>

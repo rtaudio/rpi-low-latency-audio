@@ -1,0 +1,36 @@
+%NAME%
+npth
+
+%VERSION%
+1.2-1
+
+%DESC%
+New portable threads library
+
+%URL%
+http://git.gnupg.org/cgi-bin/gitweb.cgi?p=npth.git
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1430716316
+
+%INSTALLDATE%
+1435888552
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu4@archlinuxarm.org>
+
+%SIZE%
+65536
+
+%REASON%
+1
+
+%LICENSE%
+LGPL
+
+%VALIDATION%
+sha256
+

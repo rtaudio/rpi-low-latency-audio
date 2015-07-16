@@ -1,0 +1,17 @@
+%FILES%
+etc/
+etc/protocols
+etc/services
+usr/
+usr/share/
+usr/share/iana-etc/
+usr/share/iana-etc/port-numbers.iana
+usr/share/iana-etc/protocol-numbers.iana
+usr/share/licenses/
+usr/share/licenses/iana-etc/
+usr/share/licenses/iana-etc/LICENSE
+
+%BACKUP%
+etc/protocols	f4f76d23014de4fcd09deff34fab4d50
+etc/services	c459408df521cc281e52f5695e46f792
+

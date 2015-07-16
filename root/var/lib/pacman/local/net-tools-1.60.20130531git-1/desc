@@ -1,0 +1,36 @@
+%NAME%
+net-tools
+
+%VERSION%
+1.60.20130531git-1
+
+%DESC%
+Configuration tools for Linux networking
+
+%URL%
+http://net-tools.sourceforge.net/
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1370314799
+
+%INSTALLDATE%
+1435888555
+
+%PACKAGER%
+Kevin Mihelich <kevin@archlinuxarm.org>
+
+%SIZE%
+400384
+
+%LICENSE%
+GPL2
+
+%VALIDATION%
+sha256
+
+%DEPENDS%
+glibc
+

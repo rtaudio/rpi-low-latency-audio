@@ -1,0 +1,43 @@
+%NAME%
+openssh
+
+%VERSION%
+6.8p1-3
+
+%DESC%
+Free version of the SSH connectivity tools
+
+%URL%
+http://www.openssh.org/portable.html
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1432198104
+
+%INSTALLDATE%
+1435888555
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu2@archlinuxarm.org>
+
+%SIZE%
+4530176
+
+%LICENSE%
+custom:BSD
+
+%VALIDATION%
+sha256
+
+%DEPENDS%
+krb5
+openssl
+libedit
+ldns
+
+%OPTDEPENDS%
+xorg-xauth: X11 forwarding
+x11-ssh-askpass: input passphrase in X
+

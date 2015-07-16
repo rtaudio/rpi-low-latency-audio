@@ -1,0 +1,4 @@
+# foundry	ps name	psfile
+	FreeEuro	../devps/freeeuro.pfa
+	Symbol	*/usr/share/ghostscript/9.16/Resource/Font/StandardSymL
+	ZapfDingbats	*/usr/share/ghostscript/9.16/Resource/Font/Dingbats

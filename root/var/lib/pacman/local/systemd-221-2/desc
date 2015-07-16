@@ -1,0 +1,79 @@
+%NAME%
+systemd
+
+%VERSION%
+221-2
+
+%DESC%
+system and service manager
+
+%URL%
+http://www.freedesktop.org/wiki/Software/systemd
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1435441893
+
+%INSTALLDATE%
+1435888537
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu3@archlinuxarm.org>
+
+%SIZE%
+80502784
+
+%REASON%
+1
+
+%LICENSE%
+GPL2
+LGPL2.1
+
+%VALIDATION%
+sha256
+
+%REPLACES%
+nss-myhostname
+systemd-tools
+udev
+
+%DEPENDS%
+acl
+bash
+dbus
+glib2
+iptables
+kbd
+kmod
+hwids
+libcap
+libgcrypt
+libsystemd
+libidn
+lz4
+pam
+libseccomp
+util-linux
+xz
+
+%OPTDEPENDS%
+python: systemd library bindings
+cryptsetup: required for encrypted block devices
+libmicrohttpd: remote journald capabilities
+quota-tools: kernel-level quota management
+systemd-sysvcompat: symlink package to provide sysvinit binaries
+polkit: allow administration as unprivileged user
+
+%CONFLICTS%
+nss-myhostname
+systemd-tools
+udev
+
+%PROVIDES%
+nss-myhostname
+systemd-tools=221
+udev=221
+

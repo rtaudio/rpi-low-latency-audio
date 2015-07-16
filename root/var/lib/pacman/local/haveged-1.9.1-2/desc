@@ -1,0 +1,36 @@
+%NAME%
+haveged
+
+%VERSION%
+1.9.1-2
+
+%DESC%
+Entropy harvesting daemon using CPU timings
+
+%URL%
+http://www.issihosts.com/haveged
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1421288917
+
+%INSTALLDATE%
+1435888555
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu4@archlinuxarm.org>
+
+%SIZE%
+193536
+
+%LICENSE%
+GPL
+
+%VALIDATION%
+sha256
+
+%DEPENDS%
+glibc
+

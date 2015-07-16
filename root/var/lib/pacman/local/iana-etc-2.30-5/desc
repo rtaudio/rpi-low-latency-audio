@@ -1,0 +1,36 @@
+%NAME%
+iana-etc
+
+%VERSION%
+2.30-5
+
+%DESC%
+/etc/protocols and /etc/services provided by IANA
+
+%URL%
+http://sethwklein.net/iana-etc.html
+
+%ARCH%
+any
+
+%BUILDDATE%
+1431827154
+
+%INSTALLDATE%
+1435888520
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu3@archlinuxarm.org>
+
+%SIZE%
+3877888
+
+%REASON%
+1
+
+%LICENSE%
+custom
+
+%VALIDATION%
+sha256
+

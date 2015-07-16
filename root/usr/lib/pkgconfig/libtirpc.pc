@@ -1,0 +1,12 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libtirpc
+Description: Transport Independent RPC Library
+Requires:
+Version: 0.3.2
+Libs: -L${exec_prefix}/lib -ltirpc
+Libs.private: -lpthread
+Cflags: -I${prefix}/include/tirpc
