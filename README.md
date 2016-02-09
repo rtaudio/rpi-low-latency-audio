@@ -1,6 +1,12 @@
 # rpi-low-latency-audio
 
 * Arch linux for RPI2
+* root file system located in ```root/```
+* 
+You should clone as root, not with sudo:
+```su root
+git clone https://github.com/rtaudio/rpi-low-latency-audio.git
+```
 
 # Additionally installed Packages
 * irman
