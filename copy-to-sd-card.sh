@@ -7,11 +7,11 @@ if [[ -z "`mount | grep mnt/boot`" ]]; then
 fi
 
 echo "rsync boot..."
-rsync -a ./root/boot/ ./mnt/boot/
+rsync -r -u -t ./root/boot/ ./mnt/boot/
 
 if [[ -d ./conf ]]; then
 	echo "rsync conf (update only)..."
-	rsync -u  ./conf/ ./mnt/conf/
+	rsync -r -u -t  ./conf/ ./mnt/conf/
 else
 	echo "No ./conf, skipping!"
 fi

@@ -43,3 +43,4 @@ systemd-resolve:x:195:
 systemd-journal-remote:x:999:
 systemd-journal-upload:x:998:
 alarm:x:1000:
+dnsmasq:x:997:

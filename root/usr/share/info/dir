@@ -13,3 +13,12 @@ File: dir,	Node: Top	This is the top of the INFO tree
   to select it.
 
 * Menu:
+
+Individual utilities
+* libtool-invocation: (libtool)Invoking libtool.
+                                                Running the 'libtool' script.
+* libtoolize: (libtool)Invoking libtoolize.     Adding libtool support.
+
+Software development
+* Libtool: (libtool).           Generic shared library support script.
+* Make: (make).                 Remake files automatically.
