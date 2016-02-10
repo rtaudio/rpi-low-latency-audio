@@ -16,7 +16,7 @@ sshfs --version || apt-get install sshfs
 #LOCAL_BASE_DIR="`dirname \`realpath $0\``/mnt"
 LOCAL_BASE_DIR="./mnt"
 
-[[ -d "$LOCAL_BASE_DIR/ssh_root" ]] || mkdir -p "$LOCAL_BASE_DIR/ssh_root"
+#[[ -d "$LOCAL_BASE_DIR/ssh_root" ]] || mkdir -p "$LOCAL_BASE_DIR/ssh_root"
 
 umount "$LOCAL_BASE_DIR/ssh_root" || fusermount -u "$LOCAL_BASE_DIR/ssh_root" || true
 
