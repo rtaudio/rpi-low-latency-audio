@@ -68,6 +68,7 @@
 
 #ifndef _KERNEL
 #include <rpc/rpcb_clnt.h>	/* rpcbind interface functions */
+#include <rpc/svc_mt.h>
 #endif
 #include <rpc/rpcent.h>
 

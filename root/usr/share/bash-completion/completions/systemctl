@@ -85,6 +85,12 @@ __get_masked_units   () { __systemctl $1 list-unit-files  \
         | { while read -r a b c  ; do [[ $b == "masked"   ]] && echo " $a"; done; }; }
 __get_all_unit_files () { { __systemctl $1 list-unit-files; } | { while read -r a b; do echo " $a"; done; }; }
 
+__get_machines() {
+        local a b
+        { machinectl list-images --no-legend --no-pager; machinectl list --no-legend --no-pager; } | \
+		{ while read a b; do echo " $a"; done; }
+}
+
 _systemctl () {
         local cur=${COMP_WORDS[COMP_CWORD]} prev=${COMP_WORDS[COMP_CWORD-1]}
         local i verb comps mode
@@ -92,11 +98,15 @@ _systemctl () {
         local -A OPTS=(
                [STANDALONE]='--all -a --reverse --after --before --defaults --failed --force -f --full -l --global
                              --help -h --no-ask-password --no-block --no-legend --no-pager --no-reload --no-wall
-                             --quiet -q --privileged -P --system --user --version --runtime --recursive -r --firmware-setup'
-                      [ARG]='--host -H --kill-who --property -p --signal -s --type -t --state --job-mode --root'
+                             --quiet -q --privileged -P --system --user --version --runtime --recursive -r --firmware-setup
+                             --show-types -i --ignore-inhibitors --plain'
+                      [ARG]='--host -H --kill-who --property -p --signal -s --type -t --state --job-mode --root
+                             --preset-mode -n --lines -o --output -M --machine'
         )
 
         if __contains_word "--user" ${COMP_WORDS[*]}; then
+            mode=--user
+        elif __contains_word "--global" ${COMP_WORDS[*]}; then
             mode=--user
         else
             mode=--system
@@ -108,12 +118,10 @@ _systemctl () {
                                 comps=$(compgen -A signal)
                         ;;
                         --type|-t)
-                                comps='automount busname device mount path service snapshot socket swap target timer'
+                                comps=$(__systemctl $mode -t help)
                         ;;
                         --state)
-                                comps='loaded not-found stub
-                                       active inactive
-                                       dead elapsed exited listening mounted plugged running waiting'
+                                comps=$(__systemctl $mode --state=help)
                         ;;
                         --job-mode)
                                 comps='fail replace replace-irreversibly isolate
@@ -132,6 +140,16 @@ _systemctl () {
                         --property|-p)
                                 comps=$(__systemd_properties $mode)
                         ;;
+                        --preset-mode)
+                                comps='full enable-only disable-only'
+                        ;;
+                        --output|-o)
+                                comps='short short-iso short-precise short-monotonic verbose export json
+                                       json-pretty json-sse cat'
+                        ;;
+                        --machine|-M)
+                                comps=$( __get_machines )
+                        ;;
                 esac
                 COMPREPLY=( $(compgen -W '$comps' -- "$cur") )
                 return 0
@@ -143,7 +161,7 @@ _systemctl () {
         fi
 
         local -A VERBS=(
-                [ALL_UNITS]='is-active is-failed is-enabled status show cat mask preset help list-dependencies edit'
+                [ALL_UNITS]='is-active is-failed is-enabled status show cat mask preset help list-dependencies edit set-property'
             [ENABLED_UNITS]='disable'
            [DISABLED_UNITS]='enable'
         [REENABLABLE_UNITS]='reenable'
@@ -156,14 +174,12 @@ _systemctl () {
          [TARGET_AND_UNITS]='add-wants add-requires'
              [MASKED_UNITS]='unmask'
                      [JOBS]='cancel'
-                [SNAPSHOTS]='delete'
                      [ENVS]='set-environment unset-environment'
                [STANDALONE]='daemon-reexec daemon-reload default
                              emergency exit halt hibernate hybrid-sleep kexec list-jobs
                              list-sockets list-timers list-units list-unit-files poweroff
                              reboot rescue show-environment suspend get-default
                              is-system-running'
-                     [NAME]='snapshot'
                      [FILE]='link switch-root'
                   [TARGETS]='set-default'
         )
@@ -241,15 +257,11 @@ _systemctl () {
                 fi
                 compopt -o filenames
 
-        elif __contains_word "$verb" ${VERBS[STANDALONE]} ${VERBS[NAME]}; then
+        elif __contains_word "$verb" ${VERBS[STANDALONE]}; then
                 comps=''
 
         elif __contains_word "$verb" ${VERBS[JOBS]}; then
                 comps=$( __systemctl $mode list-jobs | { while read -r a b; do echo " $a"; done; } )
-
-        elif __contains_word "$verb" ${VERBS[SNAPSHOTS]}; then
-                comps=$( __systemctl $mode list-units --type snapshot --full --all \
-                        | { while read -r a b; do echo " $a"; done; } )
 
         elif __contains_word "$verb" ${VERBS[ENVS]}; then
                 comps=$( __systemctl $mode show-environment \

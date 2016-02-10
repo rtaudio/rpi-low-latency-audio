@@ -1,0 +1,8 @@
+%FILES%
+etc/
+etc/pacman.d/
+etc/pacman.d/mirrorlist
+
+%BACKUP%
+etc/pacman.d/mirrorlist	5640118fa87776e8640c96a00163b21c
+

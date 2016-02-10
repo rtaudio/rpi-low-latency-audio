@@ -43,7 +43,8 @@
             <code class="option">expose_authtok</code>
           </span></dt><dd><p>
               During authentication the calling command can read
-              the password from <span class="citerefentry"><span class="refentrytitle">stdin</span>(3)</span>.
+              the password from <span class="citerefentry"><span class="refentrytitle">stdin</span>(3)</span>. Only first <span class="emphasis"><em>PAM_MAX_RESP_SIZE</em></span>
+              bytes of a password are provided to the command.
             </p></dd><dt><span class="term">
             <code class="option">log=<em class="replaceable"><code>file</code></em></code>
           </span></dt><dd><p>

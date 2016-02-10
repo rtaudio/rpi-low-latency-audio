@@ -31,7 +31,7 @@ OS="linux-gnueabihf"
 CC="gcc"
 CFLAGS=" -DPROGRAM='bash' -DCONF_HOSTTYPE='armv7l' -DCONF_OSTYPE='linux-gnueabihf' -DCONF_MACHTYPE='armv7l-unknown-linux-gnueabihf' -DCONF_VENDOR='unknown' -DLOCALEDIR='/usr/share/locale' -DPACKAGE='bash' -DSHELL -DHAVE_CONFIG_H   -I.  -I. -I./include -I./lib  -D_FORTIFY_SOURCE=2 -march=armv7-a -mfloat-abi=hard -mfpu=vfpv3-d16 -O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -DDEFAULT_PATH_VALUE='/usr/local/sbin:/usr/local/bin:/usr/bin' -DSTANDARD_UTILS_PATH='/usr/bin' -DSYS_BASHRC='/etc/bash.bashrc' -DSYS_BASH_LOGOUT='/etc/bash.bash_logout'"
 RELEASE="4.3"
-PATCHLEVEL="39"
+PATCHLEVEL="42"
 RELSTATUS="release"
 MACHTYPE="armv7l-unknown-linux-gnueabihf"
 

@@ -1,7 +1,7 @@
 /* $OpenLDAP$ */
 /* This work is part of OpenLDAP Software <http://www.openldap.org/>.
  * 
- * Copyright 1998-2014 The OpenLDAP Foundation.
+ * Copyright 1998-2015 The OpenLDAP Foundation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -296,6 +296,8 @@ typedef struct ldapcontrol {
 #define LDAP_SYNC_DELETE				3
 #define LDAP_SYNC_NEW_COOKIE			4
 
+/* LDAP Don't Use Copy Control (RFC 6171) */
+#define LDAP_CONTROL_DONTUSECOPY		"1.3.6.1.1.22"
 
 /* Password policy Controls *//* work in progress */
 /* ITS#3458: released; disabled by default */
@@ -309,7 +311,6 @@ typedef struct ldapcontrol {
 #define LDAP_CONTROL_MANAGEDIT			LDAP_CONTROL_RELAX
 #define LDAP_CONTROL_SLURP				"1.3.6.1.4.1.4203.666.5.13"
 #define LDAP_CONTROL_VALSORT			"1.3.6.1.4.1.4203.666.5.14"
-#define LDAP_CONTROL_DONTUSECOPY		"1.3.6.1.4.1.4203.666.5.15"
 #define	LDAP_CONTROL_X_DEREF			"1.3.6.1.4.1.4203.666.5.16"
 #define	LDAP_CONTROL_X_WHATFAILED		"1.3.6.1.4.1.4203.666.5.17"
 

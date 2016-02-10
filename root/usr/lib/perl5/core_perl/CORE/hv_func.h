@@ -83,9 +83,11 @@
 #   if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
 #       define PERL_HASH_SEED PL_hash_seed
 #   elif PERL_HASH_SEED_BYTES == 4
-#       define PERL_HASH_SEED "PeRl"
+#       define PERL_HASH_SEED ((const U8 *)"PeRl")
+#   elif PERL_HASH_SEED_BYTES == 8
+#       define PERL_HASH_SEED ((const U8 *)"PeRlHaSh")
 #   elif PERL_HASH_SEED_BYTES == 16
-#       define PERL_HASH_SEED "PeRlHaShhAcKpErl"
+#       define PERL_HASH_SEED ((const U8 *)"PeRlHaShhAcKpErl")
 #   else
 #       error "No PERL_HASH_SEED definition for " PERL_HASH_FUNC
 #   endif
@@ -100,7 +102,7 @@
  * are only needed to help derive these 3.
  *
  * U8TO32_LE(x)   Read a little endian unsigned 32-bit int
- * UNALIGNED_SAFE   Defined if READ_UINT32 works on non-word boundaries
+ * UNALIGNED_SAFE   Defined if unaligned access is safe
  * ROTL32(x,r)      Rotate x left by r bits
  */
 
@@ -114,8 +116,6 @@
                       +((const U8 *)(d))[0])
 #endif
 
-
-/* Now find best way we can to READ_UINT32 */
 #if (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678) && U32SIZE == 4
   /* CPU endian matches murmurhash algorithm, so read 32-bit word directly */
   #define U8TO32_LE(ptr)   (*((U32*)(ptr)))
@@ -570,7 +570,7 @@ S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned c
    return a 32 bit hash.
 
    Note uses unaligned 64 bit loads - will NOT work on machines with
-   strict alginment requirements.
+   strict alignment requirements.
 
    Also this code may not be suitable for big-endian machines.
 */
@@ -628,7 +628,7 @@ S_perl_hash_murmur_hash_64a (const unsigned char * const seed, const unsigned ch
    a 32 bit value
 
    Note uses unaligned 32 bit loads - will NOT work on machines with
-   strict alginment requirements.
+   strict alignment requirements.
 
    Also this code may not be suitable for big-endian machines.
 */

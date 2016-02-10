@@ -11,11 +11,12 @@ echo "ArchLinuxARM-rpi-2-latest.tar.gz"
 
 [[ -d root_from_targz ]] || mkdir root_from_targz
 
+bsdtar --version || apt-get install bsdtar
 [[ -d root_from_targz/var ]] || bsdtar -xpf ArchLinuxARM-rpi-2-latest.tar.gz -C root_from_targz
 
-# copy dir skeleton
+# copy dir skeleton (except /usr & ./var/lib)
 cd root_from_targz
-find -type d -links 2 -exec mkdir -p "../root/{}" \;
+find -type d \( -path ./usr -o -path ./var/lib \) -prune -o -links 2 -exec mkdir -p "../root/{}" \;
 cd ..
 
 #redundantely create basic directories

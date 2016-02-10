@@ -13,7 +13,7 @@ includedir=/usr/include
 Name: systemd
 Description: systemd Journal Utility Library - deprecated
 URL: http://www.freedesktop.org/wiki/Software/systemd
-Version: 221
-Requires: libsystemd = 221
+Version: 228
+Requires: libsystemd = 228
 Libs: -L${libdir} -lsystemd
 Cflags: -I${includedir}

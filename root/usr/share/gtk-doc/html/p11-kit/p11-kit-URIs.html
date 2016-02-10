@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>p11-kit: URIs</title>
+<title>URIs: p11-kit</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="p11-kit">
 <link rel="up" href="reference.html" title="API Reference">
 <link rel="prev" href="p11-kit-Modules.html" title="Modules">
 <link rel="next" href="p11-kit-PIN-Callbacks.html" title="PIN Callbacks">
-<meta name="generator" content="GTK-Doc V1.21 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -285,7 +285,6 @@ are zeroed out. Formatting this URI will produce a valid but empty URI.</p>
 <div class="refsect3">
 <a name="id-1.7.3.6.2.6"></a><h4>Returns</h4>
 <p> A newly allocated URI. This should be freed with <a class="link" href="p11-kit-URIs.html#p11-kit-uri-free" title="p11_kit_uri_free ()"><code class="function">p11_kit_uri_free()</code></a>.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -318,7 +317,6 @@ resulting URI should be filled with zeros.</p>
 <div class="refsect3">
 <a name="id-1.7.3.6.3.8"></a><h4>Returns</h4>
 <p> A pointer to the <code class="code">CK_INFO</code> structure.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -357,7 +355,6 @@ parts were encountered then this match will fail.</p>
 <div class="refsect3">
 <a name="id-1.7.3.6.4.7"></a><h4>Returns</h4>
 <p> 1 if the URI matches, 0 if not.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -390,7 +387,6 @@ resulting URI should be filled with zeros.</p>
 <div class="refsect3">
 <a name="id-1.7.3.6.5.8"></a><h4>Returns</h4>
 <p> A pointer to the <code class="code">CK_INFO</code> structure.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -430,7 +426,6 @@ unrecognized parts were encountered then this match will fail.</p>
 <div class="refsect3">
 <a name="id-1.7.3.6.6.7"></a><h4>Returns</h4>
 <p> 1 if the URI matches, 0 if not.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -438,7 +433,7 @@ unrecognized parts were encountered then this match will fail.</p>
 <a name="p11-kit-uri-get-attributes"></a><h3>p11_kit_uri_get_attributes ()</h3>
 <pre class="programlisting"><span class="returnvalue">CK_ATTRIBUTE_PTR</span>
 p11_kit_uri_get_attributes (<em class="parameter"><code><a class="link" href="p11-kit-URIs.html#P11KitUri" title="P11KitUri"><span class="type">P11KitUri</span></a> *uri</code></em>,
-                            <em class="parameter"><code><a href="http://developer.gnome.org/gck/stable/pkcs11-links.html#CK-ULONG:CAPS"><span class="type">CK_ULONG</span></a> *n_attrs</code></em>);</pre>
+                            <em class="parameter"><code><span class="type">CK_ULONG</span> *n_attrs</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -446,7 +441,7 @@ p11_kit_uri_get_attributes (<em class="parameter"><code><a class="link" href="p1
 <pre class="programlisting"><span class="returnvalue">int</span>
 p11_kit_uri_set_attributes (<em class="parameter"><code><a class="link" href="p11-kit-URIs.html#P11KitUri" title="P11KitUri"><span class="type">P11KitUri</span></a> *uri</code></em>,
                             <em class="parameter"><code><span class="type">CK_ATTRIBUTE_PTR</span> attrs</code></em>,
-                            <em class="parameter"><code><a href="http://developer.gnome.org/gck/stable/pkcs11-links.html#CK-ULONG:CAPS"><span class="type">CK_ULONG</span></a> n_attrs</code></em>);</pre>
+                            <em class="parameter"><code><span class="type">CK_ULONG</span> n_attrs</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -460,7 +455,7 @@ p11_kit_uri_clear_attributes (<em class="parameter"><code><a class="link" href="
 <pre class="programlisting"><span class="returnvalue">int</span>
 p11_kit_uri_match_attributes (<em class="parameter"><code><a class="link" href="p11-kit-URIs.html#P11KitUri" title="P11KitUri"><span class="type">P11KitUri</span></a> *uri</code></em>,
                               <em class="parameter"><code><span class="type">CK_ATTRIBUTE_PTR</span> attrs</code></em>,
-                              <em class="parameter"><code><a href="http://developer.gnome.org/gck/stable/pkcs11-links.html#CK-ULONG:CAPS"><span class="type">CK_ULONG</span></a> n_attrs</code></em>);</pre>
+                              <em class="parameter"><code><span class="type">CK_ULONG</span> n_attrs</code></em>);</pre>
 <p>Match a attributes against the object parts of this URI.</p>
 <p>Only the attributes that are valid for use in a URI will be matched. A URI
 part that was not specified in the URI will match any attribute value. If
@@ -496,7 +491,6 @@ match will fail.</p>
 <div class="refsect3">
 <a name="id-1.7.3.6.10.7"></a><h4>Returns</h4>
 <p> 1 if the URI matches, 0 if not.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -532,7 +526,6 @@ p11_kit_uri_get_attribute (<em class="parameter"><code><a class="link" href="p11
 <a name="id-1.7.3.6.11.6"></a><h4>Returns</h4>
 <p> A pointer to the attribute, or <code class="code">NULL</code> if not present.
 The attribute is owned by the URI and should not be freed.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -569,7 +562,6 @@ p11_kit_uri_set_attribute (<em class="parameter"><code><a class="link" href="p11
 <a name="id-1.7.3.6.12.7"></a><h4>Returns</h4>
 <p> <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-OK:CAPS"><code class="literal">P11_KIT_URI_OK</code></a> if the attribute was successfully set.
 <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-NOT-FOUND:CAPS"><code class="literal">P11_KIT_URI_NOT_FOUND</code></a> if the attribute was not valid for a URI.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -606,7 +598,6 @@ p11_kit_uri_clear_attribute (<em class="parameter"><code><a class="link" href="p
 <a name="id-1.7.3.6.13.7"></a><h4>Returns</h4>
 <p> <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-OK:CAPS"><code class="literal">P11_KIT_URI_OK</code></a> if the attribute was successfully cleared.
 <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-NOT-FOUND:CAPS"><code class="literal">P11_KIT_URI_NOT_FOUND</code></a> if the attribute was not valid for a URI.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -670,7 +661,6 @@ matching against this URI will always fail.</p>
 <div class="refsect3">
 <a name="id-1.7.3.6.15.7"></a><h4>Returns</h4>
 <p> 1 if unrecognized flag is set, 0 otherwise.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -697,8 +687,7 @@ lookup a PIN for logging into a PKCS#11 token.</p>
 </div>
 <div class="refsect3">
 <a name="id-1.7.3.6.16.6"></a><h4>Returns</h4>
-<p> The pin-source or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not present.</p>
-<p></p>
+<p> The pin-source or <code class="literal">NULL</code> if not present.</p>
 </div>
 </div>
 <hr>
@@ -844,7 +833,6 @@ and <code class="literal">CKA_CLASS</code>. The class must be one of
 <p> <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-OK:CAPS"><code class="literal">P11_KIT_URI_OK</code></a> if the URI was formatted successfully,
 <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-UNEXPECTED:CAPS"><code class="literal">P11_KIT_URI_UNEXPECTED</code></a> if the data in <em class="parameter"><code>uri</code></em>
 is invalid for a URI.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -897,7 +885,6 @@ prevent the URI from matching using the various match functions.</p>
 <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-BAD-SYNTAX:CAPS"><code class="literal">P11_KIT_URI_BAD_SYNTAX</code></a> if the URI syntax was bad.
 <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-BAD-VERSION:CAPS"><code class="literal">P11_KIT_URI_BAD_VERSION</code></a> if a version number was bad.
 <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-BAD-ENCODING:CAPS"><code class="literal">P11_KIT_URI_BAD_ENCODING</code></a> if the URI encoding was invalid.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -929,7 +916,7 @@ p11_kit_uri_free (<em class="parameter"><code><a class="link" href="p11-kit-URIs
 p11_kit_uri_message (<em class="parameter"><code><span class="type">int</span> code</code></em>);</pre>
 <p>Lookup a message for the uri error code. These codes are the P11_KIT_URI_XXX
 error codes that can be returned from <a class="link" href="p11-kit-URIs.html#p11-kit-uri-parse" title="p11_kit_uri_parse ()"><code class="function">p11_kit_uri_parse()</code></a> or
-<a class="link" href="p11-kit-URIs.html#p11-kit-uri-format" title="p11_kit_uri_format ()"><code class="function">p11_kit_uri_format()</code></a>. As a special case <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, will be returned for
+<a class="link" href="p11-kit-URIs.html#p11-kit-uri-format" title="p11_kit_uri_format ()"><code class="function">p11_kit_uri_format()</code></a>. As a special case <code class="literal">NULL</code>, will be returned for
 <a class="link" href="p11-kit-URIs.html#P11-KIT-URI-OK:CAPS"><code class="literal">P11_KIT_URI_OK</code></a>.</p>
 <div class="refsect3">
 <a name="id-1.7.3.6.23.5"></a><h4>Parameters</h4>
@@ -950,7 +937,6 @@ error codes that can be returned from <a class="link" href="p11-kit-URIs.html#p1
 <a name="id-1.7.3.6.23.6"></a><h4>Returns</h4>
 <p> The message for the error code. This string is owned by the p11-kit
 library.</p>
-<p></p>
 </div>
 </div>
 </div>
@@ -1132,7 +1118,6 @@ visible in this structure. Use the various accessor functions.</p>
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.21</div>
+<hr>Generated by GTK-Doc V1.24</div>
 </body>
 </html>

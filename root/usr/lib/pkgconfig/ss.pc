@@ -5,7 +5,7 @@ includedir=${prefix}/include
 
 Name: ss
 Description: Subsystem command parsing library
-Version: 1.42.12
+Version: 1.42.13
 Requires.private: com_err
 Cflags: -I${includedir}/ss -I${includedir}
 Libs: -L${libdir} -lss

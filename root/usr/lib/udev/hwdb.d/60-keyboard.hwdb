@@ -51,10 +51,11 @@
 # where /dev/input/eventXX is the keyboard in question. If in
 # doubt, simply use /dev/input/event* to reload all input rules.
 #
-# If your changes are generally applicable, open a bug report on
-#   http://bugs.freedesktop.org/enter_bug.cgi?product=systemd
-# and include your new rules, a description of the device, and the
-# output of
+# If your changes are generally applicable, preferably send them as a pull
+# request to
+#   https://github.com/systemd/systemd
+# or create a bug report on https://github.com/systemd/systemd/issues and
+# include your new rules, a description of the device, and the output of
 #   udevadm info /dev/input/eventXX
 # (or /dev/input/event*).
 
@@ -272,6 +273,8 @@ evdev:atkbd:dmi:bvn*:bvr*:bd*:svnDell*:pnXPS12-9Q33*:pvr*
 
 # Dell Latitude microphone mute
 evdev:name:Dell WMI hotkeys:dmi:bvn*:bvr*:bd*:svnDell*:pnLatitude*
+# Dell Precision microphone mute
+evdev:name:Dell WMI hotkeys:dmi:bvn*:bvr*:bd*:svnDell*:pnPrecision*
  KEYBOARD_KEY_150=f20                                   # Mic mute toggle, should be micmute
 
 ###########################################################
@@ -491,6 +494,10 @@ evdev:atkbd:dmi:bvn*:bvr*:bd*:svnHewlett-Packard*:pnHPProBook445G1NotebookPC:pvr
 # HP ProBook 450 G0
 evdev:atkbd:dmi:bvn*:bvr*:bd*:svnHewlett-Packard*:pnHPProBook450G0:pvr*
  KEYBOARD_KEY_81=f20                                    # Fn+F8; Microphone mute button, should be micmute
+
+# HP ProBook 6555b
+evdev:atkbd:dmi:bvn*:bvr*:bd*:svnHewlett-Packard:pnHPProBook6555b:*
+ KEYBOARD_KEY_b2=www                                    # Earth
 
 ###########################################################
 # IBM

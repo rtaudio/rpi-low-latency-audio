@@ -1,6 +1,7 @@
+# $Id: Common.pm 6363 2015-06-26 12:36:32Z gavin $
 # Common.pm: definition of commands. Common code of other Texinfo modules.
 #
-# Copyright 2010, 2011, 2012 Free Software Foundation, Inc.
+# Copyright 2010, 2011, 2012, 2013, 2014, 2015 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,20 +47,23 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 %EXPORT_TAGS = ( 'all' => [ qw(
-expand_verbatiminclude
+debug_hash
+debug_list
 definition_category
+expand_verbatiminclude
 expand_today
-numbered_heading
-trim_spaces_comment_from_content
 float_name_caption
+is_content_empty
+move_index_entries_after_items_in_tree
 normalize_top_node_name
+numbered_heading
 protect_comma_in_tree
 protect_first_parenthesis
 protect_hashchar_at_line_beginning
 protect_colon_in_tree
 protect_node_after_label_in_tree
+trim_spaces_comment_from_content
 valid_tree_transformation
-move_index_entries_after_items_in_tree
 ) ] );
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -67,7 +71,7 @@ move_index_entries_after_items_in_tree
 @EXPORT = qw(
 );
 
-$VERSION = '5.1.90';
+$VERSION = '6.0';
 
 # i18n
 sub N__($)
@@ -259,6 +263,7 @@ my @variable_string_settables = (
   'MACRO_BODY_IGNORES_LEADING_SPACE', 'CHECK_HTMLXREF',
   'TEXINFO_DTD_VERSION', 'TEXINFO_COLUMN_FOR_DESCRIPTION',
   'TEXINFO_OUTPUT_FORMAT', 'INFO_SPECIAL_CHARS_WARNING',
+  'INDEX_SPECIAL_CHARS_WARNING',
 );
 # Not strings. 
 # FIXME To be documented somewhere, but where?
@@ -585,7 +590,7 @@ foreach my $style_command ('asis','cite','clicksequence',
   'dfn', 'emph',
   'sc', 't', 'var',
   'headitemfont', 'code', 'command', 'env', 'file', 'kbd',
-  'option', 'samp', 'strong') {
+  'option', 'samp', 'strong', 'sub', 'sup') {
   $brace_commands{$style_command} = 1;
   $style_commands{$style_command} = 1;
 }
@@ -597,9 +602,8 @@ foreach my $command ('r', 'i', 'b', 'sansserif', 'slanted') {
   $style_commands{$command} = 1;
 }
 
-foreach my $one_arg_command (
-  'ctrl','dmn', 'w', 'key',
-  'titlefont','hyphenation','anchor','errormsg') {
+foreach my $one_arg_command ('U', 'ctrl', 'dmn', 'w', 'key',
+    'titlefont', 'hyphenation', 'anchor', 'errormsg') {
   $brace_commands{$one_arg_command} = 1;
 }
 
@@ -613,7 +617,8 @@ foreach my $command ('code', 'command', 'env', 'file', 'kbd', 'key', 'option',
 
 # Commands that enclose full texts
 our %context_brace_commands;
-foreach my $context_brace_command ('footnote', 'caption', 'shortcaption', 'math') {
+foreach my $context_brace_command ('footnote', 'caption',
+    'shortcaption', 'math') {
   $context_brace_commands{$context_brace_command} = $context_brace_command;
   $brace_commands{$context_brace_command} = 1;
 }
@@ -670,6 +675,14 @@ foreach my $in_heading_command ('thischapter', 'thischaptername',
   'thischapternum', 'thisfile', 'thispage', 'thistitle') {
   $in_heading_commands{$in_heading_command} = 1;
 }
+
+# brace command that is not replaced with text.
+my %unformatted_brace_commands;
+foreach my $unformatted_brace_command ('anchor', 'shortcaption', 
+    'caption', 'hyphenation', 'errormsg') {
+  $unformatted_brace_commands{$unformatted_brace_command} = 1;
+}
+
 
 # commands delimiting blocks, with an @end.
 # Value is either the number of arguments on the line separated by
@@ -866,6 +879,12 @@ our %deprecated_commands = (
   'quote-arg' => N__('arguments are quoted by default'),
 );
 
+my %unformatted_block_commands;
+foreach my $unformatted_block_command ('ignore', 'macro', 'rmacro') {
+  $unformatted_block_commands{$unformatted_block_command} = 1;
+}
+
+
 # commands that should only appear at the root level and contain up to
 # the next root command.  @node and sectioning commands.
 our %root_commands;
@@ -934,6 +953,18 @@ foreach my $sectioning_command (keys (%command_structuring_level)) {
     $root_commands{$sectioning_command} = 1;
   }
   $sectioning_commands{$sectioning_command} = 1;
+}
+
+# misc commands that may be formatted as text.
+# index commands may be too, but index command may be added with
+# @def*index so they are not added here.
+my %formatted_misc_commands;
+foreach my $formatted_misc_command ('insertcopying', 'contents', 
+   'shortcontents', 'summarycontents', 'center', 'printindex', 
+   'listoffloats', 'shorttitlepage', 'settitle', 
+   'author', 'subtitle', 'title', 'sp', 'exdent', 'headitem', 'item', 
+   'itemx', 'tab', 'node', keys(%sectioning_commands)) {
+  $formatted_misc_commands{$formatted_misc_command} = 1;
 }
 
 $root_commands{'node'} = 1;
@@ -1009,11 +1040,12 @@ sub locate_include_file($$)
   return $file;
 }
 
-sub open_out($$;$)
+sub open_out($$;$$)
 {
   my $self = shift;
   my $file = shift;
   my $encoding = shift;
+  my $use_binmode = shift;
 
   if (!defined($encoding) and $self 
       and defined($self->get_conf('OUTPUT_PERL_ENCODING'))) {
@@ -1021,6 +1053,7 @@ sub open_out($$;$)
   }
 
   if ($file eq '-') {
+    binmode(STDOUT) if $use_binmode;
     binmode(STDOUT, ":encoding($encoding)") if ($encoding);
     if ($self) {
       $self->{'unclosed_files'}->{$file} = \*STDOUT;
@@ -1031,6 +1064,10 @@ sub open_out($$;$)
   if (!open ($filehandle, '>', $file)) {
     return undef; 
   }
+  # We run binmode to turn off outputting LF as CR LF under MS-Windows,
+  # so that Info tag tables will have correct offsets.  This must be done
+  # before setting the encoding filters with binmode.
+  binmode($filehandle) if $use_binmode;
   if ($encoding) {
     if ($encoding eq 'utf8' or $encoding eq 'utf-8-strict') {
       binmode($filehandle, ':utf8');
@@ -1125,9 +1162,11 @@ sub expand_verbatiminclude($$)
                   {'type' => 'raw', 'text' => $_ };
       }
       if (!close (VERBINCLUDE)) {
-        $self->document_warn(sprintf($self->__(
+        if ($self) {
+          $self->document_warn(sprintf($self->__(
                       "error on closing \@verbatiminclude file %s: %s"),
                              $file, $!));
+        }
       }
     }
   } elsif ($self) {
@@ -1411,6 +1450,52 @@ sub enumerate_item_representation($$)
   return $result;
 }
 
+sub is_content_empty($;$);
+sub is_content_empty($;$)
+{
+  my $tree = shift;
+  my $do_not_ignore_index_entries = shift;
+  if (!defined($tree) or !exists($tree->{'contents'})) {
+    return 1;
+  }
+  foreach my $content (@{$tree->{'contents'}}) {
+    #print STDERR _print_current($content);
+    if ($content->{'cmdname'}) {
+      if ($content->{'type'} and $content->{'type'} eq 'index_entry_command') {
+        if ($do_not_ignore_index_entries) {
+          return 0;
+        } else {
+          next;
+        }
+      }
+      if (exists($misc_commands{$content->{'cmdname'}})) {
+        my @truc = keys(%formatted_misc_commands);
+        if ($formatted_misc_commands{$content->{'cmdname'}}) {
+          return 0;
+        } else {
+          next;
+        }
+      } elsif ($unformatted_brace_commands{$content->{'cmdname'}} 
+               or $unformatted_block_commands{$content->{'cmdname'}}) {
+        next;
+      } else {
+        return 0;
+      }
+    }
+    if ($content->{'type'}) {
+      if ($content->{'type'} eq 'paragraph') {
+        return 0;
+      }
+    }
+    if ($content->{'text'} and $content->{'text'} =~ /\S/) {
+      return 0;
+    }
+    if (not is_content_empty($content, $do_not_ignore_index_entries)) {
+      return 0;
+    }
+  }
+  return 1;
+}
 
 our %htmlxref_entries = (
  'node' => [ 'node', 'section', 'chapter', 'mono' ],
@@ -1588,6 +1673,10 @@ sub _convert_text_options($)
   return %options;
 }
 
+# Used in count_bytes
+my $Encode_encoding_object;
+my $last_encoding;
+
 sub count_bytes($$;$) 
 {
   my $self = shift;
@@ -1598,8 +1687,32 @@ sub count_bytes($$;$)
     $encoding = $self->get_conf('OUTPUT_PERL_ENCODING');
   }
 
-  if ($encoding and $encoding ne 'ascii') {
-    return length(Encode::encode($encoding, $string));
+  if ($encoding eq 'utf-8-strict') {
+    if (Encode::is_utf8($string)) {
+      # Get the number of bytes in the underlying storage.  This may
+      # be slightly faster than calling Encode::encode_utf8.
+      use bytes;
+      return length($string);
+
+      # Here's another way of doing it.
+      #Encode::_utf8_off($string);
+      #my $length = length($string);
+      #Encode::_utf8_on($string);
+      #return $length
+    } else {
+      return length(Encode::encode_utf8($string));
+    }
+  } elsif ($encoding and $encoding ne 'ascii') {
+    if (!defined($last_encoding) or $last_encoding ne $encoding) {
+      # Look up and save encoding object for next time.  This is
+      # slightly faster than calling Encode::encode.
+      $last_encoding = $encoding;
+      $Encode_encoding_object = Encode::find_encoding($encoding);
+      if (!defined($Encode_encoding_object)) {
+        Carp::croak "Unknown encoding '$encoding'";
+      }
+    }
+    return length($Encode_encoding_object->encode($string));
   } else {
     return length($string);
     #my $length = length($string);
@@ -2241,6 +2354,42 @@ sub move_index_entries_after_items_in_tree($)
   return modify_tree(undef, $tree, \&_move_index_entries_after_items);
 }
 
+sub debug_list
+{
+  my ($label) = shift;
+  my (@list) = (ref $_[0] && $_[0] =~ /.*ARRAY.*/) ? @{$_[0]} : @_;
+
+  my $str = "$label: [";
+  my @items = ();
+  for my $item (@list) {
+    $item = "" if ! defined ($item);
+    $item =~ s/\n/\\n/g;
+    push (@items, $item);
+  }
+  $str .= join (" ", @items);
+  $str .= "]";
+
+  warn "$str\n";
+}
+#
+sub debug_hash
+{
+  my ($label) = shift;
+  my (%hash) = (ref $_[0] && $_[0] =~ /.*HASH.*/) ? %{$_[0]} : @_;
+
+  my $str = "$label: {";
+  my @items = ();
+  for my $key (sort keys %hash) {
+    my $val = $hash{$key} || ""; # no undef
+    $key =~ s/\n/\\n/g;
+    $val =~ s/\n/\\n/g;
+    push (@items, "$key:$val");
+  }
+  $str .= join (",", @items);
+  $str .= "}";
+
+  warn "$str\n";
+}
 1;
 
 __END__
@@ -2438,7 +2587,8 @@ Expand today's date, as a texinfo tree with translations.
 The I<$converter> argument may be undef.  I<$verbatiminclude> is a
 C<@verbatiminclude> tree element.  This function returns a 
 C<@verbatim> tree elements after finding the included file and
-reading it.
+reading it.  If I<$converter> is not defined, the document encoding 
+is not taken into account when reading the file.
 
 =item $tree = definition_category($converter, $def_line)
 
@@ -2446,6 +2596,14 @@ The I<$converter> argument may be undef.  I<$def_line> is a
 C<def_line> texinfo tree container.  This function
 returns a texinfo tree corresponding to the category of the
 I<$def_line> taking the class into account, if there is one.
+If I<$converter> is not defined, the resulting string won't be
+translated.
+
+=item $result = is_content_empty($tree, $do_not_ignore_index_entries)
+
+Return true if the C<$tree> has content that could be formatted.
+C<$do_not_ignore_index_entries> is optional.  If set, index entries
+are considered to be formatted.
 
 =item $result = numbered_heading ($converter, $heading_element, $heading_text, $do_number)
 
@@ -2454,7 +2612,8 @@ a heading command tree element.  I<$heading_text> is the already
 formatted heading text.  if the I<$do_number> optional argument is 
 defined and false, no number is used and the text is returned as is.
 This function returns the heading with a number and the appendix 
-part if needed.
+part if needed.  If I<$converter> is not defined, the resulting 
+string won't be translated.
 
 =item ($caption, $prepended) = float_name_caption ($converter, $float)
 
@@ -2539,7 +2698,7 @@ Patrice Dumas, E<lt>pertusus@free.frE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2010, 2011, 2012 Free Software Foundation, Inc.
+Copyright 2010, 2011, 2012, 2013, 2014, 2015 Free Software Foundation, Inc.
 
 This library is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -2547,4 +2706,3 @@ the Free Software Foundation; either version 3 of the License,
 or (at your option) any later version.
 
 =cut
-

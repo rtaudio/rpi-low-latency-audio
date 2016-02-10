@@ -32,17 +32,47 @@ TAB, will not exceed 80 columns.  If you want to add text which shall
 not be copied to the ChangeLog, separate it by a line consisting of
 two dashes at the begin of a line.
 
-Typo fixes and documentation updates don't need a ChangeLog Entry,
+The one-line summary usually starts with a keyword to identify the
+mainly affected subsystem.  If more than one keyword is required the
+are delimited by a comma (e.g. =scd,w32:=). Commonly found keywords
+are
+
+ - agent   :: The gpg-agent component
+ - ssh     :: The ssh-agent part of the agent
+ - common  :: Code in common
+ - iobuf   :: The IOBUF system in common
+ - gpg     :: The gpg or gpgv components
+ - gpgsm   :: The gpgsm component
+ - scd     :: The scdaemon component
+ - ccid    :: The CCID driver in scdaemon
+ - dirmngr :: The dirmngr component
+ - w32     :: Windows related code
+ - po      :: Translations
+ - build   :: Changes to the build system
+ - speedo  :: Speedo build system specific changes
+ - doc     :: Documentation changes
+
+Typo fixes and documentation updates don't need a ChangeLog entry;
 thus you would use a commit message like
 
 #+begin_example
-Fix type in a comment
+Fix typo in a comment
 
 --
 #+end_example
 
 The marker line here is important; without it the first line would
 appear in the ChangeLog.
+
+If you exceptionally need to have longer lines in a commit log you may
+do this after this scissor line:
+#+begin_example
+# ------------------------ >8 ------------------------
+#+end_example
+(hash, blank, 24 dashes, blank, scissor, blank, 24 dashes).
+Note that such a comment will be removed if the git commit option
+=--cleanup=scissor= is used.
+
 
 ** License policy
 
@@ -60,8 +90,8 @@ appear in the ChangeLog.
   file "DCO".  (Except for a slight wording change, this DCO is
   identical to the one used by the Linux kernel.)
 
-  If your want to contribute code or documentation to GnuPG and you
-  didn't signed a copyright assignment with the FSF in the past, you
+  If you want to contribute code or documentation to GnuPG and you
+  didn't sign a copyright assignment with the FSF in the past, you
   need to take these simple steps:
 
   - Decide which mail address you want to use.  Please have your real
@@ -92,6 +122,69 @@ appear in the ChangeLog.
   the existing code as an example.  Do no re-indent code without a
   need.  If you really need to do it, use a separate commit for such a
   change.
+
+  - Only certain C99 features may be used (see below); in general
+    stick to C90.
+  - Please do not use C++ =//= style comments.
+  - Try to fit lines into 80 columns.
+  - Ignore signed/unsigned pointer mismatches
+  - No arithmetic on void pointers; cast to char* first.
+  - We use our own printf style functions like =es_printf=, and
+    =es_asprintf= which implement most C99 features with the exception
+    of =wchar_t= (which should anyway not be used).  Please always use
+    them and do not resort to those provided by libc.  The rationale
+    for using them is that we know that the format specifiers work on
+    all platforms and that we do not need to chase platform dependent
+    bugs.
+  - It is common to have a label named "leave" for a function's
+    cleanup and return code.  This helps with freeing memory and is a
+    convenient location to set a breakpoint for debugging.
+  - Always use xfree() instead of free().  If it is not easy to see
+    that the freed variable is not anymore used, explicitly set the
+    variable to NULL.
+  - Init function local variables only if needed so that the compiler
+    can do a better job in detecting uninitialized variables which may
+    indicate a problem with the code.
+  - Never init static or file local variables to 0 to make sure they
+    end up in BSS.
+  - Use --enable-maintainer-mode with configure.
+
+*** C99 language features
+
+  In GnuPG 2.x, but *not in 1.4* and not in most libraries, a limited
+  set of C99 features may be used:
+
+  - Variadic macros:
+    : #define foo(a,...)  bar(a, __VA_ARGS__)
+
+  - The predefined macro =__func__=:
+    : log_debug ("%s: Problem with foo\n", __func__);
+
+  - Variable declaration inside a for():
+    : for (int i = 0; i < 5; ++)
+    :   bar (i);
+
+  Although we usually make use of the =u16=, =u32=, and =u64= types,
+  it is also possible to include =<stdint.h>= and use =int16_t=,
+  =int32_t=, =int64_t=, =uint16_t=, =uint32_t=, and =uint64_t=.  But do
+  not use =int8_t= or =uint8_t=.
+
+** Commit log keywords
+
+  - GnuPG-bug-id :: Values are comma or space delimited bug numbers
+                    from bug.gnupg.org pertaining to this commit.
+  - Debian-bug-id :: Same as above but from the Debian bug tracker.
+  - CVE-id :: CVE id number pertaining to this commit.
+  - Regression-due-to :: Commit id of the regression fixed by this commit.
+  - Fixes-commit :: Commit id this commit fixes.
+  - Reported-by :: Value is a name or mail address of a bug reporte.
+  - Suggested-by :: Value is a name or mail address of someone how
+                    suggested this change.
+  - Co-authored-by :: Name or mail address of a co-author
+  - Some-comments-by :: Name or mail address of the author of
+                        additional comments (commit log or code).
+  - Proofread-by :: Sometimes used by translation commits.
+  - Signed-off-by :: Name or mail address of the developer
 
 * Windows
 ** How to build an installer for Windows
@@ -127,7 +220,6 @@ appear in the ChangeLog.
    speedo.mk has the versions of the tarballs and the branch names of
    the git repositories.  In case of problems, don't hesitate to ask
    on the gnupg-devel mailing for help.
-
 
 * Debug hints
 
@@ -175,13 +267,11 @@ appear in the ChangeLog.
 
 ** Detailed Roadmap
 
-  This list of file is not up to date!
+  This list of files is not up to date!
 
   - g10/gpg.c :: Main module with option parsing and all the stuff you
-                 have to do on startup.  Also has the exout handler
-                 and some helper functions.
-
-  - g10/sign.c :: Create signature and optionally encrypt
+                 have to do on startup.  Also has the exit handler and
+                 some helper functions.
 
   - g10/parse-packet.c ::
   - g10/build-packet.c ::
@@ -190,22 +280,21 @@ appear in the ChangeLog.
   - g10/getkey.c   :: Key selection code
   - g10/pkclist.c  :: Build a list of public keys
   - g10/skclist.c  :: Build a list of secret keys
-  - g10/ringedit.c :: Keyring I/O
+  - g10/keyring.c  :: Keyring access functions
   - g10/keydb.h    ::
 
-  - g10/keyid.c	:: Helper functions to get the keyid, fingerprint etc.
+  - g10/keyid.c	  :: Helper functions to get the keyid, fingerprint etc.
 
-
-  - g10/trustdb.c ::
+  - g10/trustdb.c :: Web-of-Trust computations
   - g10/trustdb.h ::
-  - g10/tdbdump.c :: Management of the trustdb.gpg
-  - g10/tdbio.c   ::
-  - g10/tdbio.h   :: I/O handling for the trustdb.gpg
+  - g10/tdbdump.c :: Export/import/list the trustdb.gpg
+  - g10/tdbio.c   :: I/O handling for the trustdb.gpg
+  - g10/tdbio.h   ::
 
   - g10/compress.c :: Filter to handle compression
   - g10/filter.h   :: Declarations for all filter functions
   - g10/delkey.c   :: Delete a key
-  - g10/kbnode.c   :: Helper for the KBNODE linked list
+  - g10/kbnode.c   :: Helper for the kbnode_t linked list
   - g10/main.h     :: Prototypes and some constants
   - g10/mainproc.c :: Message processing
   - g10/armor.c    :: Ascii armor filter
@@ -216,33 +305,28 @@ appear in the ChangeLog.
   - g10/options.h  :: Structure with all the command line options
                       and related constants
   - g10/openfile.c :: Create/Open Files
-  - g10/hkp.h      :: Keyserver access
-  - g10/hkp.c      :: Ditto.
+  - g10/keyserver.h :: Keyserver access dispatcher.
   - g10/packet.h   :: Defintion of OpenPGP structures.
   - g10/passphrase.c :: Passphrase handling code
 
-  - g10/pubkey-enc.c ::
-  - g10/seckey-cert.c ::
-  - g10/seskey.c     ::
-  - g10/import.c     ::
-  - g10/export.c     ::
-  - g10/comment.c    ::
-  - g10/status.c     ::
-  - g10/status.h     ::
-  - g10/sign.c       ::
-  - g10/plaintext.c  ::
-  - g10/encr-data.c  ::
-  - g10/encode.c     ::
-  - g10/revoke.c     ::
-  - g10/keylist.c    ::
-  - g10/sig-check.c  ::
-  - g10/signal.c     ::
-  - g10/helptext.c   ::
-  - g10/verify.c     ::
-  - g10/decrypt.c    ::
-  - g10/keyedit.c    ::
-  - g10/dearmor.c    ::
-  - g10/keygen.c     ::
+  - g10/pubkey-enc.c :: Process a public key encoded packet.
+  - g10/seckey-cert.c :: Not anymore used
+  - g10/seskey.c     :: Make sesssion keys etc.
+  - g10/import.c     :: Import keys into our key storage.
+  - g10/export.c     :: Export keys to the OpenPGP format.
+  - g10/sign.c       :: Create signature and optionally encrypt.
+  - g10/plaintext.c  :: Process plaintext packets.
+  - g10/decrypt-data.c :: Decrypt an encrypted data packet
+  - g10/encrypt.c    :: Main encryption driver
+  - g10/revoke.c     :: Create recovation certificates.
+  - g10/keylist.c    :: Print information about OpenPGP keys
+  - g10/sig-check.c  :: Check a signature
+  - g10/helptext.c   :: Show online help texts
+  - g10/verify.c     :: Verify signed data.
+  - g10/decrypt.c    :: Decrypt and verify data.
+  - g10/keyedit.c    :: Edit properties of a key.
+  - g10/dearmor.c    :: Armor utility.
+  - g10/keygen.c     :: Generate a key pair
 
 ** Memory allocation
 
@@ -263,7 +347,7 @@ Use only the functions:
  - xfree
 
 
-The *secure versions allocated memory in the secure memory. That is,
+The *secure versions allocate memory in the secure memory.  That is,
 swapping out of this memory is avoided and is gets overwritten on
 free.  Use this for passphrases, session keys and other sensitive
 material.  This memory set aside for secure memory is linited to a few
@@ -294,7 +378,7 @@ worry about this.  When it sees a compressed packet it pushes the
 uncompress filter and the next read byte is one which has already been
 uncompressed by this filter. Same goes for enciphered packet,
 plaintext packets and so on.  The file g10/encode.c might be a good
-staring point to see how it is used - actually this is the other way:
+starting point to see how it is used - actually this is the other way:
 constructing messages using pushed filters but it may be easier to
 understand.
 

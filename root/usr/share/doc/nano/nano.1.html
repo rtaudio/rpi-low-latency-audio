@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.2 -->
-<!-- CreationDate: Sun Mar 22 23:46:10 2015 -->
+<!-- CreationDate: Sun Jan 10 23:56:00 2016 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,6 +23,7 @@
 <a href="#NAME">NAME</a><br>
 <a href="#SYNOPSIS">SYNOPSIS</a><br>
 <a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#EDITING">EDITING</a><br>
 <a href="#OPTIONS">OPTIONS</a><br>
 <a href="#INITIALIZATION FILE">INITIALIZATION FILE</a><br>
 <a href="#NOTES">NOTES</a><br>
@@ -65,6 +66,37 @@ default) features in Pico, such as &quot;search and
 replace&quot; and &quot;go to line and column
 number&quot;.</p>
 
+<h2>EDITING
+<a name="EDITING"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Entering text
+and moving around in a file is straightforward: typing the
+letters and using the normal cursor movement keys. Commands
+are entered by using the Control (^) and the Alt or Meta
+(M-) keys. Typing <b>^K</b> deletes the current line and
+puts it in the cutbuffer. Consecutive <b>^K</b>s will put
+all deleted lines together in the cutbuffer. Any cursor
+movement or executing any other command will cause the next
+<b>^K</b> to overwrite the cutbuffer. A <b>^U</b> will paste
+the current contents of the cutbuffer at the current cursor
+position.</p>
+
+<p style="margin-left:11%; margin-top: 1em">When a more
+precise piece of text needs to be cut or copied, one can
+mark its start with <b>^6</b>, move the cursor to its end
+(the marked text will be highlighted), and then use
+<b>^K</b> to cut it, or <b>M-6</b> to copy it to the
+cutbuffer. One can also save the marked text to a file with
+<b>^O</b>, or spell check it with <b>^T</b>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The two lines
+at the bottom of the screen show the most important
+commands; the built-in help (<b>^G</b>) lists all the
+available ones. The default key bindings can be changed via
+the .nanorc file -- see <b>nanorc</b>(5).</p>
+
 <h2>OPTIONS
 <a name="OPTIONS"></a>
 </h2>
@@ -92,16 +124,18 @@ beginning of the line.</p>
 <b>&minus;&minus;backup</b></p>
 
 <p style="margin-left:22%;">When saving a file, back up the
-previous version of it to the current filename suffixed with
-a tilde (<b>~</b>).</p>
+previous version of it, using the current filename suffixed
+with a tilde (<b>~</b>).</p>
 
 
 <p style="margin-left:11%;"><b>&minus;C&nbsp;</b><i>directory</i>,
 <b>&minus;&minus;backupdir=</b><i>directory</i></p>
 
-<p style="margin-left:22%;">Set the directory where
-<b>nano</b> puts unique backup files, if file backups are
-enabled.</p>
+<p style="margin-left:22%;">Make and keep not just one
+backup file, but make and keep a uniquely numbered one every
+time a file is saved -- when backups are enabled. The
+uniquely numbered files are stored in the specified
+<i>directory</i>.</p>
 
 <p style="margin-left:11%;"><b>&minus;D</b>,
 <b>&minus;&minus;boldtext</b></p>
@@ -167,10 +201,12 @@ files from DOS/Mac format.</p>
 titlebar as extra editing space.</p>
 
 <p style="margin-left:11%;"><b>&minus;P</b>,
-<b>&minus;&minus;poslog</b></p>
+<b>&minus;&minus;positionlog</b></p>
 
 <p style="margin-left:22%;">Log and later read back the
-location of the cursor and place it there again.</p>
+location of the cursor and place it there again. (The old
+form of this option, <b>&minus;&minus;poslog</b>, is
+deprecated.)</p>
 
 <p style="margin-left:11%;"><b>&minus;Q
 &quot;</b><i>characters</i><b>&quot;</b>,
@@ -240,7 +276,7 @@ highlighting to use from among the ones defined in the
 <i>nanorc</i> files.</p>
 
 <p style="margin-left:11%;"><b>&minus;c</b>,
-<b>&minus;&minus;const</b></p>
+<b>&minus;&minus;constantshow</b></p>
 
 <p style="margin-left:22%;">Constantly show the cursor
 position. Note that this overrides <b>&minus;U</b>.</p>
@@ -352,6 +388,15 @@ checker command.</p>
 without prompting. Same as Pico&rsquo;s <b>&minus;t</b>
 option.</p>
 
+<p style="margin-left:11%;"><b>&minus;u</b>,
+<b>&minus;&minus;unix</b></p>
+
+<p style="margin-left:22%;">Save a file by default in Unix
+format. This overrides nano&rsquo;s default behavior of
+saving a file in the format that it had. (This option has no
+effect when you also use
+<b>&minus;&minus;noconvert</b>.)</p>
+
 <p style="margin-left:11%;"><b>&minus;v</b>,
 <b>&minus;&minus;view</b></p>
 
@@ -437,16 +482,16 @@ files.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Please send any
-comments or bug reports to <b>nano@nano-editor.org</b>.</p>
+<p style="margin-left:11%; margin-top: 1em">Justifications
+(<b>^J</b>) and reindentations (<b>M-{</b> and <b>M-}</b>)
+are not yet covered by the general undo system. So after a
+justification that is not immediately undone, or after any
+reindentation, earlier edits cannot be undone any more. The
+workaround is, of course, to exit without saving.</p>
 
-<p style="margin-left:11%; margin-top: 1em">The <b>nano</b>
-mailing list is available from
-<b>nano-devel@gnu.org</b>.</p>
-
-<p style="margin-left:11%; margin-top: 1em">To subscribe,
-email to <b>nano-devel-request@gnu.org</b> with a subject of
-&quot;subscribe&quot;.</p>
+<p style="margin-left:11%; margin-top: 1em">Please report
+any other bugs that you encounter via
+https://savannah.gnu.org/bugs/?group=nano.</p>
 
 <h2>HOMEPAGE
 <a name="HOMEPAGE"></a>

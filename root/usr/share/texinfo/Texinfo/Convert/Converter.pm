@@ -1,6 +1,7 @@
+# $Id$
 # Converter.pm: Common code for Converters.
 #
-# Copyright 2011, 2012, 2013 Free Software Foundation, Inc.
+# Copyright 2011, 2012, 2013, 2014, 2015 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,7 +60,7 @@ xml_accents
 @EXPORT = qw(
 );
 
-$VERSION = '5.1.90';
+$VERSION = '6.0';
 
 my %defaults = (
   'ENABLE_ENCODING'      => 1,
@@ -533,6 +534,388 @@ sub _set_outfile($$$)
   $self->{'output_file'} = $outfile;
 }
 
+sub _id_to_filename($$)
+{
+  my $self = shift;
+  my $id = shift;
+  return substr($id, 0, $self->get_conf('BASEFILENAME_LENGTH'));
+}
+
+sub _sectioning_command_normalized_filename($$)
+{
+  my $self = shift;
+  my $command = shift;
+  my $no_unidecode;
+
+  $no_unidecode = 1 if (defined($self->get_conf('USE_UNIDECODE')) 
+                        and !$self->get_conf('USE_UNIDECODE'));
+
+  my $normalized_name = Texinfo::Convert::NodeNameNormalization::transliterate_texinfo(
+       {'contents' => $command->{'extra'}->{'misc_content'}},
+                $no_unidecode);
+
+  my $filename = $self->_id_to_filename($normalized_name);
+  $filename .= '.'.$self->get_conf('EXTENSION') 
+    if (defined($self->get_conf('EXTENSION')) 
+      and $self->get_conf('EXTENSION') ne '');
+  return ($normalized_name, $filename);
+}
+
+sub _node_filename($$)
+{
+  my $self = shift;
+  my $node_info = shift;
+
+  my $no_unidecode;
+  $no_unidecode = 1 if (defined($self->get_conf('USE_UNIDECODE'))
+                        and !$self->get_conf('USE_UNIDECODE'));
+
+  my $filename;
+  if (defined($node_info->{'normalized'})) { 
+    if ($self->get_conf('TRANSLITERATE_FILE_NAMES')) {
+      $filename = Texinfo::Convert::NodeNameNormalization::transliterate_texinfo(
+       {'contents' => $node_info->{'node_content'}},
+            $no_unidecode);
+    } else {
+      $filename = $node_info->{'normalized'};
+    }
+  } else {
+    $filename = '';
+  }
+  $filename = $self->_id_to_filename($filename);
+  return $filename;
+}
+
+sub _set_element_file($$$)
+{
+  my $self = shift;
+  my $element = shift;
+  my $filename = shift;
+
+  if (!defined($filename)) {
+    cluck("_set_element_file: filename not defined\n");
+  }
+  if ($self->get_conf('CASE_INSENSITIVE_FILENAMES')) {
+    if (exists($self->{'filenames'}->{lc($filename)})) {
+      if ($self->get_conf('DEBUG')) {
+        print STDERR "Reusing ".$self->{'filenames'}->{lc($filename)}
+                     ." for $filename\n";
+      }
+      $filename = $self->{'filenames'}->{lc($filename)};
+    } else {
+      $self->{'filenames'}->{lc($filename)} = $filename;
+    }
+  }
+  $element->{'filename'} = $filename;
+  if (defined($self->{'destination_directory'}) 
+      and $self->{'destination_directory'} ne '') {
+    $element->{'out_filename'} = 
+      File::Spec->catfile($self->{'destination_directory'}, $filename);
+  } else {
+    $element->{'out_filename'} = $filename;
+  }
+}
+
+sub _top_node_filename($)
+{
+  my $self = shift;
+
+  my $top_node_filename;
+  if (defined($self->get_conf('TOP_FILE')) 
+      and $self->get_conf('TOP_FILE') ne '') {
+    $top_node_filename = $self->get_conf('TOP_FILE');
+  } else {
+    if (defined($self->get_conf('TOP_NODE_FILE'))) {
+      $top_node_filename = $self->get_conf('TOP_NODE_FILE');
+    } else {
+      # TOP_NODE_FILE is set in the default case.
+      # If not the manual name is used.
+      $top_node_filename = $self->{'document_name'};
+    }
+    if (defined($top_node_filename)) {
+      my $top_node_extension;
+      if ($self->get_conf('NODE_FILENAMES')) {
+        $top_node_extension = $self->get_conf('NODE_FILE_EXTENSION');
+      } else {
+        $top_node_extension = $self->get_conf('EXTENSION');
+      }
+      $top_node_filename .= '.'.$top_node_extension 
+        if (defined($top_node_extension) and $top_node_extension ne '');
+    }
+  }
+  return $top_node_filename;
+}
+
+sub _get_element($$)
+{
+  my $self = shift;
+  my $command = shift;
+  my $find_container = shift;
+
+  my $current = $command;
+
+  while (1) {
+    if ($current->{'type'}) {
+      if ($current->{'type'} eq 'element') {
+        return $current;
+      }
+    }
+    if ($current->{'parent'}) {
+      $current = $current->{'parent'};
+    } else {
+      return undef;
+    }
+  }
+}
+
+sub _set_pages_files($$)
+{
+  my $self = shift;
+  my $elements = shift;
+
+  # Ensure that the document has pages
+  return undef if (!defined($elements) or !@$elements);
+
+  my $extension = '';
+  $extension = '.'.$self->get_conf('EXTENSION') 
+            if (defined($self->get_conf('EXTENSION')) 
+                and $self->get_conf('EXTENSION') ne '');
+
+  if (!$self->get_conf('SPLIT')) {
+    foreach my $element (@$elements) {
+      if (!defined($element->{'filename'})) {
+        $element->{'filename'} = $self->{'output_filename'};
+        $element->{'out_filename'} = $self->{'output_file'};
+      }
+    }
+  } else {
+    my $node_top;
+    #my $section_top;
+    $node_top = $self->{'labels'}->{'Top'} if ($self->{'labels'});
+    #$section_top = $self->{'extra'}->{'top'} if ($self->{'extra'});
+  
+    my $top_node_filename = $self->_top_node_filename();
+    # first determine the top node file name.
+    if ($self->get_conf('NODE_FILENAMES') and $node_top 
+        and defined($top_node_filename)) {
+      my ($node_top_element) = $self->_get_element($node_top);
+      die "BUG: No element for top node" if (!defined($node_top));
+      $self->_set_element_file($node_top_element, $top_node_filename);
+    }
+    my $file_nr = 0;
+    my $previous_page;
+    foreach my $element(@$elements) {
+      # For Top node.
+      next if (defined($element->{'filename'}));
+      if (!$element->{'extra'}->{'first_in_page'}) {
+        cluck ("No first_in_page for $element\n");
+      }
+      if (!defined($element->{'extra'}->{'first_in_page'}->{'filename'})) {
+        my $file_element = $element->{'extra'}->{'first_in_page'};
+        if ($self->get_conf('NODE_FILENAMES')) {
+          foreach my $root_command (@{$file_element->{'contents'}}) {
+            if ($root_command->{'cmdname'} 
+                and $root_command->{'cmdname'} eq 'node') {
+              my $node_filename;
+              # double node are not normalized, they are handled here
+              if (!defined($root_command->{'extra'}->{'normalized'})
+                  or !defined($self->{'labels'}->{$root_command->{'extra'}->{'normalized'}})) {
+                $node_filename = 'unknown_node';
+              } else {
+                $node_filename = $self->_node_filename($root_command->{'extra'});
+              }
+              $node_filename .= '.'.$self->get_conf('NODE_FILE_EXTENSION') 
+                if (defined($self->get_conf('NODE_FILE_EXTENSION')) 
+                 and $self->get_conf('NODE_FILE_EXTENSION') ne '');
+              $self->_set_element_file($file_element, $node_filename);
+              last;
+            }
+          }
+          if (!defined($file_element->{'filename'})) {
+            # use section to do the file name if there is no node
+            my $command = $self->element_command($file_element);
+            if ($command) {
+              if ($command->{'cmdname'} eq 'top' and !$node_top
+                  and defined($top_node_filename)) {
+                $self->_set_element_file($file_element, $top_node_filename);
+              } else {
+                my ($normalized_name, $filename) 
+                   = $self->_sectioning_command_normalized_filename($command);
+                $self->_set_element_file($file_element, $filename)
+              }
+            } else {
+              # when everything else has failed
+              if ($file_nr == 0 and !$node_top 
+                  and defined($top_node_filename)) {
+                $self->_set_element_file($file_element, $top_node_filename);
+              } else {
+                my $filename = $self->{'document_name'} . "_$file_nr";
+                $filename .= $extension;
+                $self->_set_element_file($element, $filename);
+              }
+              $file_nr++;
+            }
+          }
+        } else {
+          my $filename = $self->{'document_name'} . "_$file_nr";
+          $filename .= '.'.$self->get_conf('EXTENSION') 
+            if (defined($self->get_conf('EXTENSION')) 
+                and $self->get_conf('EXTENSION') ne '');
+          $self->_set_element_file($file_element, $filename);
+          $file_nr++;
+        }
+      }
+      $element->{'filename'} 
+         = $element->{'extra'}->{'first_in_page'}->{'filename'};
+      $element->{'out_filename'}
+         = $element->{'extra'}->{'first_in_page'}->{'out_filename'};
+    }
+  }
+
+  foreach my $element (@$elements) {
+    $self->{'file_counters'}->{$element->{'filename'}}++;
+    print STDERR "Page $element ".Texinfo::Structuring::_print_element_command_texi($element).": $element->{'filename'}($self->{'file_counters'}->{$element->{'filename'}})\n"
+      if ($self->get_conf('DEBUG'));
+  }
+}
+
+sub output($$)
+{
+  my $self = shift;
+  my $root = shift;
+
+  my $elements;
+
+  if (defined($self->get_conf('OUTFILE'))
+      and ($Texinfo::Common::null_device_file{$self->get_conf('OUTFILE')}
+           or $self->get_conf('OUTFILE') eq '-'
+           or $self->get_conf('OUTFILE') eq '')) {
+    if ($self->get_conf('SPLIT')) {
+      $self->document_warn(sprintf($self->__("%s: output incompatible with split"),
+                                   $self->get_conf('OUTFILE')));
+      $self->force_conf('SPLIT', 0);
+    }
+  }
+  if ($self->get_conf('SPLIT')) {
+    $self->set_conf('NODE_FILES', 1);
+  }
+  if ($self->get_conf('NODE_FILES') 
+      or ($self->get_conf('SPLIT') and $self->get_conf('SPLIT') eq 'node')) {
+    $self->set_conf('NODE_FILENAMES', 1);
+  }
+  if ($self->get_conf('NODE_FILENAMES') and defined($self->get_conf('EXTENSION'))) {
+     $self->set_conf('NODE_FILE_EXTENSION', $self->get_conf('EXTENSION'));
+  }
+
+  $self->_set_outfile();
+  return undef unless $self->_create_destination_directory();
+
+  # do that now to have it available for formatting
+  # NOTE this calls Convert::Converter::_informative_command on all the 
+  # @informative_global commands.
+  # Thus sets among others language and encodings.
+  $self->_set_global_multiple_commands(-1);
+
+  if ($self->get_conf('USE_NODES')) {
+    $elements = Texinfo::Structuring::split_by_node($root);
+  } else {
+    $elements = Texinfo::Structuring::split_by_section($root);
+  }
+
+  Texinfo::Structuring::split_pages($elements, $self->get_conf('SPLIT'));
+
+  # determine file names associated with the different pages
+  if ($self->{'output_file'} ne '') {
+    $self->_set_pages_files($elements);
+  }
+
+  #print STDERR "$elements $elements->[0]->{'filename'}\n";
+
+  # Now do the output
+  my $fh;
+  my $output = '';
+  if (!$elements or !defined($elements->[0]->{'filename'})) {
+    # no page
+    my $outfile;
+    if ($self->{'output_file'} ne '') {
+      if ($self->get_conf('SPLIT')) {
+        $outfile = $self->_top_node_filename();
+        if (defined($self->{'destination_directory'}) 
+            and $self->{'destination_directory'} ne '') {
+          $outfile = File::Spec->catfile($self->{'destination_directory'}, 
+                                         $outfile);
+        }
+      } else {
+        $outfile = $self->{'output_file'};
+      }
+      print STDERR "DO No pages, output in $outfile\n"
+        if ($self->get_conf('DEBUG'));
+      $fh = $self->Texinfo::Common::open_out($outfile);
+      if (!$fh) {
+        $self->document_error(sprintf($self->__("could not open %s for writing: %s"),
+                                      $outfile, $!));
+        return undef;
+      }
+    } else {
+      print STDERR "DO No pages, string output\n"
+        if ($self->get_conf('DEBUG'));
+    }
+
+    if ($elements and @$elements) {
+      foreach my $element (@$elements) {
+        my $element_text = $self->convert_tree($element);
+        $output .= $self->_output_text($element_text, $fh);
+      }
+    } else {
+      $output .= $self->_output_text($self->convert($root), $fh);
+    }
+    # NOTE do not close STDOUT now to avoid a perl warning.
+    if ($fh and $outfile ne '-') {
+      $self->register_close_file($outfile);
+      if (!close($fh)) {
+        $self->document_error(sprintf($self->__("error on closing %s: %s"),
+                                      $outfile, $!));
+      }
+    }
+    return $output if ($self->{'output_file'} eq '');
+  } else {
+    # output with pages
+    print STDERR "DO Elements with filenames\n"
+      if ($self->get_conf('DEBUG'));
+    my %files;
+    
+    foreach my $element (@$elements) {
+      my $file_fh;
+      # open the file and output the elements
+      if (!$files{$element->{'filename'}}->{'fh'}) {
+        $file_fh = $self->Texinfo::Common::open_out($element->{'out_filename'});
+        if (!$file_fh) {
+          $self->document_error(sprintf($self->__("could not open %s for writing: %s"),
+                                    $element->{'out_filename'}, $!));
+          return undef;
+        }
+        $files{$element->{'filename'}}->{'fh'} = $file_fh;
+      } else {
+        $file_fh = $files{$element->{'filename'}}->{'fh'};
+      }
+      my $element_text = $self->convert_tree($element);
+      print $file_fh $element_text;
+      $self->{'file_counters'}->{$element->{'filename'}}--;
+      if ($self->{'file_counters'}->{$element->{'filename'}} == 0) {
+        # NOTE do not close STDOUT here to avoid a perl warning
+        if ($element->{'out_filename'} ne '-') {
+          $self->register_close_file($element->{'out_filename'});
+          if (!close($file_fh)) {
+            $self->document_error(sprintf($self->__("error on closing %s: %s"),
+                                  $element->{'out_filename'}, $!));
+            return undef;
+          }
+        }
+      }
+    }
+  }
+}
+
 sub _bug_message($$;$)
 {
   my $self = shift;
@@ -806,7 +1189,7 @@ sub _level_corrected_section($$)
 }
 
 # generic output method
-sub output($$)
+sub output_no_split($$)
 {
   my $self = shift;
   my $root = shift;
@@ -1259,7 +1642,7 @@ Texinfo::Convert::Converter - Parent class for Texinfo tree converters
   sub convert_tree($$) {
     ...
   }
-  sub output ($$) {
+  sub output($$) {
     ...
   }
 
@@ -1331,7 +1714,7 @@ To help with these initializations, the modules can define three methods:
 
 =item %defaults = $converter->converter_defaults($options)
 
-The converter can provide a defaults hash for configurations options.
+The converter can provide a defaults hash for configuration options.
 The I<$options> hash reference holds options for the converter.
 
 =item @global_commands = $converter->converter_global_commands()
@@ -1381,7 +1764,7 @@ the resulting string is returned.
 I<$accent_command> is an accent command, which may have other accent
 commands nested.  The function returns the accents formatted either
 as encoded letters, or formatted using I<\&format_accents>.
-If I<$in_upper_case> is set, the result should be upper cased.  
+If I<$in_upper_case> is set, the result should be uppercased.
 
 =back
 
@@ -1404,14 +1787,24 @@ should be a Texinfo tree element corresponding to an accent command taking
 an argument.  I<$in_upper_case> is optional, and, if set, the text is put
 in upper case.  The function returns the accented letter as XML entity 
 if possible.  I<$use_numeric_entities> is also optional, and, if set, and
-there is no XML entity, the numerical entity corresponding to unicode 
-points is preferred to an ascii transliteration.
+there is no XML entity, the numerical entity corresponding to Unicode 
+points is preferred to an ASCII transliteration.
 
 =item $result = $converter->xml_accents($accent_command, $in_upper_case)
 
 I<$accent_command> is an accent command, which may have other accent
 commands nested.  If I<$in_upper_case> is set, the result should be 
 upper cased.  The function returns the accents formatted as XML.
+
+=back
+
+Finally, there is:
+
+=item $result = $converter->output_internal_links()
+
+At this level, the method just returns undef.  It is used in the HTML
+output, following the C<--internal-links> option of texi2any/makeinfo
+specification.
 
 =back
 
@@ -1426,7 +1819,7 @@ Patrice Dumas, E<lt>pertusus@free.frE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011, 2012, 2013 Free Software Foundation, Inc.
+Copyright 2011, 2012, 2013, 2014, 2015 Free Software Foundation, Inc.
 
 This library is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

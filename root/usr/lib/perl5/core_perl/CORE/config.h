@@ -9,9 +9,9 @@
 
 /* Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Jun 28 05:51:50 MDT 2015
+ * Configuration time: Thu Dec 24 08:06:58 MST 2015
  * Configured by     : builduser
- * Target system     : linux leming 3.10.69-1-arch #1 smp preempt sat feb 14 09:51:55 mst 2015 armv7l gnulinux 
+ * Target system     : linux leming 3.10.82-8-arch #1 smp preempt wed sep 2 18:34:32 mdt 2015 armv7l gnulinux 
  */
 
 #ifndef _config_h_
@@ -883,7 +883,7 @@
  *	feature tests from Configure are generally more reliable.
  */
 #define OSNAME "linux"		/**/
-#define OSVERS "3.10.69-1-arch"		/**/
+#define OSVERS "3.10.82-8-arch"		/**/
 
 /* MULTIARCH:
  *	This symbol, if defined, signifies that the build

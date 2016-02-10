@@ -82,11 +82,7 @@ File: qlogic/1040.bin
 File: qlogic/1280.bin
 File: qlogic/12160.bin
 
-Licence: Allegedly GPLv2+, but no source visible. Marked:
-
-                   QLOGIC LINUX SOFTWARE
-  QLogic ISP1280/ device driver for Linux 2.2.x and 2.4.x
-  Copyright (C) 2001 Qlogic Corporation (www.qlogic.com)
+Licence: Redistributable. See LICENCE.qla1280 for details
 
 --------------------------------------------------------------------------
 
@@ -111,7 +107,7 @@ File: kaweth/new_code_fix.bin
 File: kaweth/trigger_code.bin
 File: kaweth/trigger_code_fix.bin
 
-Licence: Unknown
+Licence: Redistributable. See LICENCE.kaweth for details
 
 Found in hex form in the kernel source.
 
@@ -429,9 +425,9 @@ Version: 3.03.28 IPX
 File: ql2322_fw.bin
 Version: 3.03.28 IPX
 File: ql2400_fw.bin
-Version: 7.03.00 MID
+Version: 8.03.00 MID
 File: ql2500_fw.bin
-Version: 7.03.00 MIDQ
+Version: 8.03.00 MIDQ
 
 Licence: Redistributable. See LICENCE.qla2xxx for details
 
@@ -468,12 +464,16 @@ File: htc_9271.fw
 Version: 1.3.1
 File: htc_7010.fw
 Version: 1.3.1
+
+Licence: Redistributable. See LICENCE.atheros_firmware for details
+
 File: ath9k_htc/htc_7010-1.4.0.fw
 Version: 1.4.0
 File: ath9k_htc/htc_9271-1.4.0.fw
 Version: 1.4.0
 
-Licence: Redistributable. See LICENCE.atheros_firmware for details
+Licence: Redistributable (full source code is available under free
+software licences). See LICENCE.open-ath9k-htc-firmware for details
 
 --------------------------------------------------------------------------
 
@@ -571,10 +571,12 @@ Found in hex form in kernel source.
 
 Driver: cxgb4 - Chelsio Terminator 4/5 1G/10/40G Ethernet adapter
 
-File: cxgb4/t4fw-1.13.32.0.bin
-Link: cxgb4/t4fw.bin -> t4fw-1.13.32.0.bin
-File: cxgb4/t5fw-1.13.32.0.bin
-Link: cxgb4/t5fw.bin -> t5fw-1.13.32.0.bin
+File: cxgb4/t4fw-1.14.4.0.bin
+Link: cxgb4/t4fw.bin -> t4fw-1.14.4.0.bin
+File: cxgb4/t5fw-1.14.4.0.bin
+Link: cxgb4/t5fw.bin -> t5fw-1.14.4.0.bin
+File: cxgb4/aq1202_fw.cld
+File: cxgb4/bcm8483.bin
 
 Licence: Redistributable. See LICENCE.chelsio_firmware for details
 
@@ -586,9 +588,7 @@ File: e100/d101m_ucode.bin
 File: e100/d101s_ucode.bin
 File: e100/d102e_ucode.bin
 
-Licence: Unknown
-
-Found in hex form in kernel source.
+Licence: Redistributable. See LICENCE.e100 for details
 
 --------------------------------------------------------------------------
 
@@ -737,19 +737,25 @@ File: mrvl/sd8797_uapsta.bin
 Version: 14.66.11.p151
 
 File: mrvl/usb8797_uapsta.bin
-Version: 14.68.29.p38
+Version: 14.68.29.p49
 
 File: mrvl/sd8897_uapsta.bin
-Version: 15.68.4.p112
+Version: 15.68.7.p53
 
 File: mrvl/usb8897_uapsta.bin
 Version: 15.68.4.p103
 
 File: mrvl/pcie8897_uapsta.bin
-Version: 15.68.4.p112
+Version: 15.68.7.p53
 
 File: mrvl/sd8887_uapsta.bin
 Version: 15.68.7.p5
+
+File: mrvl/sd8801_uapsta.bin
+Version: 14.68.36.p60
+
+File: mrvl/usb8801_uapsta.bin
+Version: 14.68.36.p60
 
 Licence: Redistributable. See LICENCE.Marvell for details.  Originates from
 http://git.marvell.com/?p=mwifiex-firmware.git
@@ -834,6 +840,12 @@ Version: 23.15.10.0
 File: iwlwifi-7260-12.ucode
 Version: 25.17.12.0
 
+File: iwlwifi-7260-13.ucode
+Version: 25.30.13.0
+
+File: iwlwifi-7260-16.ucode
+Version 16.242414.0
+
 File: iwlwifi-3160-7.ucode
 Version: 22.1.7.0
 
@@ -849,6 +861,12 @@ Version: 23.15.10.0
 File: iwlwifi-3160-12.ucode
 Version: 25.17.12.0
 
+File: iwlwifi-3160-13.ucode
+Version: 25.30.13.0
+
+File: iwlwifi-3160-16.ucode
+Version 16.242414.0
+
 File: iwlwifi-7265-8.ucode
 Version: 22.24.8.0
 
@@ -861,11 +879,29 @@ Version: 23.15.10.0
 File: iwlwifi-7265-12.ucode
 Version: 25.17.12.0
 
+File: iwlwifi-7265-13.ucode
+Version: 25.30.13.0
+
+File: iwlwifi-7265-16.ucode
+Version 16.242414.0
+
 File: iwlwifi-7265D-10.ucode
 Version: 23.15.10.0
 
 File: iwlwifi-7265D-12.ucode
 Version: 25.17.12.0
+
+File: iwlwifi-7265D-13.ucode
+Version: 25.30.13.0
+
+File: iwlwifi-7265D-16.ucode
+Version 16.242414.0
+
+File: iwlwifi-8000C-13.ucode
+Version: 25.30.13.0
+
+File: iwlwifi-8000C-16.ucode
+Version 16.242414.0
 
 Licence: Redistributable. See LICENCE.iwlwifi_firmware for details
 
@@ -877,7 +913,8 @@ Driver: cx231xx - Conexant Cx23100/101/102 USB broadcast A/V decoder
 
 File: v4l-cx231xx-avcore-01.fw
 
-Licence:
+Licence: Redistributable.
+
   Conexant grants permission to use and redistribute these firmware
   files for use with Conexant devices, but not as a part of the Linux
   kernel or in any other form which would require these files themselves
@@ -1080,7 +1117,8 @@ File: v4l-cx23418-apu.fw
 File: v4l-cx23418-cpu.fw
 File: v4l-cx23418-dig.fw
 
-Licence:
+Licence: Redistributable.
+
   Conexant grants permission to use and redistribute these firmware
   files for use with Conexant devices, but not as a part of the Linux
   kernel or in any other form which would require these files themselves
@@ -1094,9 +1132,9 @@ Licence:
 Driver: cx23885 - Conexant PCI Express Broadcast A/V decoder
 
 File: v4l-cx23885-avcore-01.fw
-File: v4l-cx23885-enc.fw
 
-Licence:
+Licence: Redistributable.
+
   Conexant grants permission to use and redistribute these firmware
   files for use with Conexant devices, but not as a part of the Linux
   kernel or in any other form which would require these files themselves
@@ -1111,7 +1149,8 @@ Driver: cx23840 - Conexant sideport Broadcast A/V decoder
 
 File: v4l-cx25840.fw
 
-Licence:
+Licence: Redistributable.
+
   Conexant grants permission to use and redistribute these firmware
   files for use with Conexant devices, but not as a part of the Linux
   kernel or in any other form which would require these files themselves
@@ -1186,6 +1225,13 @@ File: bnx2x/bnx2x-e2-7.8.19.0.fw
 File: bnx2x/bnx2x-e1-7.10.51.0.fw
 File: bnx2x/bnx2x-e1h-7.10.51.0.fw
 File: bnx2x/bnx2x-e2-7.10.51.0.fw
+File: bnx2x/bnx2x-e1-7.12.30.0.fw
+File: bnx2x/bnx2x-e1h-7.12.30.0.fw
+File: bnx2x/bnx2x-e2-7.12.30.0.fw
+File: bnx2x/bnx2x-e1-7.13.1.0.fw
+File: bnx2x/bnx2x-e1h-7.13.1.0.fw
+File: bnx2x/bnx2x-e2-7.13.1.0.fw
+
 
 License:
   Copyright (c) 2007-2011 Broadcom Corporation
@@ -1261,7 +1307,7 @@ Source: av7110/Makefile
 
 Licence: GPLv2 or later
 
-ARM assembly source code from http://www.linuxtv.org/downloads/firmware/Boot.S
+ARM assembly source code from https://linuxtv.org/downloads/firmware/Boot.S
 
 --------------------------------------------------------------------------
 
@@ -1295,6 +1341,17 @@ File: rt73.bin
 Licence: Redistributable. See LICENCE.ralink-firmware.txt for details
 
 Downloaded from http://www.ralinktech.com/ralink/Home/Support/Linux.html
+
+---------------------------------------------------------------------------
+
+Driver: mt7601u - MediaTek MT7601U Wireless MACs
+
+File: mt7601u.bin
+Version: 34
+
+Licence: Redistributable. See LICENCE.ralink_a_mediatek_company_firmware for details
+
+Downloaded from http://www.mediatek.com/en/downloads/
 
 --------------------------------------------------------------------------
 
@@ -1380,7 +1437,7 @@ Driver: dib0700 - DiBcom dib0700 USB DVB bridge driver
 File: dvb-usb-dib0700-1.20.fw
 Version: 1.20
 
-Licence: Redistributable. See LICENCE.dib0700 for details
+Licence: Redistributable. See LICENSE.dib0700 for details
 
 --------------------------------------------------------------------------
 
@@ -1589,6 +1646,7 @@ File: radeon/TAHITI_pfp.bin
 File: radeon/TAHITI_rlc.bin
 File: radeon/TAHITI_uvd.bin
 File: radeon/TAHITI_smc.bin
+File: radeon/TAHITI_vce.bin
 File: radeon/VERDE_ce.bin
 File: radeon/VERDE_mc.bin
 File: radeon/VERDE_mc2.bin
@@ -1685,13 +1743,19 @@ File: radeon/bonaire_mec.bin
 File: radeon/bonaire_pfp.bin
 File: radeon/bonaire_rlc.bin
 File: radeon/bonaire_sdma.bin
+File: radeon/bonaire_sdma1.bin
 File: radeon/bonaire_smc.bin
+File: radeon/bonaire_uvd.bin
+File: radeon/bonaire_vce.bin
 File: radeon/kabini_ce.bin
 File: radeon/kabini_me.bin
 File: radeon/kabini_mec.bin
 File: radeon/kabini_pfp.bin
 File: radeon/kabini_rlc.bin
 File: radeon/kabini_sdma.bin
+File: radeon/kabini_sdma1.bin
+File: radeon/kabini_uvd.bin
+File: radeon/kabini_vce.bin
 File: radeon/kaveri_ce.bin
 File: radeon/kaveri_me.bin
 File: radeon/kaveri_mec.bin
@@ -1699,6 +1763,9 @@ File: radeon/kaveri_mec2.bin
 File: radeon/kaveri_pfp.bin
 File: radeon/kaveri_rlc.bin
 File: radeon/kaveri_sdma.bin
+File: radeon/kaveri_sdma1.bin
+File: radeon/kaveri_uvd.bin
+File: radeon/kaveri_vce.bin
 File: radeon/hawaii_ce.bin
 File: radeon/hawaii_mc.bin
 File: radeon/hawaii_me.bin
@@ -1706,15 +1773,80 @@ File: radeon/hawaii_mec.bin
 File: radeon/hawaii_pfp.bin
 File: radeon/hawaii_rlc.bin
 File: radeon/hawaii_sdma.bin
+File: radeon/hawaii_sdma1.bin
 File: radeon/hawaii_smc.bin
+File: radeon/hawaii_uvd.bin
+File: radeon/hawaii_vce.bin
 File: radeon/mullins_ce.bin
 File: radeon/mullins_me.bin
 File: radeon/mullins_mec.bin
 File: radeon/mullins_pfp.bin
 File: radeon/mullins_rlc.bin
 File: radeon/mullins_sdma.bin
+File: radeon/mullins_sdma1.bin
+File: radeon/mullins_uvd.bin
+File: radeon/mullins_vce.bin
 
 Licence: Redistributable. See LICENSE.radeon for details.
+
+--------------------------------------------------------------------------
+
+Driver: amdgpu - AMD Radeon
+
+File: amdgpu/topaz_ce.bin
+File: amdgpu/topaz_mc.bin
+File: amdgpu/topaz_me.bin
+File: amdgpu/topaz_mec2.bin
+File: amdgpu/topaz_mec.bin
+File: amdgpu/topaz_pfp.bin
+File: amdgpu/topaz_rlc.bin
+File: amdgpu/topaz_sdma1.bin
+File: amdgpu/topaz_sdma.bin
+File: amdgpu/topaz_smc.bin
+File: amdgpu/tonga_ce.bin
+File: amdgpu/tonga_mc.bin
+File: amdgpu/tonga_me.bin
+File: amdgpu/tonga_mec2.bin
+File: amdgpu/tonga_mec.bin
+File: amdgpu/tonga_pfp.bin
+File: amdgpu/tonga_rlc.bin
+File: amdgpu/tonga_sdma1.bin
+File: amdgpu/tonga_sdma.bin
+File: amdgpu/tonga_smc.bin
+File: amdgpu/tonga_uvd.bin
+File: amdgpu/tonga_vce.bin
+File: amdgpu/carrizo_ce.bin
+File: amdgpu/carrizo_me.bin
+File: amdgpu/carrizo_mec2.bin
+File: amdgpu/carrizo_mec.bin
+File: amdgpu/carrizo_pfp.bin
+File: amdgpu/carrizo_rlc.bin
+File: amdgpu/carrizo_sdma1.bin
+File: amdgpu/carrizo_sdma.bin
+File: amdgpu/carrizo_uvd.bin
+File: amdgpu/carrizo_vce.bin
+File: amdgpu/fiji_ce.bin
+File: amdgpu/fiji_mc.bin
+File: amdgpu/fiji_me.bin
+File: amdgpu/fiji_mec2.bin
+File: amdgpu/fiji_mec.bin
+File: amdgpu/fiji_pfp.bin
+File: amdgpu/fiji_rlc.bin
+File: amdgpu/fiji_sdma1.bin
+File: amdgpu/fiji_sdma.bin
+File: amdgpu/fiji_smc.bin
+File: amdgpu/fiji_uvd.bin
+File: amdgpu/fiji_vce.bin
+File: amdgpu/stoney_ce.bin
+File: amdgpu/stoney_me.bin
+File: amdgpu/stoney_mec.bin
+File: amdgpu/stoney_pfp.bin
+File: amdgpu/stoney_rlc.bin
+File: amdgpu/stoney_sdma.bin
+File: amdgpu/stoney_uvd.bin
+File: amdgpu/stoney_vce.bin
+
+Licence: Redistributable. See LICENSE.amdgpu for details.
 
 --------------------------------------------------------------------------
 
@@ -1722,7 +1854,8 @@ Driver: s2255drv
 
 File: f2255usb.bin
 
-Licence:
+Licence: Redistributable.
+
   Sensoray grants permission to use and redistribute these firmware
   files for use with Sensoray devices, but not as a part of the Linux
   kernel or in any other form which would require these files themselves
@@ -1735,7 +1868,10 @@ Licence:
 
 Driver: rtl8192e - Realtek 8192 PCI wireless driver
 
-File: RTL8192E/*
+File: RTL8192E/boot.img
+File: RTL8192E/data.img
+File: RTL8192E/main.img
+
 Licence: Redistributable, provided by Realtek in their driver
          source download.
 
@@ -1786,6 +1922,22 @@ Licence:
  * SOFTWARE.
 
 Found in hex form in kernel source.
+
+--------------------------------------------------------------------------
+
+Driver: qed - QLogic 4xxxx Ethernet Driver Core Module.
+
+File: qed/qed_init_values_zipped-8.4.2.0.bin
+File: qed/qed_init_values_zipped-8.7.3.0.bin
+
+Licence:
+  This file contains firmware data derived from proprietary unpublished
+  source code.
+  Copyright (c) 2015 QLogic Corporation.
+
+  Permission is hereby granted for the distribution of this firmware data
+  in hexadecimal or equivalent format, provided this copyright notice is
+  accompanying it.
 
 --------------------------------------------------------------------------
 
@@ -1875,12 +2027,15 @@ File: brcm/brcmfmac43242a.bin
 File: brcm/brcmfmac43143.bin
 File: brcm/brcmfmac43143-sdio.bin
 File: brcm/brcmfmac43455-sdio.bin
+File: brcm/brcmfmac4350c2-pcie.bin
+File: brcm/brcmfmac4350-pcie.bin
 File: brcm/brcmfmac4354-sdio.bin
 File: brcm/brcmfmac4356-pcie.bin
 File: brcm/brcmfmac43569.bin
 File: brcm/brcmfmac43570-pcie.bin
 File: brcm/brcmfmac43602-pcie.bin
 File: brcm/brcmfmac43602-pcie.ap.bin
+File: brcm/brcmfmac4371-pcie.bin
 
 Licence: Redistributable. See LICENCE.broadcom_bcm43xx for details.
 
@@ -1903,7 +2058,7 @@ Version: 4.0.4.3.7
 
 File: ti-connectivity/wl1251-nvs.bin
 
-Licence: See LICENCE.wl1251 for details.
+Licence: Redistributable. See LICENCE.wl1251 for details.
 
 The published NVS files are for testing only.  Every device needs to
 have a unique NVS which is properly calibrated for best results.
@@ -1965,7 +2120,7 @@ File: ti-connectivity/wl128x-nvs.bin
 Link: ti-connectivity/wl12xx-nvs.bin -> wl127x-nvs.bin
 Link: ti-connectivity/wl1271-nvs.bin -> wl127x-nvs.bin
 
-Licence: See LICENCE.ti-connectivity for details.
+Licence: Redistributable. See LICENCE.ti-connectivity for details.
 
 The NVS file includes two parts:
 	 - radio calibration
@@ -1999,7 +2154,7 @@ Version: 8.8.0.0.13
 File: ti-connectivity/wl18xx-fw-4.bin
 Version: 8.9.0.0.39
 
-Licence: See LICENCE.ti-connectivity for details.
+Licence: Redistributable. See LICENCE.ti-connectivity for details.
 
 The driver expects to find the firmwares under a ti-connectivity
 subdirectory.  So if your system looks for firmwares in /lib/firmware,
@@ -2012,7 +2167,7 @@ Driver: TI_ST - Texas Instruments bluetooth driver
 
 File: ti-connectivity/TIInit_7.2.31.bts
 
-Licence: See LICENCE.ti-connectivity for details.
+Licence: Redistributable. See LICENCE.ti-connectivity for details.
 
 	TIInit_7.2.31.bts version 7.2.31
 
@@ -2024,7 +2179,8 @@ Driver: tlg2300 - Telgent 2300 V4L/DVB driver.
 
 File: tlg2300_firmware.bin
 
-Licence:
+Licence: Redistributable.
+
   Telegent System grants permission to use and redistribute these
   firmware files for use with devices containing the chip tlg2300, but
   not as a part of the Linux kernel or in any other form which would
@@ -2158,6 +2314,28 @@ Licence: Redistributable. See LICENCE.rtlwifi_firmware.txt for details.
 
 --------------------------------------------------------------------------
 
+Driver: rtl8xxxu - Realtek 802.11n WLAN driver for RTL8XXX USB devices
+
+Info: rtl8723au taken from Realtek driver
+      rtl8723A_WiFi_linux_v4.1.3_6044.20121224
+      Firmware is embedded in the driver as data statements. This info
+      has been extracted into a binary file.
+File: rtlwifi/rtl8723aufw_A.bin
+File: rtlwifi/rtl8723aufw_B.bin
+File: rtlwifi/rtl8723aufw_B_NoBT.bin
+
+Info: rtl8723bu taken from Realtek driver
+      rtl8723BU_WiFi_linux_v4.3.16_14189.20150519_BTCOEX20150119-5844
+      Firmware is embedded in the driver as data statements. This info
+      has been extracted into a binary file.
+File: rtlwifi/rtl8723bu_nic.bin
+File: rtlwifi/rtl8723bu_wowlan.bin
+File: rtlwifi/rtl8723bu_ap_wowlan.bin
+
+Licence: Redistributable. See LICENCE.rtlwifi_firmware.txt for details.
+
+--------------------------------------------------------------------------
+
 Driver: r8169 - RealTek 8169/8168/8101 ethernet driver.
 
 File: rtl_nic/rtl8168d-1.fw
@@ -2243,6 +2421,8 @@ File: ar3k/ramps_0x01020201_26.dfu
 File: ar3k/ramps_0x01020201_40.dfu
 File: ar3k/AthrBT_0x41020000.dfu
 File: ar3k/ramps_0x41020000_40.dfu
+File: ar3k/AthrBT_0x11020100.dfu
+File: ar3k/ramps_0x11020100_40.dfu
 
 Licence: Redistributable. See LICENCE.atheros_firmware for details
 
@@ -2315,6 +2495,23 @@ Driver: ath10k - Qualcomm Atheros support for QCA988x family of chips
 
 File: ath10k/QCA988X/hw2.0/board.bin
 File: ath10k/QCA988X/hw2.0/firmware-4.bin
+Version: 10.2.4.45
+Licence: ath10k/QCA988X/hw2.0/notice_ath10k_firmware-4.txt
+File: ath10k/QCA988X/hw2.0/firmware-5.bin
+Version: 10.2.4.70.9-2
+Licence: ath10k/QCA988X/hw2.0/notice_ath10k_firmware-5.txt
+File: ath10k/QCA6174/hw2.1/board.bin
+File: ath10k/QCA6174/hw2.1/firmware-5.bin
+Version: WLAN.RM.1.1-00141
+Licence: ath10k/QCA6174/hw2.1/notice_ath10k_firmware-5.txt
+File: ath10k/QCA6174/hw3.0/board.bin
+File: ath10k/QCA6174/hw3.0/firmware-4.bin
+Version: WLAN.RM.2.0-00180-QCARMSWPZ-1
+Licence: ath10k/QCA6174/hw3.0/notice_ath10k_firmware-4.txt
+File: ath10k/QCA99X0/hw2.0/board.bin
+File: ath10k/QCA99X0/hw2.0/firmware-5.bin
+Version: 10.4.1.00030-1
+Licence: ath10k/QCA99X0/hw2.0/notice_ath10k_firmware-5.txt
 
 Licence: Redistributable. See LICENSE.QualcommAtheros_ath10k for details
 
@@ -2366,7 +2563,8 @@ Driver: drxk - Micronas DRX-K demodulator driver
 
 File: dvb-usb-terratec-h5-drxk.fw
 
-Licence:
+Licence: Redistributable.
+
 TERRATEC grants permission to use and redistribute these firmware
 files for use with TERRATEC devices, but not as part of the Linux
 kernel or in any other form which would require these files themselves
@@ -2419,7 +2617,8 @@ File: s5p-mfc-v6-v2.fw
 File: s5p-mfc-v7.fw
 File: s5p-mfc-v8.fw
 
-Licence:
+Licence: Redistributable.
+
 Samsung grants permission to use and redistribute aforementioned firmware
 files for the use with Exynos series devices, but not as part of the Linux
 kernel, or in any other form which would require these files themselves
@@ -2459,19 +2658,25 @@ Driver: btusb - Bluetooth USB driver
 File: intel/ibt-hw-37.7.bseq
 Version: 1316.02.00
 File: intel/ibt-hw-37.7.10-fw-1.80.2.3.d.bseq
-Version: WP_1303_02_patch_0.0.79.1
+Version: WP_1303_02_patch_0.0.83.1
 File: intel/ibt-hw-37.7.10-fw-1.0.2.3.d.bseq
-Version: WP_1303_02_patch_0.0.79.1
+Version: WP_1303_02_patch_0.0.83.1
 File: intel/ibt-hw-37.7.10-fw-1.80.1.2d.d.bseq
-Version: WP_1345_01_patch_0.0.26.1
+Version: WP_1345_01_patch_0.0.34.1
 File: intel/ibt-hw-37.7.10-fw-1.0.1.2d.d.bseq
-Version: WP_1345_01_patch_0.0.26.1
+Version: WP_1345_01_patch_0.0.34.1
 File: intel/ibt-hw-37.8.bseq
 Version: 1339_02.00
 File: intel/ibt-hw-37.8.10-fw-1.10.2.27.d.bseq
-Version: STP2_C0_1339_02_patch_43.1
+Version: BT_StonePeak_C0_REL_55_0001
 File: intel/ibt-hw-37.8.10-fw-1.10.3.11.e.bseq
-Version: STP2_D0_1417_04_patch_15.1
+Version: BT_StonePeak_D0_REL_32_0002
+File: intel/ibt-hw-37.8.10-fw-22.50.19.14.f.bseq
+Version: STP_D1_REL_13
+File: intel/ibt-11-5.ddc
+Version: LnP/SfP_REL0190
+File: intel/ibt-11-5.sfi
+Version: LnP/SfP_REL0190
 
 Licence: Redistributable. See LICENCE.ibt_firmware for details
 
@@ -2502,7 +2707,8 @@ Driver: rp2 -- Comtrol RocketPort 2 serial driver
 
 File: rp2.fw
 
-Licence:
+Licence: Redistributable.
+
 Copyright (C) 2013 Comtrol Corporation
 
 Comtrol grants permission to use and redistribute these firmware
@@ -2539,7 +2745,7 @@ File: go7007/px-m402u.fw
 File: go7007/px-tv402u.fw
 File: go7007/wis-startrek.fw
 
-Licence: Redistributable. See LICENCE.go7007_firmware for details
+Licence: Redistributable. See LICENCE.go7007 for details
 
 --------------------------------------------------------------------------
 
@@ -2556,6 +2762,18 @@ License: Redistributable. See LICENSE.amd-ucode for details
 
 --------------------------------------------------------------------------
 
+Driver: mxu11x0 - MOXA UPort 11x0 USB Serial hub driver
+
+File: moxa/moxa-1110.fw
+File: moxa/moxa-1130.fw
+File: moxa/moxa-1131.fw
+File: moxa/moxa-1150.fw
+File: moxa/moxa-1151.fw
+
+License: Redistributable. See LICENSE.moxa for details
+
+--------------------------------------------------------------------------
+
 Driver: mxuport - MOXA UPort USB Serial hub driver
 
 File: moxa/moxa-1250.fw
@@ -2568,23 +2786,7 @@ File: moxa/moxa-1618.fw
 File: moxa/moxa-1653.fw
 File: moxa/moxa-1658.fw
 
-License:
-The software accompanying this license statement (the “Software”)
-is the property of Moxa Inc. (the “Moxa”), and is protected by
-United States and International Copyright Laws and International
-treaty provisions. No ownership rights are granted by this
-Agreement or possession of the Software. Therefore, you must treat
-the Licensed Software like any other copyrighted material. Your
-rights and obligations in its use are described as follows:
-
-1. You may freely redistribute this software under this license.
-2. You may freely download and use this software on Moxa's device.
-3. You may not modify or attempt to reverse engineer the software, or
-   make any attempt to change or even examine the source code of the
-   software.
-4. You may not re-license or sub-license the software to any person or
-   business, using any other license.
-5. Moxa(r) is worldwide registered trademark.
+License: Redistributable. See LICENSE.moxa for details
 
 --------------------------------------------------------------------------
 
@@ -2592,7 +2794,7 @@ Driver: cw1200 - ST-E CW1100/CW1200 WLAN driver
 
 File: wsm_22.bin
 Version: WSM395
-Licence: Redistributable. See LICENSE.cw1200 for details.
+Licence: Redistributable. See LICENCE.cw1200 for details.
 
 File: sdd_sagrad_1091_1098.bin
 
@@ -2635,8 +2837,6 @@ Permission is hereby granted for the distribution of this firmware data
 in hexadecimal or equivalent format, provided this copyright notice is
 accompanying it.
 
-Found in hex form in kernel source.
-
 QLogic grants permission to use and redistribute these firmware files
 for use with QLogic BR-series devices, but not as a part of the Linux
 kernel or in any other form which would require these files themselves
@@ -2646,11 +2846,16 @@ useful, but WITHOUT ANY WARRANTY; without even the implied warranty
 of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 --------------------------------------------------------------------------
-Driver: qat_dh895xxcc - Intel(R) QAT crypto accelerator
+Driver: qat - Intel(R) QAT crypto accelerator
 
 File: qat_895xcc.bin
+File: qat_895xcc_mmp.bin
+File: qat_c3xxx.bin
+File: qat_c3xxx_mmp.bin
+File: qat_c62x.bin
+File: qat_c62x_mmp.bin
 
-Licence: Redistributable. See LICENCE.qat_dh895xcc_firmware for details
+Licence: Redistributable. See LICENCE.qat_firmware
 --------------------------------------------------------------------------
 
 Driver: rsi -- Redpine Signals Inc 91x driver
@@ -2668,9 +2873,10 @@ Licence:
 
 --------------------------------------------------------------------------
 
-Driver: xhci-rcar -- Renesas R-Car H2/M2 USB 3.0 host controller driver
+Driver: xhci-rcar -- Renesas R-Car H2/M2/H3 USB 3.0 host controller driver
 
 File: r8a779x_usb3_v1.dlmem
+File: r8a779x_usb3_v2.dlmem
 
 Licence: Redistributable. See LICENCE.r8a779x_usb3 for details.
 
@@ -2722,8 +2928,19 @@ License: Redistributable. See LICENCE.fw_sst_0f28 for details
 Driver: snd_intel_sst_core
 
 File: intel/fw_sst_22a8.bin
+Version: 01.0B.02.01
 
 License: Redistributable. See LICENCE.fw_sst_0f28 for details
+
+--------------------------------------------------------------------------
+
+Driver: snd-soc-skl
+
+File: intel/dsp_fw_release.bin
+Version: 8.20.00.827
+md5sum: 2a2166e169098c8620cb15ea0f850ed9
+
+License: Redistributable. See LICENCE.adsp_sst for details
 
 --------------------------------------------------------------------------
 
@@ -2753,6 +2970,134 @@ File: nvidia/tegra124/xusb.bin
 Version: v45.46
 
 File: nvidia/tegra210/xusb.bin
-Version: v50.07
+Version: v50.10
 
 Licence: Redistributable. See LICENCE.nvidia for details
+
+--------------------------------------------------------------------------
+
+Driver: atusb - ATUSB IEEE 802.15.4 transceiver driver
+
+File: atusb/atusb-0.2.dfu
+Version: 0.2
+Info: atusb/ChangeLog
+
+Licence: GPLv2+
+
+--------------------------------------------------------------------------
+
+Driver: qca - Qualcomm Atheros Bluetooth support for QCA61x4 chips
+
+File: qca/nvm_usb_00000201.bin
+File: qca/nvm_usb_00000200.bin
+File: qca/nvm_usb_00000300.bin
+File: qca/nvm_usb_00000302.bin
+File: qca/nvm_00130300.bin
+File: qca/nvm_00130302.bin
+File: qca/rampatch_usb_00000200.bin
+File: qca/rampatch_usb_00000201.bin
+File: qca/rampatch_usb_00000300.bin
+File: qca/rampatch_usb_00000302.bin
+File: qca/rampatch_00130300.bin
+File: qca/rampatch_00130302.bin
+
+Licence: Redistributable. See LICENSE.QualcommAtheros_ath10k for details
+
+--------------------------------------------------------------------------
+
+Driver: liquidio -- Cavium LiquidIO driver
+
+File: liquidio/lio_210nv_nic.bin
+Version: v1.1.9
+
+File: liquidio/lio_210sv_nic.bin
+Version: v1.1.9
+
+File: liquidio/lio_410nv_nic.bin
+Version: v1.1.9
+
+Licence: Redistributable. See LICENCE.cavium for details
+
+--------------------------------------------------------------------------
+
+Driver: i915 -- Intel Integrated Graphics driver
+
+File: i915/skl_dmc_ver1_23.bin
+
+File: i915/skl_dmc_ver1.bin
+Version: DMC API/ABI ver 1 - release 23 for Skylake
+
+File: i915/bxt_dmc_ver1_04.bin
+File: i915/bxt_dmc_ver1_05.bin
+File: i915/bxt_dmc_ver1_06.bin
+
+File: i915/bxt_dmc_ver1.bin
+Version: DMC API/ABI ver 1 - release 06 for Broxton
+
+File: i915/skl_guc_ver1_1059.bin
+File: i915/skl_guc_ver4_3.bin
+
+File: i915/skl_guc_ver1.bin
+Version: Guc API/ABI ver 1 - release 1059 for Skylake
+
+File: i915/skl_guc_ver4.bin
+Version: Guc API/ABI ver 4 - release 3 for Skylake
+
+License: Redistributable. See LICENSE.i915 for details
+
+--------------------------------------------------------------------------
+
+Driver: nouveau - NVIDIA GK20A GPU driver
+
+File: nvidia/gk20a/fecs_data.bin
+File: nvidia/gk20a/fecs_inst.bin
+File: nvidia/gk20a/gpccs_data.bin
+File: nvidia/gk20a/gpccs_inst.bin
+File: nvidia/gk20a/sw_bundle_init.bin
+File: nvidia/gk20a/sw_ctx.bin
+File: nvidia/gk20a/sw_method_init.bin
+File: nvidia/gk20a/sw_nonctx.bin
+
+Licence: Redistributable. See LICENCE.nvidia for details
+
+--------------------------------------------------------------------------
+
+Driver: wilc1000 - Atmel 802.11n WLAN driver for WILC1000
+
+File: atmel/wilc1000_fw.bin
+File: atmel/wilc1000_ap_fw.bin
+File: atmel/wilc1000_p2p_fw.bin
+
+License: Redistributable. See LICENSE.atmel for details
+
+--------------------------------------------------------------------------
+
+Driver: hfi1 - Intel OPA Gen 1 adapter
+
+File: hfi1_dc8051.fw
+Version: 0.25
+File: hfi1_fabric.fw
+File: hfi1_pcie.fw
+File: hfi1_sbus.fw
+
+Licence: Redistributable. See LICENSE.hfi1_firmware for details
+
+--------------------------------------------------------------------------
+
+Driver: knav_qmss_queue - TI Keystone 2 QMSS driver
+
+File: ti-keystone/ks2_qmss_pdsp_acc48_k2_le_1_0_0_9.bin
+
+Licence: Redistributable. See LICENCE.ti-keystone for details.
+
+--------------------------------------------------------------------------
+
+Driver: mwlwifi - Marvell mac80211 driver for 80211ac cards.
+
+File: mwlwifi/88W8864.bin
+Version: 7.2.8.6
+
+File: mwlwifi/88W8897.bin
+Version: 8.2.0.10
+
+Licence: Redistributable. See LICENCE.Marvell for details.

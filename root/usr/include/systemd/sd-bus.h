@@ -156,6 +156,9 @@ void sd_bus_close(sd_bus *bus);
 
 sd_bus *sd_bus_ref(sd_bus *bus);
 sd_bus *sd_bus_unref(sd_bus *bus);
+sd_bus *sd_bus_flush_close_unref(sd_bus *bus);
+
+void sd_bus_default_flush_close(void);
 
 int sd_bus_is_open(sd_bus *bus);
 
@@ -204,7 +207,7 @@ sd_bus* sd_bus_slot_get_bus(sd_bus_slot *slot);
 void *sd_bus_slot_get_userdata(sd_bus_slot *slot);
 void *sd_bus_slot_set_userdata(sd_bus_slot *slot, void *userdata);
 int sd_bus_slot_set_description(sd_bus_slot *slot, const char *description);
-int sd_bus_slot_get_description(sd_bus_slot *slot, char **description);
+int sd_bus_slot_get_description(sd_bus_slot *slot, const char **description);
 
 sd_bus_message* sd_bus_slot_get_current_message(sd_bus_slot *slot);
 sd_bus_message_handler_t sd_bus_slot_get_current_handler(sd_bus_slot *bus);
@@ -417,7 +420,9 @@ int sd_bus_error_add_map(const sd_bus_error_map *map);
 /* Label escaping */
 
 int sd_bus_path_encode(const char *prefix, const char *external_id, char **ret_path);
+int sd_bus_path_encode_many(char **out, const char *path_template, ...);
 int sd_bus_path_decode(const char *path, const char *prefix, char **ret_external_id);
+int sd_bus_path_decode_many(const char *path, const char *path_template, ...);
 
 /* Tracking peers */
 

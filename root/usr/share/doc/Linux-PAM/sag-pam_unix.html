@@ -38,6 +38,11 @@
       argument can be used to suppress this temporary shielding and may be
       needed for use with certain applications.
     </p><p>
+      The maximum length of a password supported by the pam_unix module
+      via the helper binary is <span class="emphasis"><em>PAM_MAX_RESP_SIZE</em></span>
+      - currently 512 bytes. The rest of the password provided by the
+      conversation function to the module will be ignored.
+    </p><p>
       The password component of this module performs the task of updating
       the user's password. The default encryption hash is taken from the
       <span class="emphasis"><em>ENCRYPT_METHOD</em></span> variable from

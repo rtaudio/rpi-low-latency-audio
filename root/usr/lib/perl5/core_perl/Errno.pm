@@ -9,8 +9,8 @@ use Config;
 use strict;
 
 "$Config{'archname'}-$Config{'osvers'}" eq
-"armv7l-linux-thread-multi-3.10.69-1-arch" or
-	die "Errno architecture (armv7l-linux-thread-multi-3.10.69-1-arch) does not match executable architecture ($Config{'archname'}-$Config{'osvers'})";
+"armv7l-linux-thread-multi-3.10.82-8-arch" or
+	die "Errno architecture (armv7l-linux-thread-multi-3.10.82-8-arch) does not match executable architecture ($Config{'archname'}-$Config{'osvers'})";
 
 our $VERSION = "1.23";
 $VERSION = eval $VERSION;

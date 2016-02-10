@@ -90,8 +90,8 @@ sub _add_text($$)
   my $text = shift;
   if ($line->{'line_beginning'}) {
     if ($line->{'indent_length'}) {
-      $line->{'leading_spaces'} .= 
-        ' ' x ($line->{'indent_length'} - $line->{'counter'});
+      my $nspaces = $line->{'indent_length'} - $line->{'counter'};
+      ($line->{'leading_spaces'} .= ' ' x $nspaces) if $nspaces > 0;
       print STDERR "INDENT.U($line->{'counter'})\n" if ($line->{'DEBUG'});
     }
     $line->{'line_beginning'} = 0;

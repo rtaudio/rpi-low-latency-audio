@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 1998-2009,2010 Free Software Foundation, Inc.              *
+ * Copyright (c) 1998-2011,2013 Free Software Foundation, Inc.              *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
  * copy of this software and associated documentation files (the            *
@@ -32,7 +32,7 @@
 /*    and: Thomas E. Dickey                        1995-on                  */
 /****************************************************************************/
 
-/* $Id: MKterm.h.awk.in,v 1.58 2010/01/09 19:53:26 tom Exp $ */
+/* $Id: MKterm.h.awk.in,v 1.62 2013/08/17 19:21:56 tom Exp $ */
 
 /*
 **	term.h -- Definition of struct term
@@ -42,7 +42,7 @@
 #define NCURSES_TERM_H_incl 1
 
 #undef  NCURSES_VERSION
-#define NCURSES_VERSION "5.9"
+#define NCURSES_VERSION "6.0"
 
 #include <ncurses_dll.h>
 
@@ -55,10 +55,16 @@ extern "C" {
  */
 
 #undef  NCURSES_CONST
-#define NCURSES_CONST /*nothing*/
+#define NCURSES_CONST const
 
 #undef  NCURSES_SBOOL
 #define NCURSES_SBOOL char
+
+#undef  NCURSES_USE_DATABASE
+#define NCURSES_USE_DATABASE 1
+
+#undef  NCURSES_USE_TERMCAP
+#define NCURSES_USE_TERMCAP 0
 
 #undef  NCURSES_XNAMES
 #define NCURSES_XNAMES 1
@@ -90,41 +96,6 @@ extern "C" {
 
 #include <termio.h>
 #define TTY struct termio
-
-/* Add definitions to make termio look like termios.
- * But ifdef it, since there are some implementations
- * that try to do this for us in a fake <termio.h>.
- */
-#ifndef TCSANOW
-#define TCSANOW TCSETA
-#endif
-#ifndef TCSADRAIN
-#define TCSADRAIN TCSETAW
-#endif
-#ifndef TCSAFLUSH
-#define TCSAFLUSH TCSETAF
-#endif
-#ifndef tcsetattr
-#define tcsetattr(fd, cmd, arg) ioctl(fd, cmd, arg)
-#endif
-#ifndef tcgetattr
-#define tcgetattr(fd, arg) ioctl(fd, TCGETA, arg)
-#endif
-#ifndef cfgetospeed
-#define cfgetospeed(t) ((t)->c_cflag & CBAUD)
-#endif
-#ifndef TCIFLUSH 
-#define TCIFLUSH 0
-#endif
-#ifndef TCOFLUSH 
-#define TCOFLUSH 1
-#endif
-#ifndef TCIOFLUSH 
-#define TCIOFLUSH 2
-#endif
-#ifndef tcflush
-#define tcflush(fd, arg) ioctl(fd, TCFLSH, arg)
-#endif
 
 #else /* !HAVE_TERMIO_H */
 
@@ -754,6 +725,7 @@ extern NCURSES_EXPORT(int) _nc_set_tty_mode (TTY *buf);
 extern NCURSES_EXPORT(int) _nc_get_tty_mode (TTY *buf);
 extern NCURSES_EXPORT(int) _nc_read_entry (const char * const, char * const, TERMTYPE *const);
 extern NCURSES_EXPORT(int) _nc_read_file_entry (const char *const, TERMTYPE *);
+extern NCURSES_EXPORT(void) _nc_init_termtype (TERMTYPE *const);
 extern NCURSES_EXPORT(int) _nc_read_termtype (TERMTYPE *, char *, int);
 extern NCURSES_EXPORT(char *) _nc_first_name (const char *const);
 extern NCURSES_EXPORT(int) _nc_name_match (const char *const, const char *const, const char *const);

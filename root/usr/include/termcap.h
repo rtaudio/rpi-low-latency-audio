@@ -37,7 +37,7 @@
 #define NCURSES_TERMCAP_H_incl	1
 
 #undef  NCURSES_VERSION
-#define NCURSES_VERSION "5.9"
+#define NCURSES_VERSION "6.0"
 
 #include <ncurses_dll.h>
 
@@ -49,7 +49,7 @@ extern "C"
 #include <sys/types.h>
 
 #undef  NCURSES_CONST 
-#define NCURSES_CONST /*nothing*/ 
+#define NCURSES_CONST const 
 
 #undef  NCURSES_OSPEED 
 #define NCURSES_OSPEED short 

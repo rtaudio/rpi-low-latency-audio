@@ -1,7 +1,7 @@
 # Structuring.pm: extract informations about a document structure based on the 
 #                 document tree.
 #
-# Copyright 2010, 2011, 2012 Free Software Foundation, Inc.
+# Copyright 2010, 2011, 2012, 2013, 2014 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -61,6 +61,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
   split_by_node
   split_by_section
   split_pages
+  warn_non_empty_parts
 ) ] );
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -68,7 +69,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 @EXPORT = qw(
 );
 
-$VERSION = '5.1.90';
+$VERSION = '6.0';
 
 
 my %types_to_enter;
@@ -249,7 +250,7 @@ sub sectioning_structure($$)
           }
         } else {
           my $up = $previous_section->{'section_up'};
-          my $new_upper_element;
+          my $new_upper_part_element;
           if ($previous_section->{'level'} != $level) {
             # means it is above the previous command, the up is to be found
             while ($up->{'section_up'} and $up->{'level'} >= $level) {
@@ -257,7 +258,7 @@ sub sectioning_structure($$)
             }
             if ($level <= $up->{'level'}) {
               if ($content->{'cmdname'} eq 'part') {
-                $new_upper_element = 1;
+                $new_upper_part_element = 1;
                 if ($level < $up->{'level'}) {
                   $self->line_warn(sprintf($self->__(
                     "no chapter-level command before \@%s"),
@@ -276,7 +277,7 @@ sub sectioning_structure($$)
               and $up->{'cmdname'} and $up->{'cmdname'} eq 'part') {
             $up = $up->{'section_up'};
           }
-          if ($new_upper_element) {
+          if ($new_upper_part_element) {
             # In that case the root has to be updated because the first 
             # 'part' just appeared
             $content->{'section_up'} = $sec_root;
@@ -494,6 +495,20 @@ sub fill_gaps_in_sectioning($)
     }
   }
   return (\@contents, \@added_sections);
+}
+
+sub warn_non_empty_parts($)
+{
+  my $self = shift;
+  my $global_commands = $self->global_commands_information();
+  if ($global_commands->{'part'}) {
+    foreach my $part (@{$global_commands->{'part'}}) {
+      if (!Texinfo::Common::is_content_empty($part)) {
+        $self->line_warn(sprintf($self->__("\@%s not empty"),
+                         $part->{'cmdname'}), $part->{'line_nr'});
+      }
+    }
+  }
 }
 
 sub _check_node_same_texinfo_code($$)
@@ -828,7 +843,8 @@ sub nodes_tree($)
     # and therefore $node->{'node_up'}->{'extra'}->{'manual_content'}.
     # The node_up should always be different from the menu_up, therefore
     # if in a menu, the second condition/error message applies.
-    if ($node->{'node_up'} and ($node->{'node_up'}->{'extra'}->{'manual_content'}
+    if ($self->{'SHOW_MENU'} and $node->{'node_up'} 
+        and ($node->{'node_up'}->{'extra'}->{'manual_content'}
          or !$node->{'menu_up_hash'}
          or !$node->{'menu_up_hash'}->{$node->{'node_up'}->{'extra'}->{'normalized'}})) {
       if (!$node->{'node_up'}->{'extra'}->{'manual_content'}) {
@@ -2214,7 +2230,7 @@ up with nodes, floats or anchors with C<associate_internal_references>.
 It is also possible to group the top-level contents of the tree, which consist
 in nodes and sectioning commands into elements that group together a node and
 the next sectioning element.  With C<split_by_node> nodes are considered
-to be the main sectionning elements, while with C<split_by_section> the 
+to be the main sectioning elements, while with C<split_by_section> the 
 sectioning command elements are the main elements.  The first mode is typical
 of Info format, while the second correspond to a traditional book.
 The elements may be further split in I<pages>, which are not pages as
@@ -2331,6 +2347,10 @@ Verify that internal references (C<@ref> and similar without
 fourth of fifth argument) have an associated node, anchor or float.
 Set the I<label> key in the I<extra> hash of the reference tree
 element to the associated labeled tree element.
+
+=item warn_non_empty_parts($parser)
+
+Register a warning in C<$parser> for each C<@part> that is not empty.
 
 =item $elements = split_by_node($tree)
 

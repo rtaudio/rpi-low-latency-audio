@@ -53,7 +53,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 @EXPORT = qw(
 );
 
-$VERSION = '5.1.90';
+$VERSION = '6.0';
 
 my %defaults = (
   'ENABLE_ENCODING'      => 0,

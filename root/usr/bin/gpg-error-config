@@ -59,7 +59,7 @@ while test $# -gt 0; do
 	    output="$output $exec_prefix"
 	    ;;
         --version)
-            echo "1.19"
+            echo "1.21"
 	    exit 0
 	    ;;
         --cflags)

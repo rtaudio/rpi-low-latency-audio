@@ -2,8 +2,8 @@
                       =========================
                              Version 2.1
 
-          Copyright 1997-2015 Werner Koch
-          Copyright 1998-2015 Free Software Foundation, Inc.
+          Copyright 1997-2016 Werner Koch
+          Copyright 1998-2016 Free Software Foundation, Inc.
 
 
 * INTRODUCTION
@@ -169,7 +169,7 @@
   "https://gnupg.org/faq/whats-new-in-2.1.html" .
 
   The primary WWW page is "https://www.gnupg.org"
-             or using TOR "http://ic6au7wa3f6naxjq.onion"
+             or using Tor "http://ic6au7wa3f6naxjq.onion"
   The primary FTP site is "ftp://ftp.gnupg.org/gcrypt/"
 
   See [[https://gnupg.org/download/mirrors.html]] for a list of

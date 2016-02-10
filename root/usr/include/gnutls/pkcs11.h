@@ -114,7 +114,7 @@ void gnutls_pkcs11_obj_set_pin_function(gnutls_pkcs11_obj_t obj,
  * @GNUTLS_PKCS11_OBJ_FLAG_CRT: When searching, restrict to certificates only (seek).
  * @GNUTLS_PKCS11_OBJ_FLAG_PUBKEY: When searching, restrict to public key objects only (seek).
  * @GNUTLS_PKCS11_OBJ_FLAG_PRIVKEY: When searching, restrict to private key objects only (seek).
- * @GNUTLS_PKCS11_OBJ_FLAG_WITH_PRIVKEY: When searching, restrict to objects which have a corresponding private key (seek).
+ * @GNUTLS_PKCS11_OBJ_FLAG_NO_STORE_PUBKEY: When generating a keypair don't store the public key (store).
  *
  * Enumeration of different PKCS #11 object flags. Some flags are used
  * to mark objects when storing, while others are also used while seeking
@@ -142,6 +142,7 @@ typedef enum gnutls_pkcs11_obj_flags {
 	GNUTLS_PKCS11_OBJ_FLAG_CRT = (1<<18),
 	GNUTLS_PKCS11_OBJ_FLAG_WITH_PRIVKEY = (1<<19),
 	GNUTLS_PKCS11_OBJ_FLAG_PUBKEY = (1<<20),
+	GNUTLS_PKCS11_OBJ_FLAG_NO_STORE_PUBKEY = GNUTLS_PKCS11_OBJ_FLAG_PUBKEY,
 	GNUTLS_PKCS11_OBJ_FLAG_PRIVKEY = (1<<21),
 	/* flags 1<<29 and later are reserved - see pkcs11_int.h */
 } gnutls_pkcs11_obj_flags;
@@ -222,6 +223,12 @@ gnutls_pkcs11_privkey_generate(const char *url, gnutls_pk_algorithm_t pk,
 			       unsigned int flags);
 #endif
 
+int
+gnutls_pkcs11_copy_pubkey(const char *token_url,
+			  gnutls_pubkey_t crt, const char *label,
+			  const gnutls_datum_t *cid,
+			  unsigned int key_usage, unsigned int flags);
+
 #define gnutls_pkcs11_copy_x509_crt(url, crt, label, flags) \
 	gnutls_pkcs11_copy_x509_crt2(url, crt, label, NULL, flags)
 
@@ -262,9 +269,9 @@ int gnutls_pkcs11_copy_secret_key(const char *token_url,
  * @GNUTLS_PKCS11_OBJ_TOKEN_MANUFACTURER: The token's manufacturer.
  * @GNUTLS_PKCS11_OBJ_TOKEN_MODEL: The token's model.
  * @GNUTLS_PKCS11_OBJ_ID: The object ID.
- * @GNUTLS_PKCS11_OBJ_LIBRARY_VERSION: The library's used to access the object version.
- * @GNUTLS_PKCS11_OBJ_LIBRARY_DESCRIPTION: The library's used to access the object description (name).
- * @GNUTLS_PKCS11_OBJ_LIBRARY_MANUFACTURER: The library's used to access the object manufacturer name.
+ * @GNUTLS_PKCS11_OBJ_LIBRARY_VERSION: The library's version.
+ * @GNUTLS_PKCS11_OBJ_LIBRARY_DESCRIPTION: The library's description.
+ * @GNUTLS_PKCS11_OBJ_LIBRARY_MANUFACTURER: The library's manufacturer name.
  *
  * Enumeration of several object information types.
  */
@@ -305,7 +312,7 @@ int gnutls_pkcs11_obj_set_info(gnutls_pkcs11_obj_t crt,
  * @GNUTLS_PKCS11_TOKEN_SERIAL: The token's serial number (string)
  * @GNUTLS_PKCS11_TOKEN_MANUFACTURER: The token's manufacturer (string)
  * @GNUTLS_PKCS11_TOKEN_MODEL: The token's model (string)
- * @GNUTLS_PKCS11_TOKEN_TRUSTED: Whether the token is marked as trusted in p11-kit (unsigned int)
+ * @GNUTLS_PKCS11_TOKEN_MODNAME: The token's module name (string - since 3.4.3)
  *
  * Enumeration of types for retrieving token information.
  */
@@ -313,7 +320,8 @@ typedef enum {
 	GNUTLS_PKCS11_TOKEN_LABEL,
 	GNUTLS_PKCS11_TOKEN_SERIAL,
 	GNUTLS_PKCS11_TOKEN_MANUFACTURER,
-	GNUTLS_PKCS11_TOKEN_MODEL
+	GNUTLS_PKCS11_TOKEN_MODEL,
+	GNUTLS_PKCS11_TOKEN_MODNAME
 } gnutls_pkcs11_token_info_t;
 
 /**

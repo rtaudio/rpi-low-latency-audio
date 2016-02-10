@@ -1,14 +1,19 @@
-<!-- $Id: texinfo.dtd 5369 2013-09-09 18:08:48Z karl $
+<!-- $Id: texinfo.dtd 6241 2015-05-03 23:18:07Z karl $
   Document Type Definition for Texinfo XML output (the '-'-xml option).
 
   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
-  2011, 2012, 2013 Free Software Foundation, Inc.
+  2011, 2012, 2013, 2014, 2015 Free Software Foundation, Inc.
 
   Copying and distribution of this file, with or without modification,
   are permitted in any medium without royalty provided the copyright
   notice and this notice are preserved.
 
-  Original author: Philippe Martin.
+  As soon as this file is nontrivially modified, update
+  TEXINFO_DTD_VERSION in configure.ac (if not already done).
+  See comments there for explanation.
+  
+  Email bug-texinfo@gnu.org with any discussion.
+  (Original author: Philippe Martin.)
 -->
 
 <!-- * ENTITIES * -->
@@ -146,7 +151,7 @@
 <!ENTITY % Inline.footnote "footnote">
 <!ENTITY % Inline.markup "code | command | env | file | option | samp | verb
                           | dfn | cite | key | kbd | var | acronym | abbr
-                          | indicateurl | w | asis"> 
+                          | indicateurl | w | asis | sub | sup "> 
 <!ENTITY % Inline.math "math | dmn">
 <!ENTITY % Inline.reference "xref | ref | pxref | inforef | email | uref | url">
 <!ENTITY % Inline.misc "click | clicksequence | logo | punct | spacecmd | today
@@ -1003,6 +1008,8 @@
 <!ELEMENT clicksequence (#PCDATA | %Inline.phrase;)*>
 <!ELEMENT w       (#PCDATA | %Inline.phrase;)*>
 <!ELEMENT asis    (#PCDATA | %Inline.phrase;)*>
+<!ELEMENT sub     (#PCDATA | %Inline.phrase;)*>
+<!ELEMENT sup     (#PCDATA | %Inline.phrase;)*>
 <!ELEMENT verb    (#PCDATA)>
 <!ATTLIST verb
           delimiter CDATA #REQUIRED>
@@ -1221,24 +1228,29 @@
           %lineattr;
           value     NMTOKEN #REQUIRED>
 
-<!-- misc -->
+<!-- unusual insertions and other -->
 
-<!ELEMENT bye EMPTY>
-
-<!-- space and accent commands -->
-<!ELEMENT spacecmd EMPTY>
-<!ATTLIST spacecmd
-          type (%spacetype;) #IMPLIED>
 <!ELEMENT accent (#PCDATA | accent | dotless)*>
 <!ATTLIST accent
           %bracketedattr;
           %spacesattr;
           type        CDATA #REQUIRED>
-<!ELEMENT dotless (#PCDATA)>
+
+<!ELEMENT bye EMPTY>
+
 <!ELEMENT click  EMPTY>
 <!ATTLIST click
           command        CDATA #REQUIRED>
+
+<!ELEMENT dotless (#PCDATA)>
+
+<!ELEMENT spacecmd EMPTY>
+<!ATTLIST spacecmd
+          type (%spacetype;) #IMPLIED>
+
 <!ELEMENT today EMPTY>
+
+<!ELEMENT U (#PCDATA)>
 
 
 <!-- emacs-page
@@ -1403,4 +1415,4 @@
 
 <!ENTITY macr "&#xaf;">
 
-<!ENTITY backslash  "\">
+<!ENTITY backslash "\">

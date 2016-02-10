@@ -36,8 +36,8 @@ LICENSE:
         - except src/udev/* which is (currently still) GPLv2, GPLv2+
 
 REQUIREMENTS:
-        Linux kernel >= 3.7
-        Linux kernel >= 3.8 for Smack support
+        Linux kernel >= 3.11
+        Linux kernel >= 4.2 for unified cgroup hierarchy support
 
         Kernel Config Options:
           CONFIG_DEVTMPFS
@@ -82,11 +82,11 @@ REQUIREMENTS:
           CONFIG_SECCOMP
           CONFIG_CHECKPOINT_RESTORE (for the kcmp() syscall)
 
-        Required for CPUShares in resource control unit settings
+        Required for CPUShares= in resource control unit settings
           CONFIG_CGROUP_SCHED
           CONFIG_FAIR_GROUP_SCHED
 
-        Required for CPUQuota in resource control unit settings
+        Required for CPUQuota= in resource control unit settings
           CONFIG_CFS_BANDWIDTH
 
         For systemd-bootchart, several proc debug interfaces are required:
@@ -96,6 +96,15 @@ REQUIREMENTS:
         For UEFI systems:
           CONFIG_EFIVAR_FS
           CONFIG_EFI_PARTITION
+
+        We recommend to turn off Real-Time group scheduling in the
+        kernel when using systemd. RT group scheduling effectively
+        makes RT scheduling unavailable for most userspace, since it
+        requires explicit assignment of RT budgets to each unit whose
+        processes making use of RT. As there's no sensible way to
+        assign these budgets automatically this cannot really be
+        fixed, and it's best to disable group scheduling hence.
+           CONFIG_RT_GROUP_SCHED=n
 
         Note that kernel auditing is broken when used with systemd's
         container code. When using systemd in conjunction with
@@ -113,7 +122,7 @@ REQUIREMENTS:
 
         glibc >= 2.16
         libcap
-        libmount >= 2.20 (from util-linux)
+        libmount >= 2.27.1 (from util-linux)
         libseccomp >= 1.0.0 (optional)
         libblkid >= 2.24 (from util-linux) (optional)
         libkmod >= 15 (optional)
@@ -135,13 +144,12 @@ REQUIREMENTS:
         During runtime, you need the following additional
         dependencies:
 
-        util-linux >= v2.26 required
+        util-linux >= v2.27.1 required
         dbus >= 1.4.0 (strictly speaking optional, but recommended)
         dracut (optional)
         PolicyKit (optional)
 
-        When building from git, you need the following additional
-        dependencies:
+        When building from git, the following tools are needed:
 
         pkg-config
         docbook-xsl
@@ -153,19 +161,16 @@ REQUIREMENTS:
         gperf
         python (optional)
         python-lxml (optional, but required to build the indices)
-        sphinx (optional)
+
+        The build system is initialized with ./autogen.sh. A tar ball
+        can be created with:
+          git archive --format=tar --prefix=systemd-222/ v222 | xz > systemd-222.tar.xz
 
         When systemd-hostnamed is used, it is strongly recommended to
         install nss-myhostname to ensure that, in a world of
         dynamically changing hostnames, the hostname stays resolvable
         under all circumstances. In fact, systemd-hostnamed will warn
         if nss-myhostname is not installed.
-
-        To build HTML documentation for python-systemd using sphinx,
-        please first install systemd (using 'make install'), and then
-        invoke sphinx-build with 'make sphinx-<target>', with <target>
-        being 'html' or 'latexpdf'. If using DESTDIR for installation,
-        pass the same DESTDIR to 'make sphinx-html' invocation.
 
 USERS AND GROUPS:
         Default udev rules use the following standard system group
@@ -232,9 +237,9 @@ SYSV INIT.D SCRIPTS:
         needs to look like, and provide an implementation at the marked places.
 
 WARNINGS:
-        systemd will warn you during boot if /etc/mtab is not a
-        symlink to /proc/mounts. Please ensure that /etc/mtab is a
-        proper symlink.
+        systemd will freeze execution during boot if /etc/mtab exists
+        but is not a symlink to /proc/mounts. Please ensure that
+        /etc/mtab is a proper symlink.
 
         systemd will warn you during boot if /usr is on a different
         file system than /. While in systemd itself very little will
@@ -258,7 +263,7 @@ WARNINGS:
         false positives will be triggered by code which violates
         some rules but is actually safe.
 
-ENGINEERING AND CONSULTING SERVICES:
-        ENDOCODE <https://endocode.com/> offers professional
-        engineering and consulting services for systemd. Please
-        contact Chris Kühl <chris@endocode.com> for more information.
+        Currently, systemd-timesyncd defaults to use the Google NTP
+        servers if not specified otherwise at configure time. You
+        really should not ship an OS or device with this default
+        setting. See DISTRO_PORTING for details.

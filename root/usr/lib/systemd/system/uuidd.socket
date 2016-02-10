@@ -3,6 +3,7 @@ Description=UUID daemon activation socket
 
 [Socket]
 ListenStream=/run/uuidd/request
+RuntimeDirectory=uuidd
 
 [Install]
 WantedBy=sockets.target

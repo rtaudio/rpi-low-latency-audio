@@ -2,7 +2,7 @@
 #define __NETTLE_STDINT_H 1
 #ifndef _GENERATED_STDINT_H
 #define _GENERATED_STDINT_H " "
-/* generated using gnu compiler gcc (GCC) 4.9.2 20150304 (prerelease) */
+/* generated using gnu compiler gcc (GCC) 5.3.0 */
 #define _STDINT_HAVE_STDINT_H 1
 
 /* ................... shortcircuit part ........................... */

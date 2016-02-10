@@ -1,6 +1,6 @@
 #
 # Arch Linux ARM repository mirrorlist
-# Generated on 2015-05-20
+# Generated on 2016-01-17
 #
 
 ## Geo-IP based mirror selection and load balancing
@@ -29,10 +29,6 @@ Server = http://mirror.archlinuxarm.org/$arch/$repo
 ### France
 ## Ain
 # Server = http://fr.mirror.archlinuxarm.org/$arch/$repo
-## Paris
-# Server = http://fr2.mirror.archlinuxarm.org/$arch/$repo
-## Roubaix
-# Server = http://fr3.mirror.archlinuxarm.org/$arch/$repo
 
 ### Germany
 ## Aachen
@@ -45,6 +41,7 @@ Server = http://mirror.archlinuxarm.org/$arch/$repo
 # Server = http://eu.mirror.archlinuxarm.org/$arch/$repo
 # Server = http://de5.mirror.archlinuxarm.org/$arch/$repo
 # Server = http://de6.mirror.archlinuxarm.org/$arch/$repo
+# Server = http://de7.mirror.archlinuxarm.org/$arch/$repo
 ## Nuremberg
 # Server = http://de2.mirror.archlinuxarm.org/$arch/$repo
 
@@ -60,16 +57,17 @@ Server = http://mirror.archlinuxarm.org/$arch/$repo
 ## Trondheim
 # Server = http://no.mirror.archlinuxarm.org/$arch/$repo
 
-### Poland
-## Gdansk
-# Server = http://pl.mirror.archlinuxarm.org/$arch/$repo
-
 ### Russia
 ## Moscow
 # Server = http://ru.mirror.archlinuxarm.org/$arch/$repo
 
 ### Singapore
 # Server = http://sg.mirror.archlinuxarm.org/$arch/$repo
+# Server = http://sg2.mirror.archlinuxarm.org/$arch/$repo
+
+### South Africa
+## Johannesburg
+# Server = https://za.mirror.archlinuxarm.org/$arch/$repo
 
 ### Taiwan
 ## New Taipei City
@@ -80,12 +78,8 @@ Server = http://mirror.archlinuxarm.org/$arch/$repo
 # Server = http://co.us.mirror.archlinuxarm.org/$arch/$repo
 ## Delaware
 # Server = http://de.us.mirror.archlinuxarm.org/$arch/$repo
-## California
-# Server = http://ca.us.mirror.archlinuxarm.org/$arch/$repo
 ## Florida
 # Server = http://fl.us.mirror.archlinuxarm.org/$arch/$repo
-## Georgia
-# Server = http://ga.us.mirror.archlinuxarm.org/$arch/$repo
 ## Michigan
 # Server = http://mi.us.mirror.archlinuxarm.org/$arch/$repo
 ## Virginia

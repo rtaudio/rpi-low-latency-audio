@@ -1,6 +1,6 @@
 # Texinfo.pm: format Pod as Texinfo.
 #
-# Copyright 2011, 2012 Free Software Foundation, Inc.
+# Copyright 2011, 2012, 2013, 2014 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,8 +53,10 @@ foreach my $level (1 .. 4) {
   $head_commands_level{'head'.$level} = $level;
 }
 
-my @numbered_sectioning_commands = ('part', 'chapter', 'section', 'subsection', 
+my @numbered_sectioning_commands = ('part', 'chapter', 'section', 'subsection',
   'subsubsection');
+my @appendix_sectioning_commands = ('part', 'appendix', 'appendixsec',
+  'appendixsubsec', 'appendixsubsubsec');
 my @unnumbered_sectioning_commands = ('part', 'unnumbered', 'unnumberedsec', 
   'unnumberedsubsec', 'unnumberedsubsubsec');
 
@@ -110,8 +112,10 @@ sub run
   $base_level = 1 if ($base_level <= 1);
   if ($self->texinfo_sectioning_style eq 'numbered') {
     $self->{'texinfo_sectioning_commands'} = \@numbered_sectioning_commands;
-  } else {
+  } elsif ($self->texinfo_sectioning_style eq 'unnumbered') {
     $self->{'texinfo_sectioning_commands'} = \@unnumbered_sectioning_commands;
+  } else {
+    $self->{'texinfo_sectioning_commands'} = \@appendix_sectioning_commands;
   }
   foreach my $heading_command (keys(%head_commands_level)) {
     my $level = $head_commands_level{$heading_command} + $base_level -1;
@@ -461,6 +465,10 @@ sub _convert_pod($)
           my $linktype = $token->attr('type');
           my $content_implicit = $token->attr('content-implicit');
           #print STDERR " L: $linktype\n";
+          #my @attrs = keys %{$token->attr_hash};
+          #print STDERR "  @attrs\n";
+          #my $raw_L = $token->attr('raw').'';
+          #print STDERR " $token->attr('raw'): $raw_L\n";
           my ($url_arg, $texinfo_node, $texinfo_manual, $texinfo_section);
           if ($linktype eq 'man') {
             # NOTE: the .'' is here to force the $token->attr to ba a real
@@ -534,9 +542,11 @@ sub _convert_pod($)
                                      $self->texinfo_sectioning_base_level);
               $texinfo_section = _normalize_texinfo_name(
                  _protect_comma(_protect_text($section)), 'section');
+              #print STDERR "L: internal: $texinfo_node/$texinfo_section\n";
             }
             $texinfo_node = _normalize_texinfo_name(
                     _protect_comma(_protect_text($texinfo_node)), 'anchor');
+            #print STDERR "L: normalized node: $texinfo_node\n";
 
             # for pod, 'to' is the pod manual name.  Then 'section' is the 
             # section.
@@ -588,6 +598,7 @@ sub _convert_pod($)
       my $tagname = $token->tagname();
       if ($context_tags{$tagname}) {
         my ($result, $out) = _end_context(\@accumulated_output);
+        #print STDERR "end: $tagname: $result, $out\n";
         my $texinfo_node = '';
         if ($line_commands{$tagname}) {
 
@@ -768,8 +779,9 @@ is C<http://man.he.net/man>.
 =item texinfo_sectioning_style
 
 Default is C<numbered>, using the numbered sectioning Texinfo @-commands
-(@chapter, @section...), any other value would lead to using unnumbered
-sectioning command variants (@unnumbered...).
+(@chapter, @section...).  Giving C<unnumbered> leads to using unnumbered
+sectioning command variants (@unnumbered...), and any other value would
+lead to using appendix sectioning command variants (@appendix...).
 
 =item texinfo_add_upper_sectioning_command
 

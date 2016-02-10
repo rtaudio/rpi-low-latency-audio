@@ -1,4 +1,4 @@
-root::14871::::::
+root:$6$EXsfyBs6$eisqUg3cMXVEIyDPFfPoBe.AEMRAmsBGQwG5whG3z2doRJ/OhUTjX.rWt3WOl/29f7RqTIEWq2SDJIeVtrtnR.:16836::::::
 bin:x:14871::::::
 daemon:x:14871::::::
 mail:x:14871::::::
@@ -12,6 +12,5 @@ systemd-timesync:x:14871::::::
 systemd-network:x:14871::::::
 systemd-bus-proxy:x:14871::::::
 systemd-resolve:x:14871::::::
-systemd-journal-upload:!!:16619::::::
-systemd-journal-remote:!!:16619::::::
-
+systemd-journal-remote:!!:16836::::::
+systemd-journal-upload:!!:16836::::::

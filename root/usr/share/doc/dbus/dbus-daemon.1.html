@@ -9,9 +9,9 @@ exchange messages with one another.</p><p>There are two standard message bus ins
 per-user-login-session message bus (started each time a user logs in).
 <span class="command"><strong>dbus-daemon</strong></span> is used for both of these instances, but with
 a different configuration file.</p><p>The --session option is equivalent to
-"--config-file=/etc/dbus-1/session.conf" and the --system
+"--config-file=/usr/share/dbus-1/session.conf" and the --system
 option is equivalent to
-"--config-file=/etc/dbus-1/system.conf". By creating
+"--config-file=/usr/share/dbus-1/system.conf". By creating
 additional configuration files and using the --config-file option,
 additional special-purpose message bus daemons could be created.</p><p>The systemwide daemon is normally launched by an init script,
 standardly called simply "messagebus".</p><p>The systemwide daemon is largely used for broadcasting system events,
@@ -42,9 +42,10 @@ while another might set it up to be a per-user-login-session bus.</p><p>The conf
 parameters, and so forth.</p><p>The configuration file is not part of any interoperability
 specification and its backward compatibility is not guaranteed; this
 document is documentation, not specification.</p><p>The standard systemwide and per-session message bus setups are
-configured in the files "/etc/dbus-1/system.conf" and
-"/etc/dbus-1/session.conf".  These files normally
-&lt;include&gt; a system-local.conf or session-local.conf; you can put local
+configured in the files "/usr/share/dbus-1/system.conf" and
+"/usr/share/dbus-1/session.conf".  These files normally
+&lt;include&gt; a system-local.conf or session-local.conf in
+/etc/dbus-1; you can put local
 overrides in those files to avoid modifying the primary configuration
 files.</p><p>The configuration file is an XML document. It must have the following
 doctype declaration:</p><div class="literallayout"><p><br>
@@ -76,6 +77,7 @@ point. Files in the directory are included in undefined order.
 Only files ending in ".conf" are included.</p><p>This is intended to allow extension of the system bus by particular
 packages. For example, if CUPS wants to be able to send out
 notification of printer queue changes, it could install a file to
+/usr/share/dbus-1/system.d or
 /etc/dbus-1/system.d that allowed all apps to receive
 this message and allowed the printer daemon user to send it.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="emphasis"><em>&lt;user&gt;</em></span></p></li></ul></div><p>The user account the daemon should run as, as either a username or a
 UID. If the daemon cannot change to this UID on startup, it will exit.
@@ -109,9 +111,11 @@ DBUS_SESSION_BUS_ADDRESS is set.</p><p>Example: &lt;listen&gt;tcp:host=localhost
 used in a listenable address to configure the interface on which
 the server will listen: either the hostname is the IP address of
 one of the local machine's interfaces (most commonly 127.0.0.1),
-or a DNS name that resolves to one of those IP addresses, or '*'
-to listen on all interfaces simultaneously.  If not specified,
-the default is the same value as "host".</p><p>Example: &lt;listen&gt;tcp:host=localhost,bind=*,port=0&lt;/listen&gt;</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="emphasis"><em>&lt;auth&gt;</em></span></p></li></ul></div><p>Lists permitted authorization mechanisms. If this element doesn't
+a DNS name that resolves to one of those IP addresses, '0.0.0.0'
+to listen on all IPv4 interfaces simultaneously, or '::'
+to listen on all IPv4 and IPv6 interfaces simultaneously (if supported
+by the OS).  If not specified,
+the default is the same value as "host".</p><p>Example: &lt;listen&gt;tcp:host=localhost,bind=0.0.0.0,port=0&lt;/listen&gt;</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="emphasis"><em>&lt;auth&gt;</em></span></p></li></ul></div><p>Lists permitted authorization mechanisms. If this element doesn't
 exist, then all known mechanisms are allowed.  If there are multiple
 &lt;auth&gt; elements, all the listed mechanisms are allowed.  The order in
 which mechanisms are listed is not meaningful.</p><p>Example: &lt;auth&gt;EXTERNAL&lt;/auth&gt;</p><p>Example: &lt;auth&gt;DBUS_COOKIE_SHA1&lt;/auth&gt;</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="emphasis"><em>&lt;servicedir&gt;</em></span></p></li></ul></div><p>Adds a directory to scan for .service files. Directories are
@@ -132,11 +136,11 @@ configuration file would probably be nonsense.</p><div class="itemizedlist"><ul 
 activation directories that should be searched for service files.
 This option defaults to /usr/share/dbus-1/system-services.</p><p>The &lt;standard_system_servicedirs/&gt; option is only relevant to the
 per-system bus daemon defined in
-/etc/dbus-1/system.conf. Putting it in any other
+/usr/share/dbus-1/system.conf. Putting it in any other
 configuration file would probably be nonsense.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="emphasis"><em>&lt;servicehelper/&gt;</em></span></p></li></ul></div><p>&lt;servicehelper/&gt; specifies the setuid helper that is used to launch
 system daemons with an alternate user. Typically this should be
 the dbus-daemon-launch-helper executable in located in libexec.</p><p>The &lt;servicehelper/&gt; option is only relevant to the per-system bus daemon
-defined in /etc/dbus-1/system.conf. Putting it in any other
+defined in /usr/share/dbus-1/system.conf. Putting it in any other
 configuration file would probably be nonsense.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="emphasis"><em>&lt;limit&gt;</em></span></p></li></ul></div><p>&lt;limit&gt; establishes a resource limit. For example:</p><div class="literallayout"><p><br>
   &lt;limit name="max_message_size"&gt;64&lt;/limit&gt;<br>
   &lt;limit name="max_completed_connections"&gt;512&lt;/limit&gt;<br>
@@ -307,7 +311,17 @@ we add this syntax it will look like:</p><div class="literallayout"><p><br>
    &lt;associate own="*" context="foo_t"/&gt;<br>
 </p></div><p>If you find a reason this is useful, let the developers know.
 Right now the default will be the security context of the bus itself.</p><p>If two &lt;associate&gt; elements specify the same name, the element
-appearing later in the configuration file will be used.</p></div><div class="refsect1"><a name="selinux"></a><h2>SELinux</h2><p>See <a class="ulink" href="http://www.nsa.gov/selinux/" target="_top">http://www.nsa.gov/selinux/</a> for full details on SELinux. Some useful excerpts:</p><p>Every subject (process) and object (e.g. file, socket, IPC object,
+appearing later in the configuration file will be used.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="emphasis"><em>&lt;apparmor&gt;</em></span></p></li></ul></div><p>The &lt;apparmor&gt; element is used to configure AppArmor mediation on
+the bus. It can contain one attribute that specifies the mediation mode:</p><div class="literallayout"><p><br>
+   &lt;apparmor mode="(enabled|disabled|required)"/&gt;<br>
+</p></div><p>The default mode is "enabled". In "enabled" mode, AppArmor mediation
+will be performed if AppArmor support is available in the kernel. If it is not
+available, dbus-daemon will start but AppArmor mediation will not occur. In
+"disabled" mode, AppArmor mediation is disabled. In "required" mode, AppArmor
+mediation will be enabled if AppArmor support is available, otherwise
+dbus-daemon will refuse to start.</p><p>The AppArmor mediation mode of the bus cannot be changed after the bus
+starts. Modifying the mode in the configuration file and sending a SIGHUP
+signal to the daemon has no effect on the mediation mode.</p></div><div class="refsect1"><a name="selinux"></a><h2>SELinux</h2><p>See <a class="ulink" href="http://www.nsa.gov/selinux/" target="_top">http://www.nsa.gov/selinux/</a> for full details on SELinux. Some useful excerpts:</p><p>Every subject (process) and object (e.g. file, socket, IPC object,
 etc) in the system is assigned a collection of security attributes,
 known as a security context. A security context contains all of the
 security attributes associated with a particular subject or object
@@ -340,7 +354,23 @@ class "dbus" and requested permission "acquire_svc".</p><p>The security context 
 &lt;associate&gt; element described earlier in this document.
 If a name has no security context associated in the
 configuration file, the security context of the bus daemon
-itself will be used.</p></div><div class="refsect1"><a name="debugging"></a><h2>DEBUGGING</h2><p>If you're trying to figure out where your messages are going or why
+itself will be used.</p></div><div class="refsect1"><a name="apparmor"></a><h2>AppArmor</h2><p>The AppArmor confinement context is stored when applications connect to
+the bus. The confinement context consists of a label and a confinement mode.
+When a security decision is required, the daemon uses the confinement context
+to query the AppArmor policy to determine if the action should be allowed or
+denied and if the action should be audited.</p><p>The daemon performs AppArmor security checks in three places.</p><p>First, any time a message is routed from one connection to another
+connection, the bus daemon will check permissions with the label of the first
+connection as source, label and/or connection name of the second connection as
+target, along with the bus name, the path name, the interface name, and the
+member name. Reply messages, such as method_return and error messages, are
+implicitly allowed if they are in response to a message that has already been
+allowed.</p><p>Second, any time a connection asks to own a name, the bus daemon will
+check permissions with the label of the connection as source, the requested
+name as target, along with the bus name.</p><p>Third, any time a connection attempts to eavesdrop, the bus daemon will
+check permissions with the label of the connection as the source, along with
+the bus name.</p><p>AppArmor rules for bus mediation are not stored in the bus configuration
+files. They are stored in the application's AppArmor profile. Please see
+<span class="emphasis"><em>apparmor.d(5)</em></span> for more details.</p></div><div class="refsect1"><a name="debugging"></a><h2>DEBUGGING</h2><p>If you're trying to figure out where your messages are going or why
 you aren't getting messages, there are several things you can try.</p><p>Remember that the system bus is heavily locked down and if you
 haven't installed a security policy file to allow your message
 through, it won't work. For the session bus, this is not a concern.</p><p>The simplest way to figure out what's happening on the bus is to run

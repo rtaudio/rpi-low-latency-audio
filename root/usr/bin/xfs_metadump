@@ -5,11 +5,12 @@
 
 OPTS=" "
 DBOPTS=" "
-USAGE="Usage: xfs_metadump [-efFogwV] [-m max_extents] [-l logdev] source target"
+USAGE="Usage: xfs_metadump [-aefFogwV] [-m max_extents] [-l logdev] source target"
 
-while getopts "efgl:m:owFV" c
+while getopts "aefgl:m:owFV" c
 do
 	case $c in
+	a)	OPTS=$OPTS"-a ";;
 	e)	OPTS=$OPTS"-e ";;
 	g)	OPTS=$OPTS"-g ";;
 	m)	OPTS=$OPTS"-m "$OPTARG" ";;

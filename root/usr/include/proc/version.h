@@ -1,25 +1,33 @@
+/*
+ * libprocps - Library to read proc filesystem
+ *
+ * Copyright (C) 1995 Martin Schulze <joey@infodrom.north.de>
+ * Copyright (C) 1996 Charles Blake <cblake@bbn.com>
+ * Copyright (C) 2003 Albert Cahalan
+ * Copyright (C) 2015 Craig Small <csmall@enc.com.au>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 #ifndef PROC_VERSION_H
 #define PROC_VERSION_H
 
-#include "procps.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Suite version information for procps-ng utilities
- * Copyright (c) 1995 Martin Schulze <joey@infodrom.north.de>
- * Linux kernel version information for procps-ng utilities
- * Copyright (c) 1996 Charles Blake <cblake@bbn.com>
- * Distributable under the terms of the GNU Library General Public License
- *
- * Copyright 2002 Albert Cahalan
- */
-
-EXTERN_C_BEGIN
-
-void init_Linux_version(void);    /* Get Linux version */
-extern void display_version(void);	/* display suite version */
-extern const char procps_version[];		/* global buf for suite version */
-
-extern int linux_version_code;		/* runtime version of LINUX_VERSION_CODE
-					   in /usr/include/linux/version.h */
+int procps_linux_version(void);
 
 /* Convenience macros for composing/decomposing version codes */
 #define LINUX_VERSION(x,y,z)   (0x10000*(x) + 0x100*(y) + z)
@@ -27,6 +35,8 @@ extern int linux_version_code;		/* runtime version of LINUX_VERSION_CODE
 #define LINUX_VERSION_MINOR(x) (((x)>> 8) & 0xFF)
 #define LINUX_VERSION_PATCH(x) ( (x)      & 0xFF)
 
-EXTERN_C_END
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif	/* PROC_VERSION_H */

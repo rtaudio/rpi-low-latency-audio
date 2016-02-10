@@ -26,7 +26,7 @@ set -o errexit
 export TEXTDOMAIN='pacman-scripts'
 export TEXTDOMAINDIR='/usr/share/locale'
 
-declare -r myver='4.2.1'
+declare -r myver='5.0.0'
 
 QUIET=0
 USE_COLOR='y'
@@ -360,7 +360,7 @@ create_xdelta()
 	deltafile=$(dirname "$newfile")/$pkgname-${oldver}_to_${newver}-$arch.delta
 	local ret=0
 
-	xdelta3 -q -f -s "$oldfile" "$newfile" "$deltafile" || ret=$?
+	xdelta3 -q -f -9 -S lzma -s "$oldfile" "$newfile" "$deltafile" || ret=$?
 	if (( ret )); then
 		error "$(gettext "Delta could not be created.")"
 		return 1

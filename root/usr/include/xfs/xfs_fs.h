@@ -239,7 +239,7 @@ typedef struct xfs_fsop_resblks {
 #define XFS_FSOP_GEOM_FLAGS_V5SB	0x8000	/* version 5 superblock */
 #define XFS_FSOP_GEOM_FLAGS_FTYPE	0x10000	/* inode directory types */
 #define XFS_FSOP_GEOM_FLAGS_FINOBT	0x20000	/* free inode btree */
-
+#define XFS_FSOP_GEOM_FLAGS_SPINODES	0x40000	/* sparse inode chunks	*/
 
 /*
  * Minimum and maximum sizes need for growth checks.
@@ -256,8 +256,8 @@ typedef struct xfs_fsop_resblks {
 	((2 * 1024 * 1024 * 1024ULL) - XFS_MIN_LOG_BYTES)
 
 /* Used for sanity checks on superblock */
-#define XFS_MAX_DBLOCKS(s) ((xfs_drfsbno_t)(s)->sb_agcount * (s)->sb_agblocks)
-#define XFS_MIN_DBLOCKS(s) ((xfs_drfsbno_t)((s)->sb_agcount - 1) *	\
+#define XFS_MAX_DBLOCKS(s) ((xfs_rfsblock_t)(s)->sb_agcount * (s)->sb_agblocks)
+#define XFS_MIN_DBLOCKS(s) ((xfs_rfsblock_t)((s)->sb_agcount - 1) *	\
 			 (s)->sb_agblocks + XFS_MIN_AG_BLOCKS)
 
 /*
@@ -376,6 +376,9 @@ struct xfs_fs_eofblocks {
 #define XFS_EOF_FLAGS_GID		(1 << 2) /* filter by gid */
 #define XFS_EOF_FLAGS_PRID		(1 << 3) /* filter by project id */
 #define XFS_EOF_FLAGS_MINFILESIZE	(1 << 4) /* filter by min file size */
+#define XFS_EOF_FLAGS_UNION		(1 << 5) /* union filter algorithm;
+						  * kernel only, not included in
+						  * valid mask */
 #define XFS_EOF_FLAGS_VALID	\
 	(XFS_EOF_FLAGS_SYNC |	\
 	 XFS_EOF_FLAGS_UID |	\
@@ -487,6 +490,15 @@ typedef struct xfs_swapext
 #define XFS_FSOP_GOING_FLAGS_NOLOGFLUSH		0x2	/* don't flush log nor data */
 
 /*
+ * ioctl limits
+ */
+#ifdef XATTR_LIST_MAX
+#  define XFS_XATTR_LIST_MAX XATTR_LIST_MAX
+#else
+#  define XFS_XATTR_LIST_MAX 65536
+#endif
+
+/*
  * ioctl commands that are used by Linux filesystems
  */
 #define XFS_IOC_GETXFLAGS	FS_IOC_GETFLAGS
@@ -556,6 +568,47 @@ typedef struct xfs_swapext
 #define XFS_IOC_GOINGDOWN	     _IOR ('X', 125, __uint32_t)
 /*	XFS_IOC_GETFSUUID ---------- deprecated 140	 */
 
+/* reflink ioctls; these MUST match the btrfs ioctl definitions */
+/* from struct btrfs_ioctl_clone_range_args */
+struct xfs_clone_args {
+	__s64 src_fd;
+	__u64 src_offset;
+	__u64 src_length;
+	__u64 dest_offset;
+};
+
+/* extent-same (dedupe) ioctls; these MUST match the btrfs ioctl definitions */
+#define XFS_EXTENT_DATA_SAME	0
+#define XFS_EXTENT_DATA_DIFFERS	1
+
+/* from struct btrfs_ioctl_file_extent_same_info */
+struct xfs_extent_data_info {
+	__s64 fd;		/* in - destination file */
+	__u64 logical_offset;	/* in - start of extent in destination */
+	__u64 bytes_deduped;	/* out - total # of bytes we were able
+				 * to dedupe from this file */
+	/* status of this dedupe operation:
+	 * < 0 for error
+	 * == XFS_EXTENT_DATA_SAME if dedupe succeeds
+	 * == XFS_EXTENT_DATA_DIFFERS if data differs
+	 */
+	__s32 status;		/* out - see above description */
+	__u32 reserved;
+};
+
+/* from struct btrfs_ioctl_file_extent_same_args */
+struct xfs_extent_data {
+	__u64 logical_offset;	/* in - start of extent in source */
+	__u64 length;		/* in - length of extent */
+	__u16 dest_count;	/* in - total elements in info array */
+	__u16 reserved1;
+	__u32 reserved2;
+	struct xfs_extent_data_info info[0];
+};
+
+#define XFS_IOC_CLONE		 _IOW (0x94, 9, int)
+#define XFS_IOC_CLONE_RANGE	 _IOW (0x94, 13, struct xfs_clone_args)
+#define XFS_IOC_FILE_EXTENT_SAME _IOWR(0x94, 54, struct xfs_extent_data)
 
 #ifndef HAVE_BBMACROS
 /*

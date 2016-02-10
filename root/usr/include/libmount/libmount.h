@@ -29,9 +29,9 @@ extern "C" {
 #include <mntent.h>
 #include <sys/types.h>
 
-#define LIBMOUNT_VERSION   "2.26.0"
+#define LIBMOUNT_VERSION   "2.27.0"
 #define LIBMOUNT_MAJOR_VERSION   2
-#define LIBMOUNT_MINOR_VERSION   26
+#define LIBMOUNT_MINOR_VERSION   27
 #define LIBMOUNT_PATCH_VERSION   0
 
 /**

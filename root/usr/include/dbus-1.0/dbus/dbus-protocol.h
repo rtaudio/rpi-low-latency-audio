@@ -254,6 +254,11 @@ extern "C" {
  * message.
  */
 #define DBUS_HEADER_FLAG_NO_AUTO_START     0x2
+/**
+ * If set on a method call, this flag means that the caller is prepared to
+ * wait for interactive authorization.
+ */
+#define DBUS_HEADER_FLAG_ALLOW_INTERACTIVE_AUTHORIZATION 0x4
 
 /* Header fields */
 
@@ -446,6 +451,10 @@ extern "C" {
 /** The message meta data does not match the payload. e.g. expected
     number of file descriptors were not sent over the socket this message was received on. */
 #define DBUS_ERROR_INCONSISTENT_MESSAGE       "org.freedesktop.DBus.Error.InconsistentMessage"
+/** The message is not allowed without performing interactive authorization,
+ * but could have succeeded if an interactive authorization step was
+ * allowed. */
+#define DBUS_ERROR_INTERACTIVE_AUTHORIZATION_REQUIRED "org.freedesktop.DBus.Error.InteractiveAuthorizationRequired"
 
 /* XML introspection format */
 

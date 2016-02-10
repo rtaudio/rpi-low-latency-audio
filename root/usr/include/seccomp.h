@@ -37,7 +37,7 @@ extern "C" {
 
 #define SCMP_VER_MAJOR		2
 #define SCMP_VER_MINOR		2
-#define SCMP_VER_MICRO		0
+#define SCMP_VER_MICRO		3
 
 /*
  * types
@@ -121,10 +121,13 @@ struct scmp_arg_cmp {
  * The ARM architecture tokens
  */
 #define SCMP_ARCH_ARM		AUDIT_ARCH_ARM
-#ifndef AUDIT_ARCH_AARCH64
 /* AArch64 support for audit was merged in 3.17-rc1 */
+#ifndef AUDIT_ARCH_AARCH64
+#ifndef EM_AARCH64
+#define EM_AARCH64		183
+#endif /* EM_AARCH64 */
 #define AUDIT_ARCH_AARCH64	(EM_AARCH64|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE)
-#endif
+#endif /* AUDIT_ARCH_AARCH64 */
 #define SCMP_ARCH_AARCH64	AUDIT_ARCH_AARCH64
 
 /**
@@ -133,21 +136,30 @@ struct scmp_arg_cmp {
 #ifndef __AUDIT_ARCH_CONVENTION_MIPS64_N32
 #define __AUDIT_ARCH_CONVENTION_MIPS64_N32	0x20000000
 #endif
-#define SCMP_ARCH_MIPS		AUDIT_ARCH_MIPS
-#define SCMP_ARCH_MIPS64	AUDIT_ARCH_MIPS64
-#ifndef AUDIT_ARCH_MIPS64N32
+#ifndef EM_MIPS
+#define EM_MIPS			8
+#endif
+#ifndef AUDIT_ARCH_MIPS
+#define AUDIT_ARCH_MIPS		(EM_MIPS)
+#endif
+#ifndef AUDIT_ARCH_MIPS64
+#define AUDIT_ARCH_MIPS64	(EM_MIPS|__AUDIT_ARCH_64BIT)
+#endif
 /* MIPS64N32 support was merged in 3.15 */
+#ifndef AUDIT_ARCH_MIPS64N32
 #define AUDIT_ARCH_MIPS64N32	(EM_MIPS|__AUDIT_ARCH_64BIT|\
 				 __AUDIT_ARCH_CONVENTION_MIPS64_N32)
 #endif
-#define SCMP_ARCH_MIPS64N32	AUDIT_ARCH_MIPS64N32
-#define SCMP_ARCH_MIPSEL	AUDIT_ARCH_MIPSEL
-#define SCMP_ARCH_MIPSEL64	AUDIT_ARCH_MIPSEL64
-#ifndef AUDIT_ARCH_MIPSEL64N32
 /* MIPSEL64N32 support was merged in 3.15 */
+#ifndef AUDIT_ARCH_MIPSEL64N32
 #define AUDIT_ARCH_MIPSEL64N32	(EM_MIPS|__AUDIT_ARCH_64BIT|__AUDIT_ARCH_LE|\
 				 __AUDIT_ARCH_CONVENTION_MIPS64_N32)
 #endif
+#define SCMP_ARCH_MIPS		AUDIT_ARCH_MIPS
+#define SCMP_ARCH_MIPS64	AUDIT_ARCH_MIPS64
+#define SCMP_ARCH_MIPS64N32	AUDIT_ARCH_MIPS64N32
+#define SCMP_ARCH_MIPSEL	AUDIT_ARCH_MIPSEL
+#define SCMP_ARCH_MIPSEL64	AUDIT_ARCH_MIPSEL64
 #define SCMP_ARCH_MIPSEL64N32	AUDIT_ARCH_MIPSEL64N32
 
 /**
@@ -1215,9 +1227,11 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #endif /* __NR_cachectl */
 
 #define __PNR_cacheflush	-10104
-#ifndef __NR_cacheflush
+#ifdef __ARM_NR_cacheflush
+#define __NR_cacheflush		__ARM_NR_cacheflush
+#else
 #define __NR_cacheflush		__PNR_cacheflush
-#endif /* __NR_cacheflush */
+#endif /* __ARM_NR_cacheflush */
 
 #define __PNR_sysmips		-10106
 #ifndef __NR_sysmips
@@ -1423,6 +1437,44 @@ int seccomp_export_bpf(const scmp_filter_ctx ctx, int fd);
 #ifndef __NR_utimes
 #define __NR_utimes		__PNR_utimes
 #endif /* __NR_utimes */
+
+#define __PNR_getrlimit		-10180
+#ifndef __NR_getrlimit
+#define __NR_getrlimit		__PNR_getrlimit
+#endif /* __NR_utimes */
+
+#define __PNR_mmap		-10181
+#ifndef __NR_mmap
+#define __NR_mmap		__PNR_mmap
+#endif /* __NR_utimes */
+
+#define __PNR_breakpoint	-10182
+#ifdef __ARM_NR_breakpoint
+#define __NR_breakpoint		__ARM_NR_breakpoint
+#else
+#define __NR_breakpoint		__PNR_breakpoint
+#endif /* __ARM_NR_breakpoint */
+
+#define __PNR_set_tls		-10183
+#ifdef __ARM_NR_set_tls
+#define __NR_set_tls		__ARM_NR_set_tls
+#else
+#define __NR_set_tls		__PNR_set_tls
+#endif /* __ARM_NR_set_tls */
+
+#define __PNR_usr26		-10184
+#ifdef __ARM_NR_usr26
+#define __NR_usr26		__ARM_NR_usr26
+#else
+#define __NR_usr26		__PNR_usr26
+#endif /* __ARM_NR_usr26 */
+
+#define __PNR_usr32		-10185
+#ifdef __ARM_NR_usr32
+#define __NR_usr32		__ARM_NR_usr32
+#else
+#define __NR_usr32		__PNR_usr32
+#endif /* __ARM_NR_usr32 */
 
 #ifdef __cplusplus
 }

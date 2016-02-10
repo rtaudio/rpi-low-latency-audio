@@ -5,6 +5,6 @@ includedir=/usr/include
 
 Name: smartcols
 Description: table or tree library
-Version: 2.26.0
+Version: 2.27.0
 Cflags: -I${includedir}/libsmartcols
 Libs: -L${libdir} -lsmartcols

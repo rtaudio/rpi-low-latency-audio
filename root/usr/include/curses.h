@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 1998-2010,2011 Free Software Foundation, Inc.              *
+ * Copyright (c) 1998-2013,2014 Free Software Foundation, Inc.              *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
  * copy of this software and associated documentation files (the            *
@@ -32,7 +32,7 @@
  *     and: Thomas E. Dickey                        1996-on                 *
  ****************************************************************************/
 
-/* $Id: curses.h.in,v 1.220 2011/01/22 19:47:20 tom Exp $ */
+/* $Id: curses.h.in,v 1.241 2014/08/09 20:39:44 tom Exp $ */
 
 #ifndef __NCURSES_H
 #define __NCURSES_H
@@ -41,23 +41,27 @@
 #define CURSES_H 1
 
 /* These are defined only in curses.h, and are used for conditional compiles */
-#define NCURSES_VERSION_MAJOR 5
-#define NCURSES_VERSION_MINOR 9
-#define NCURSES_VERSION_PATCH 20110404
+#define NCURSES_VERSION_MAJOR 6
+#define NCURSES_VERSION_MINOR 0
+#define NCURSES_VERSION_PATCH 20150808
 
 /* This is defined in more than one ncurses header, for identification */
 #undef  NCURSES_VERSION
-#define NCURSES_VERSION "5.9"
+#define NCURSES_VERSION "6.0"
 
 /*
  * Identify the mouse encoding version.
  */
-#define NCURSES_MOUSE_VERSION 1
+#define NCURSES_MOUSE_VERSION 2
 
 /*
  * Definitions to facilitate DLL's.
  */
 #include <ncurses_dll.h>
+
+#if 1
+#include <stdint.h>
+#endif
 
 /*
  * User-definable tweak to disable the include of <stdbool.h>.
@@ -70,12 +74,6 @@
  * NCURSES_ATTR_T is used to quiet compiler warnings when building ncurses
  * configured using --disable-macros.
  */
-#ifdef NCURSES_NOMACROS
-#ifndef NCURSES_ATTR_T
-#define NCURSES_ATTR_T attr_t
-#endif
-#endif /* NCURSES_NOMACROS */
-
 #ifndef NCURSES_ATTR_T
 #define NCURSES_ATTR_T int
 #endif
@@ -85,16 +83,25 @@
  * doing so makes it incompatible with other implementations of X/Open Curses.
  */
 #undef  NCURSES_CONST
-#define NCURSES_CONST /*nothing*/
+#define NCURSES_CONST const
 
 #undef NCURSES_INLINE
 #define NCURSES_INLINE inline
 
 /*
- * The internal type used for color values
+ * The internal type used for color values, and for color-pairs.  The latter
+ * allows the curses library to enumerate the combinations of foreground and
+ * background colors used by an application, and is normally the product of the
+ * total foreground and background colors.
+ *
+ * X/Open uses "short" for both of these types, ultimately because they are
+ * numbers from the terminal database, which uses 16-bit signed values.
  */
 #undef	NCURSES_COLOR_T
 #define	NCURSES_COLOR_T short
+
+#undef	NCURSES_PAIRS_T
+#define	NCURSES_PAIRS_T short
 
 /*
  * Definition used to make WINDOW and similar structs opaque.
@@ -114,7 +121,7 @@
  * Control whether bindings for interop support are added.
  */
 #undef	NCURSES_INTEROP_FUNCS
-#define	NCURSES_INTEROP_FUNCS 0
+#define	NCURSES_INTEROP_FUNCS 1
 
 /*
  * The internal type used for window dimensions.
@@ -129,6 +136,13 @@
 #define NCURSES_TPARM_VARARGS 1
 
 /*
+ * Control type used for tparm's arguments.  While X/Open equates long and
+ * char* values, this is not always workable for 64-bit platforms.
+ */
+#undef NCURSES_TPARM_ARG
+#define NCURSES_TPARM_ARG intptr_t
+
+/*
  * NCURSES_CH_T is used in building the library, but not used otherwise in
  * this header file, since that would make the normal/wide-character versions
  * of the header incompatible.
@@ -136,12 +150,12 @@
 #undef	NCURSES_CH_T
 #define NCURSES_CH_T cchar_t
 
-#if 0 && defined(_LP64)
+#if 1 && defined(_LP64)
 typedef unsigned chtype;
 typedef unsigned mmask_t;
 #else
-typedef unsigned long chtype;
-typedef unsigned long mmask_t;
+typedef uint32_t chtype;
+typedef uint32_t mmask_t;
 #endif
 
 /*
@@ -151,15 +165,21 @@ typedef unsigned long mmask_t;
 
 /*
  * With XPG4, you must define _XOPEN_SOURCE_EXTENDED, it is redundant (or
- * conflicting) when _XOPEN_SOURCE is 500 or greater.
+ * conflicting) when _XOPEN_SOURCE is 500 or greater.  If NCURSES_WIDECHAR is
+ * not already defined, e.g., if the platform relies upon nonstandard feature
+ * test macros, define it at this point if the standard feature test macros
+ * indicate that it should be defined.
  */
-#undef NCURSES_WIDECHAR
-#if defined(_XOPEN_SOURCE_EXTENDED) || defined(_XPG5)
-#define NCURSES_WIDECHAR
+#ifndef NCURSES_WIDECHAR
+#if defined(_XOPEN_SOURCE_EXTENDED) || (defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE - 0 >= 500))
+#define NCURSES_WIDECHAR 1
+#else
+#define NCURSES_WIDECHAR 0
 #endif
+#endif /* NCURSES_WIDECHAR */
 
 #include <stdarg.h>	/* we need va_list */
-#ifdef NCURSES_WIDECHAR
+#if NCURSES_WIDECHAR
 #include <stddef.h>	/* we want wchar_t */
 #endif
 
@@ -231,6 +251,10 @@ extern "C" {
 #define WA_TOP		A_TOP
 #define WA_VERTICAL	A_VERTICAL
 
+#if 1
+#define WA_ITALIC	A_ITALIC	/* ncurses extension */
+#endif
+
 /* colors */
 #define COLOR_BLACK	0
 #define COLOR_RED	1
@@ -250,7 +274,7 @@ NCURSES_WRAPPED_VAR(chtype*, acs_map);
 extern NCURSES_EXPORT_VAR(chtype) acs_map[];
 #endif
 
-#define NCURSES_ACS(c)	(acs_map[NCURSES_CAST(unsigned char,c)])
+#define NCURSES_ACS(c)	(acs_map[NCURSES_CAST(unsigned char,(c))])
 
 /* VT100 symbols begin here */
 #define ACS_ULCORNER	NCURSES_ACS('l') /* upper left corner */
@@ -342,7 +366,7 @@ typedef struct _win_st WINDOW;
 
 typedef	chtype	attr_t;		/* ...must be at least as wide as chtype */
 
-#ifdef NCURSES_WIDECHAR
+#if NCURSES_WIDECHAR
 
 #if 0
 #ifdef mblen			/* libutf8.h defines it w/o undefining first */
@@ -366,7 +390,7 @@ typedef unsigned int wint_t1;
 /*
  * cchar_t stores an array of CCHARW_MAX wide characters.  The first is
  * normally a spacing character.  The others are non-spacing.  If those
- * (spacing and nonspacing) do not fill the array, a null L'\0' follows. 
+ * (spacing and nonspacing) do not fill the array, a null L'\0' follows.
  * Otherwise, a null is assumed to follow when extracting via getcchar().
  */
 #define CCHARW_MAX	5
@@ -374,9 +398,9 @@ typedef struct
 {
     attr_t	attr;
     wchar_t	chars[CCHARW_MAX];
-#if 0
+#if 1
 #undef NCURSES_EXT_COLORS
-#define NCURSES_EXT_COLORS 20110404
+#define NCURSES_EXT_COLORS 20150808
     int		ext_color;	/* color pair, must be more than 16-bits */
 #endif
 }
@@ -434,9 +458,9 @@ struct _win_st
 
 	NCURSES_SIZE_T _yoffset; /* real begy is _begy + _yoffset */
 
-#ifdef NCURSES_WIDECHAR
+#if NCURSES_WIDECHAR
 	cchar_t  _bkgrnd;	/* current background char/attribute pair */
-#if 0
+#if 1
 	int	_color;		/* current color-pair for non-space character */
 #endif
 #endif
@@ -556,10 +580,10 @@ extern NCURSES_EXPORT(int) addstr (const char *);			/* generated */
 extern NCURSES_EXPORT(int) attroff (NCURSES_ATTR_T);			/* generated */
 extern NCURSES_EXPORT(int) attron (NCURSES_ATTR_T);			/* generated */
 extern NCURSES_EXPORT(int) attrset (NCURSES_ATTR_T);			/* generated */
-extern NCURSES_EXPORT(int) attr_get (attr_t *, short *, void *);	/* generated */
+extern NCURSES_EXPORT(int) attr_get (attr_t *, NCURSES_PAIRS_T *, void *);	/* generated */
 extern NCURSES_EXPORT(int) attr_off (attr_t, void *);			/* generated */
 extern NCURSES_EXPORT(int) attr_on (attr_t, void *);			/* generated */
-extern NCURSES_EXPORT(int) attr_set (attr_t, short, void *);		/* generated */
+extern NCURSES_EXPORT(int) attr_set (attr_t, NCURSES_PAIRS_T, void *);		/* generated */
 extern NCURSES_EXPORT(int) baudrate (void);				/* implemented */
 extern NCURSES_EXPORT(int) beep  (void);				/* implemented */
 extern NCURSES_EXPORT(int) bkgd (chtype);				/* generated */
@@ -568,13 +592,13 @@ extern NCURSES_EXPORT(int) border (chtype,chtype,chtype,chtype,chtype,chtype,cht
 extern NCURSES_EXPORT(int) box (WINDOW *, chtype, chtype);		/* generated */
 extern NCURSES_EXPORT(bool) can_change_color (void);			/* implemented */
 extern NCURSES_EXPORT(int) cbreak (void);				/* implemented */
-extern NCURSES_EXPORT(int) chgat (int, attr_t, short, const void *);	/* generated */
+extern NCURSES_EXPORT(int) chgat (int, attr_t, NCURSES_PAIRS_T, const void *);	/* generated */
 extern NCURSES_EXPORT(int) clear (void);				/* generated */
 extern NCURSES_EXPORT(int) clearok (WINDOW *,bool);			/* implemented */
 extern NCURSES_EXPORT(int) clrtobot (void);				/* generated */
 extern NCURSES_EXPORT(int) clrtoeol (void);				/* generated */
-extern NCURSES_EXPORT(int) color_content (short,short*,short*,short*);	/* implemented */
-extern NCURSES_EXPORT(int) color_set (short,void*);			/* generated */
+extern NCURSES_EXPORT(int) color_content (NCURSES_COLOR_T,NCURSES_COLOR_T*,NCURSES_COLOR_T*,NCURSES_COLOR_T*);	/* implemented */
+extern NCURSES_EXPORT(int) color_set (NCURSES_PAIRS_T,void*);			/* generated */
 extern NCURSES_EXPORT(int) COLOR_PAIR (int);				/* generated */
 extern NCURSES_EXPORT(int) copywin (const WINDOW*,WINDOW*,int,int,int,int,int,int,int);	/* implemented */
 extern NCURSES_EXPORT(int) curs_set (int);				/* implemented */
@@ -613,8 +637,8 @@ extern NCURSES_EXPORT(chtype) inch (void);				/* generated */
 extern NCURSES_EXPORT(int) inchnstr (chtype *, int);			/* generated */
 extern NCURSES_EXPORT(int) inchstr (chtype *);				/* generated */
 extern NCURSES_EXPORT(WINDOW *) initscr (void);				/* implemented */
-extern NCURSES_EXPORT(int) init_color (short,short,short,short);	/* implemented */
-extern NCURSES_EXPORT(int) init_pair (short,short,short);		/* implemented */
+extern NCURSES_EXPORT(int) init_color (NCURSES_COLOR_T,NCURSES_COLOR_T,NCURSES_COLOR_T,NCURSES_COLOR_T);	/* implemented */
+extern NCURSES_EXPORT(int) init_pair (NCURSES_PAIRS_T,NCURSES_COLOR_T,NCURSES_COLOR_T);		/* implemented */
 extern NCURSES_EXPORT(int) innstr (char *, int);			/* generated */
 extern NCURSES_EXPORT(int) insch (chtype);				/* generated */
 extern NCURSES_EXPORT(int) insdelln (int);				/* generated */
@@ -638,7 +662,7 @@ extern NCURSES_EXPORT(int) mvaddchnstr (int, int, const chtype *, int);	/* gener
 extern NCURSES_EXPORT(int) mvaddchstr (int, int, const chtype *);	/* generated */
 extern NCURSES_EXPORT(int) mvaddnstr (int, int, const char *, int);	/* generated */
 extern NCURSES_EXPORT(int) mvaddstr (int, int, const char *);		/* generated */
-extern NCURSES_EXPORT(int) mvchgat (int, int, int, attr_t, short, const void *);	/* generated */
+extern NCURSES_EXPORT(int) mvchgat (int, int, int, attr_t, NCURSES_PAIRS_T, const void *);	/* generated */
 extern NCURSES_EXPORT(int) mvcur (int,int,int,int);			/* implemented */
 extern NCURSES_EXPORT(int) mvdelch (int, int);				/* generated */
 extern NCURSES_EXPORT(int) mvderwin (WINDOW *, int, int);		/* implemented */
@@ -664,7 +688,7 @@ extern NCURSES_EXPORT(int) mvwaddchnstr (WINDOW *, int, int, const chtype *, int
 extern NCURSES_EXPORT(int) mvwaddchstr (WINDOW *, int, int, const chtype *);	/* generated */
 extern NCURSES_EXPORT(int) mvwaddnstr (WINDOW *, int, int, const char *, int);	/* generated */
 extern NCURSES_EXPORT(int) mvwaddstr (WINDOW *, int, int, const char *);	/* generated */
-extern NCURSES_EXPORT(int) mvwchgat (WINDOW *, int, int, int, attr_t, short, const void *);/* generated */
+extern NCURSES_EXPORT(int) mvwchgat (WINDOW *, int, int, int, attr_t, NCURSES_PAIRS_T, const void *);/* generated */
 extern NCURSES_EXPORT(int) mvwdelch (WINDOW *, int, int);		/* generated */
 extern NCURSES_EXPORT(int) mvwgetch (WINDOW *, int, int);		/* generated */
 extern NCURSES_EXPORT(int) mvwgetnstr (WINDOW *, int, int, char *, int);	/* generated */
@@ -698,7 +722,7 @@ extern NCURSES_EXPORT(int) noraw (void);				/* implemented */
 extern NCURSES_EXPORT(int) notimeout (WINDOW *,bool);			/* implemented */
 extern NCURSES_EXPORT(int) overlay (const WINDOW*,WINDOW *);		/* implemented */
 extern NCURSES_EXPORT(int) overwrite (const WINDOW*,WINDOW *);		/* implemented */
-extern NCURSES_EXPORT(int) pair_content (short,short*,short*);		/* implemented */
+extern NCURSES_EXPORT(int) pair_content (NCURSES_PAIRS_T,NCURSES_COLOR_T*,NCURSES_COLOR_T*);		/* implemented */
 extern NCURSES_EXPORT(int) PAIR_NUMBER (int);				/* generated */
 extern NCURSES_EXPORT(int) pechochar (WINDOW *, const chtype);		/* implemented */
 extern NCURSES_EXPORT(int) pnoutrefresh (WINDOW*,int,int,int,int,int,int);/* implemented */
@@ -732,9 +756,9 @@ extern NCURSES_EXPORT(int) slk_attron (const chtype);			/* implemented */
 extern NCURSES_EXPORT(int) slk_attr_on (attr_t,void*);			/* generated:WIDEC */
 extern NCURSES_EXPORT(int) slk_attrset (const chtype);			/* implemented */
 extern NCURSES_EXPORT(attr_t) slk_attr (void);				/* implemented */
-extern NCURSES_EXPORT(int) slk_attr_set (const attr_t,short,void*);	/* implemented */
+extern NCURSES_EXPORT(int) slk_attr_set (const attr_t,NCURSES_PAIRS_T,void*);	/* implemented */
 extern NCURSES_EXPORT(int) slk_clear (void);				/* implemented */
-extern NCURSES_EXPORT(int) slk_color (short);				/* implemented */
+extern NCURSES_EXPORT(int) slk_color (NCURSES_PAIRS_T);				/* implemented */
 extern NCURSES_EXPORT(int) slk_init (int);				/* implemented */
 extern NCURSES_EXPORT(char *) slk_label (int);				/* implemented */
 extern NCURSES_EXPORT(int) slk_noutrefresh (void);			/* implemented */
@@ -757,6 +781,7 @@ extern NCURSES_EXPORT(int) typeahead (int);				/* implemented */
 extern NCURSES_EXPORT(int) ungetch (int);				/* implemented */
 extern NCURSES_EXPORT(int) untouchwin (WINDOW *);			/* generated */
 extern NCURSES_EXPORT(void) use_env (bool);				/* implemented */
+extern NCURSES_EXPORT(void) use_tioctl (bool);				/* implemented */
 extern NCURSES_EXPORT(int) vidattr (chtype);				/* implemented */
 extern NCURSES_EXPORT(int) vidputs (chtype, NCURSES_OUTC);		/* implemented */
 extern NCURSES_EXPORT(int) vline (chtype, int);				/* generated */
@@ -772,18 +797,18 @@ extern NCURSES_EXPORT(int) waddstr (WINDOW *,const char *);		/* generated */
 extern NCURSES_EXPORT(int) wattron (WINDOW *, int);			/* generated */
 extern NCURSES_EXPORT(int) wattroff (WINDOW *, int);			/* generated */
 extern NCURSES_EXPORT(int) wattrset (WINDOW *, int);			/* generated */
-extern NCURSES_EXPORT(int) wattr_get (WINDOW *, attr_t *, short *, void *);	/* generated */
+extern NCURSES_EXPORT(int) wattr_get (WINDOW *, attr_t *, NCURSES_PAIRS_T *, void *);	/* generated */
 extern NCURSES_EXPORT(int) wattr_on (WINDOW *, attr_t, void *);		/* implemented */
 extern NCURSES_EXPORT(int) wattr_off (WINDOW *, attr_t, void *);	/* implemented */
-extern NCURSES_EXPORT(int) wattr_set (WINDOW *, attr_t, short, void *);	/* generated */
+extern NCURSES_EXPORT(int) wattr_set (WINDOW *, attr_t, NCURSES_PAIRS_T, void *);	/* generated */
 extern NCURSES_EXPORT(int) wbkgd (WINDOW *, chtype);			/* implemented */
 extern NCURSES_EXPORT(void) wbkgdset (WINDOW *,chtype);			/* implemented */
 extern NCURSES_EXPORT(int) wborder (WINDOW *,chtype,chtype,chtype,chtype,chtype,chtype,chtype,chtype);	/* implemented */
-extern NCURSES_EXPORT(int) wchgat (WINDOW *, int, attr_t, short, const void *);/* implemented */
+extern NCURSES_EXPORT(int) wchgat (WINDOW *, int, attr_t, NCURSES_PAIRS_T, const void *);/* implemented */
 extern NCURSES_EXPORT(int) wclear (WINDOW *);				/* implemented */
 extern NCURSES_EXPORT(int) wclrtobot (WINDOW *);			/* implemented */
 extern NCURSES_EXPORT(int) wclrtoeol (WINDOW *);			/* implemented */
-extern NCURSES_EXPORT(int) wcolor_set (WINDOW*,short,void*);		/* implemented */
+extern NCURSES_EXPORT(int) wcolor_set (WINDOW*,NCURSES_PAIRS_T,void*);		/* implemented */
 extern NCURSES_EXPORT(void) wcursyncup (WINDOW *);			/* implemented */
 extern NCURSES_EXPORT(int) wdelch (WINDOW *);				/* implemented */
 extern NCURSES_EXPORT(int) wdeleteln (WINDOW *);			/* generated */
@@ -832,7 +857,7 @@ extern NCURSES_EXPORT(int) putp (const char *);				/* implemented */
 #if NCURSES_TPARM_VARARGS
 extern NCURSES_EXPORT(char *) tparm (NCURSES_CONST char *, ...);	/* special */
 #else
-extern NCURSES_EXPORT(char *) tparm (NCURSES_CONST char *, long,long,long,long,long,long,long,long,long);	/* special */
+extern NCURSES_EXPORT(char *) tparm (NCURSES_CONST char *, NCURSES_TPARM_ARG,NCURSES_TPARM_ARG,NCURSES_TPARM_ARG,NCURSES_TPARM_ARG,NCURSES_TPARM_ARG,NCURSES_TPARM_ARG,NCURSES_TPARM_ARG,NCURSES_TPARM_ARG,NCURSES_TPARM_ARG);	/* special */
 extern NCURSES_EXPORT(char *) tparm_varargs (NCURSES_CONST char *, ...);	/* special */
 #endif
 
@@ -854,7 +879,7 @@ extern NCURSES_EXPORT(int) getpary (const WINDOW *);			/* generated */
 /*
  * vid_attr() was implemented originally based on a draft of X/Open curses.
  */
-#ifndef NCURSES_WIDECHAR
+#if !NCURSES_WIDECHAR
 #define vid_attr(a,pair,opts) vidattr(a)
 #endif
 
@@ -863,7 +888,7 @@ extern NCURSES_EXPORT(int) getpary (const WINDOW *);			/* generated */
  */
 #if 1
 #undef  NCURSES_EXT_FUNCS
-#define NCURSES_EXT_FUNCS 20110404
+#define NCURSES_EXT_FUNCS 20150808
 typedef int (*NCURSES_WINDOW_CB)(WINDOW *, void *);
 typedef int (*NCURSES_SCREEN_CB)(SCREEN *, void *);
 extern NCURSES_EXPORT(bool) is_term_resized (int, int);
@@ -903,6 +928,7 @@ extern NCURSES_EXPORT(bool) is_pad (const WINDOW *);		/* generated */
 extern NCURSES_EXPORT(bool) is_scrollok (const WINDOW *);	/* generated */
 extern NCURSES_EXPORT(bool) is_subwin (const WINDOW *);		/* generated */
 extern NCURSES_EXPORT(bool) is_syncok (const WINDOW *);		/* generated */
+extern NCURSES_EXPORT(int) wgetdelay (const WINDOW *);		/* generated */
 extern NCURSES_EXPORT(int) wgetscrreg (const WINDOW *, int *, int *); /* generated */
 
 #else
@@ -913,9 +939,9 @@ extern NCURSES_EXPORT(int) wgetscrreg (const WINDOW *, int *, int *); /* generat
  * Extra extension-functions, which pass a SCREEN pointer rather than using
  * a global variable SP.
  */
-#if 0
+#if 1
 #undef  NCURSES_SP_FUNCS
-#define NCURSES_SP_FUNCS 20110404
+#define NCURSES_SP_FUNCS 20150808
 #define NCURSES_SP_NAME(name) name##_sp
 
 /* Define the sp-funcs helper function */
@@ -929,7 +955,7 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(beep) (SCREEN*); /* implemented:SP_FU
 extern NCURSES_EXPORT(bool) NCURSES_SP_NAME(can_change_color) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(cbreak) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(curs_set) (SCREEN*, int); /* implemented:SP_FUNC */
-extern NCURSES_EXPORT(int) NCURSES_SP_NAME(color_content) (SCREEN*, short, short*, short*, short*); /* implemented:SP_FUNC */
+extern NCURSES_EXPORT(int) NCURSES_SP_NAME(color_content) (SCREEN*, NCURSES_PAIRS_T, NCURSES_COLOR_T*, NCURSES_COLOR_T*, NCURSES_COLOR_T*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(def_prog_mode) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(def_shell_mode) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(delay_output) (SCREEN*, int); /* implemented:SP_FUNC */
@@ -945,8 +971,8 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(halfdelay) (SCREEN*, int); /* impleme
 extern NCURSES_EXPORT(bool) NCURSES_SP_NAME(has_colors) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(bool) NCURSES_SP_NAME(has_ic) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(bool) NCURSES_SP_NAME(has_il) (SCREEN*); /* implemented:SP_FUNC */
-extern NCURSES_EXPORT(int) NCURSES_SP_NAME(init_color) (SCREEN*, short, short, short, short); /* implemented:SP_FUNC */
-extern NCURSES_EXPORT(int) NCURSES_SP_NAME(init_pair) (SCREEN*, short, short, short); /* implemented:SP_FUNC */
+extern NCURSES_EXPORT(int) NCURSES_SP_NAME(init_color) (SCREEN*, NCURSES_COLOR_T, NCURSES_COLOR_T, NCURSES_COLOR_T, NCURSES_COLOR_T); /* implemented:SP_FUNC */
+extern NCURSES_EXPORT(int) NCURSES_SP_NAME(init_pair) (SCREEN*, NCURSES_PAIRS_T, NCURSES_COLOR_T, NCURSES_COLOR_T); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(intrflush) (SCREEN*, WINDOW*, bool);	/* implemented:SP_FUNC */
 extern NCURSES_EXPORT(bool) NCURSES_SP_NAME(isendwin) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(NCURSES_CONST char *) NCURSES_SP_NAME(keyname) (SCREEN*, int); /* implemented:SP_FUNC */
@@ -963,7 +989,7 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(noecho) (SCREEN*); /* implemented:SP_
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(nonl) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(void) NCURSES_SP_NAME(noqiflush) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(noraw) (SCREEN*); /* implemented:SP_FUNC */
-extern NCURSES_EXPORT(int) NCURSES_SP_NAME(pair_content) (SCREEN*, short, short*, short*); /* implemented:SP_FUNC */
+extern NCURSES_EXPORT(int) NCURSES_SP_NAME(pair_content) (SCREEN*, NCURSES_PAIRS_T, NCURSES_COLOR_T*, NCURSES_COLOR_T*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(void) NCURSES_SP_NAME(qiflush) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(raw) (SCREEN*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(reset_prog_mode) (SCREEN*); /* implemented:SP_FUNC */
@@ -978,9 +1004,9 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_attroff) (SCREEN*, const chtype);
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_attron) (SCREEN*, const chtype); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_attrset) (SCREEN*, const chtype); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(attr_t) NCURSES_SP_NAME(slk_attr) (SCREEN*); /* implemented:SP_FUNC */
-extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_attr_set) (SCREEN*, const attr_t, short, void*); /* implemented:SP_FUNC */
+extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_attr_set) (SCREEN*, const attr_t, NCURSES_PAIRS_T, void*); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_clear) (SCREEN*); /* implemented:SP_FUNC */
-extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_color) (SCREEN*, short); /* implemented:SP_FUNC */
+extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_color) (SCREEN*, NCURSES_PAIRS_T); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_init) (SCREEN*, int); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(char *) NCURSES_SP_NAME(slk_label) (SCREEN*, int); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(slk_noutrefresh) (SCREEN*); /* implemented:SP_FUNC */
@@ -994,6 +1020,7 @@ extern NCURSES_EXPORT(char *) NCURSES_SP_NAME(termname) (SCREEN*); /* implemente
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(typeahead) (SCREEN*, int); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(ungetch) (SCREEN*, int); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(void) NCURSES_SP_NAME(use_env) (SCREEN*, bool); /* implemented:SP_FUNC */
+extern NCURSES_EXPORT(void) NCURSES_SP_NAME(use_tioctl) (SCREEN*, bool); /* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(vidattr) (SCREEN*, chtype);	/* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(vidputs) (SCREEN*, chtype, NCURSES_SP_OUTC); /* implemented:SP_FUNC */
 #if 1
@@ -1022,27 +1049,31 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(use_legacy_coding) (SCREEN*, int);	/*
 /* attributes */
 
 #define NCURSES_ATTR_SHIFT       8
-#define NCURSES_BITS(mask,shift) ((mask) << ((shift) + NCURSES_ATTR_SHIFT))
+#define NCURSES_BITS(mask,shift) (NCURSES_CAST(chtype,(mask)) << ((shift) + NCURSES_ATTR_SHIFT))
 
-#define A_NORMAL	(1UL - 1UL)
-#define A_ATTRIBUTES	NCURSES_BITS(~(1UL - 1UL),0)
-#define A_CHARTEXT	(NCURSES_BITS(1UL,0) - 1UL)
-#define A_COLOR		NCURSES_BITS(((1UL) << 8) - 1UL,0)
-#define A_STANDOUT	NCURSES_BITS(1UL,8)
-#define A_UNDERLINE	NCURSES_BITS(1UL,9)
-#define A_REVERSE	NCURSES_BITS(1UL,10)
-#define A_BLINK		NCURSES_BITS(1UL,11)
-#define A_DIM		NCURSES_BITS(1UL,12)
-#define A_BOLD		NCURSES_BITS(1UL,13)
-#define A_ALTCHARSET	NCURSES_BITS(1UL,14)
-#define A_INVIS		NCURSES_BITS(1UL,15)
-#define A_PROTECT	NCURSES_BITS(1UL,16)
-#define A_HORIZONTAL	NCURSES_BITS(1UL,17)
-#define A_LEFT		NCURSES_BITS(1UL,18)
-#define A_LOW		NCURSES_BITS(1UL,19)
-#define A_RIGHT		NCURSES_BITS(1UL,20)
-#define A_TOP		NCURSES_BITS(1UL,21)
-#define A_VERTICAL	NCURSES_BITS(1UL,22)
+#define A_NORMAL	(1U - 1U)
+#define A_ATTRIBUTES	NCURSES_BITS(~(1U - 1U),0)
+#define A_CHARTEXT	(NCURSES_BITS(1U,0) - 1U)
+#define A_COLOR		NCURSES_BITS(((1U) << 8) - 1U,0)
+#define A_STANDOUT	NCURSES_BITS(1U,8)
+#define A_UNDERLINE	NCURSES_BITS(1U,9)
+#define A_REVERSE	NCURSES_BITS(1U,10)
+#define A_BLINK		NCURSES_BITS(1U,11)
+#define A_DIM		NCURSES_BITS(1U,12)
+#define A_BOLD		NCURSES_BITS(1U,13)
+#define A_ALTCHARSET	NCURSES_BITS(1U,14)
+#define A_INVIS		NCURSES_BITS(1U,15)
+#define A_PROTECT	NCURSES_BITS(1U,16)
+#define A_HORIZONTAL	NCURSES_BITS(1U,17)
+#define A_LEFT		NCURSES_BITS(1U,18)
+#define A_LOW		NCURSES_BITS(1U,19)
+#define A_RIGHT		NCURSES_BITS(1U,20)
+#define A_TOP		NCURSES_BITS(1U,21)
+#define A_VERTICAL	NCURSES_BITS(1U,22)
+
+#if 1
+#define A_ITALIC	NCURSES_BITS(1U,23)	/* ncurses extension */
+#endif
 
 /*
  * Most of the pseudo functions are macros that either provide compatibility
@@ -1084,7 +1115,7 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(use_legacy_coding) (SCREEN*, int);	/*
  */
 
 #define wgetstr(w, s)		wgetnstr(w, s, -1)
-#define getnstr(s, n)		wgetnstr(stdscr, s, n)
+#define getnstr(s, n)		wgetnstr(stdscr, s, (n))
 
 #define setterm(term)		setupterm(term, 1, (int *)0)
 
@@ -1115,9 +1146,9 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(use_legacy_coding) (SCREEN*, int);	/*
 #define wattroff(win,at)	wattr_off(win, NCURSES_CAST(attr_t, at), NULL)
 
 #if !NCURSES_OPAQUE
-#if defined(NCURSES_WIDECHAR) && 0
+#if NCURSES_WIDECHAR && 1
 #define wattrset(win,at)	((win) \
-				  ? ((win)->_color = PAIR_NUMBER(at), \
+				  ? ((win)->_color = NCURSES_CAST(int, PAIR_NUMBER(at)), \
                                      (win)->_attrs = NCURSES_CAST(attr_t, at), \
                                      OK) \
 				  : ERR)
@@ -1137,15 +1168,15 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(use_legacy_coding) (SCREEN*, int);	/*
 
 #define box(win, v, h)		wborder(win, v, v, h, h, 0, 0, 0, 0)
 #define border(ls, rs, ts, bs, tl, tr, bl, br)	wborder(stdscr, ls, rs, ts, bs, tl, tr, bl, br)
-#define hline(ch, n)		whline(stdscr, ch, n)
-#define vline(ch, n)		wvline(stdscr, ch, n)
+#define hline(ch, n)		whline(stdscr, ch, (n))
+#define vline(ch, n)		wvline(stdscr, ch, (n))
 
 #define winstr(w, s)		winnstr(w, s, -1)
 #define winchstr(w, s)		winchnstr(w, s, -1)
 #define winsstr(w, s)		winsnstr(w, s, -1)
 
 #if !NCURSES_OPAQUE
-#define redrawwin(win)		wredrawln(win, 0, (win)->_maxy+1)
+#define redrawwin(win)		wredrawln(win, 0, ((win) ? (win)->_maxy+1 : -1))
 #endif /* NCURSES_OPAQUE */
 
 #define waddstr(win,str)	waddnstr(win,str,-1)
@@ -1154,55 +1185,55 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(use_legacy_coding) (SCREEN*, int);	/*
 /*
  * These apply to the first 256 color pairs.
  */
-#define COLOR_PAIR(n)	NCURSES_BITS(n, 0)
-#define PAIR_NUMBER(a)	(NCURSES_CAST(int,((NCURSES_CAST(unsigned long,a) & A_COLOR) >> NCURSES_ATTR_SHIFT)))
+#define COLOR_PAIR(n)	NCURSES_BITS((n), 0)
+#define PAIR_NUMBER(a)	(NCURSES_CAST(int,((NCURSES_CAST(unsigned long,(a)) & A_COLOR) >> NCURSES_ATTR_SHIFT)))
 
 /*
  * pseudo functions for standard screen
  */
 
-#define addch(ch)		waddch(stdscr,ch)
-#define addchnstr(str,n)	waddchnstr(stdscr,str,n)
-#define addchstr(str)		waddchstr(stdscr,str)
-#define addnstr(str,n)		waddnstr(stdscr,str,n)
-#define addstr(str)		waddnstr(stdscr,str,-1)
-#define attroff(at)		wattroff(stdscr,at)
-#define attron(at)		wattron(stdscr,at)
-#define attrset(at)		wattrset(stdscr,at)
-#define attr_get(ap,cp,o)	wattr_get(stdscr,ap,cp,o)
-#define attr_off(a,o)		wattr_off(stdscr,a,o)
-#define attr_on(a,o)		wattr_on(stdscr,a,o)
-#define attr_set(a,c,o)		wattr_set(stdscr,a,c,o)
-#define bkgd(ch)		wbkgd(stdscr,ch)
-#define bkgdset(ch)		wbkgdset(stdscr,ch)
-#define chgat(n,a,c,o)		wchgat(stdscr,n,a,c,o)
+#define addch(ch)		waddch(stdscr,(ch))
+#define addchnstr(str,n)	waddchnstr(stdscr,(str),(n))
+#define addchstr(str)		waddchstr(stdscr,(str))
+#define addnstr(str,n)		waddnstr(stdscr,(str),(n))
+#define addstr(str)		waddnstr(stdscr,(str),-1)
+#define attroff(at)		wattroff(stdscr,(at))
+#define attron(at)		wattron(stdscr,(at))
+#define attrset(at)		wattrset(stdscr,(at))
+#define attr_get(ap,cp,o)	wattr_get(stdscr,(ap),(cp),(o))
+#define attr_off(a,o)		wattr_off(stdscr,(a),(o))
+#define attr_on(a,o)		wattr_on(stdscr,(a),(o))
+#define attr_set(a,c,o)		wattr_set(stdscr,(a),(c),(o))
+#define bkgd(ch)		wbkgd(stdscr,(ch))
+#define bkgdset(ch)		wbkgdset(stdscr,(ch))
+#define chgat(n,a,c,o)		wchgat(stdscr,(n),(a),(c),(o))
 #define clear()			wclear(stdscr)
 #define clrtobot()		wclrtobot(stdscr)
 #define clrtoeol()		wclrtoeol(stdscr)
-#define color_set(c,o)		wcolor_set(stdscr,c,o)
+#define color_set(c,o)		wcolor_set(stdscr,(c),(o))
 #define delch()			wdelch(stdscr)
 #define deleteln()		winsdelln(stdscr,-1)
-#define echochar(c)		wechochar(stdscr,c)
+#define echochar(c)		wechochar(stdscr,(c))
 #define erase()			werase(stdscr)
 #define getch()			wgetch(stdscr)
-#define getstr(str)		wgetstr(stdscr,str)
+#define getstr(str)		wgetstr(stdscr,(str))
 #define inch()			winch(stdscr)
-#define inchnstr(s,n)		winchnstr(stdscr,s,n)
-#define inchstr(s)		winchstr(stdscr,s)
-#define innstr(s,n)		winnstr(stdscr,s,n)
-#define insch(c)		winsch(stdscr,c)
-#define insdelln(n)		winsdelln(stdscr,n)
+#define inchnstr(s,n)		winchnstr(stdscr,(s),(n))
+#define inchstr(s)		winchstr(stdscr,(s))
+#define innstr(s,n)		winnstr(stdscr,(s),(n))
+#define insch(c)		winsch(stdscr,(c))
+#define insdelln(n)		winsdelln(stdscr,(n))
 #define insertln()		winsdelln(stdscr,1)
-#define insnstr(s,n)		winsnstr(stdscr,s,n)
-#define insstr(s)		winsstr(stdscr,s)
-#define instr(s)		winstr(stdscr,s)
-#define move(y,x)		wmove(stdscr,y,x)
+#define insnstr(s,n)		winsnstr(stdscr,(s),(n))
+#define insstr(s)		winsstr(stdscr,(s))
+#define instr(s)		winstr(stdscr,(s))
+#define move(y,x)		wmove(stdscr,(y),(x))
 #define refresh()		wrefresh(stdscr)
-#define scrl(n)			wscrl(stdscr,n)
-#define setscrreg(t,b)		wsetscrreg(stdscr,t,b)
+#define scrl(n)			wscrl(stdscr,(n))
+#define setscrreg(t,b)		wsetscrreg(stdscr,(t),(b))
 #define standend()		wstandend(stdscr)
 #define standout()		wstandout(stdscr)
-#define timeout(delay)		wtimeout(stdscr,delay)
+#define timeout(delay)		wtimeout(stdscr,(delay))
 #define wdeleteln(win)		winsdelln(win,-1)
 #define winsertln(win)		winsdelln(win,1)
 
@@ -1210,70 +1241,75 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(use_legacy_coding) (SCREEN*, int);	/*
  * mv functions
  */
 
-#define mvwaddch(win,y,x,ch)		(wmove(win,y,x) == ERR ? ERR : waddch(win,ch))
-#define mvwaddchnstr(win,y,x,str,n)	(wmove(win,y,x) == ERR ? ERR : waddchnstr(win,str,n))
-#define mvwaddchstr(win,y,x,str)	(wmove(win,y,x) == ERR ? ERR : waddchnstr(win,str,-1))
-#define mvwaddnstr(win,y,x,str,n)	(wmove(win,y,x) == ERR ? ERR : waddnstr(win,str,n))
-#define mvwaddstr(win,y,x,str)		(wmove(win,y,x) == ERR ? ERR : waddnstr(win,str,-1))
-#define mvwdelch(win,y,x)		(wmove(win,y,x) == ERR ? ERR : wdelch(win))
-#define mvwchgat(win,y,x,n,a,c,o)	(wmove(win,y,x) == ERR ? ERR : wchgat(win,n,a,c,o))
-#define mvwgetch(win,y,x)		(wmove(win,y,x) == ERR ? ERR : wgetch(win))
-#define mvwgetnstr(win,y,x,str,n)	(wmove(win,y,x) == ERR ? ERR : wgetnstr(win,str,n))
-#define mvwgetstr(win,y,x,str)		(wmove(win,y,x) == ERR ? ERR : wgetstr(win,str))
-#define mvwhline(win,y,x,c,n)		(wmove(win,y,x) == ERR ? ERR : whline(win,c,n))
-#define mvwinch(win,y,x)		(wmove(win,y,x) == ERR ? NCURSES_CAST(chtype, ERR) : winch(win))
-#define mvwinchnstr(win,y,x,s,n)	(wmove(win,y,x) == ERR ? ERR : winchnstr(win,s,n))
-#define mvwinchstr(win,y,x,s)		(wmove(win,y,x) == ERR ? ERR : winchstr(win,s))
-#define mvwinnstr(win,y,x,s,n)		(wmove(win,y,x) == ERR ? ERR : winnstr(win,s,n))
-#define mvwinsch(win,y,x,c)		(wmove(win,y,x) == ERR ? ERR : winsch(win,c))
-#define mvwinsnstr(win,y,x,s,n)		(wmove(win,y,x) == ERR ? ERR : winsnstr(win,s,n))
-#define mvwinsstr(win,y,x,s)		(wmove(win,y,x) == ERR ? ERR : winsstr(win,s))
-#define mvwinstr(win,y,x,s)		(wmove(win,y,x) == ERR ? ERR : winstr(win,s))
-#define mvwvline(win,y,x,c,n)		(wmove(win,y,x) == ERR ? ERR : wvline(win,c,n))
+#define mvwaddch(win,y,x,ch)		(wmove((win),(y),(x)) == ERR ? ERR : waddch((win),(ch)))
+#define mvwaddchnstr(win,y,x,str,n)	(wmove((win),(y),(x)) == ERR ? ERR : waddchnstr((win),(str),(n)))
+#define mvwaddchstr(win,y,x,str)	(wmove((win),(y),(x)) == ERR ? ERR : waddchnstr((win),(str),-1))
+#define mvwaddnstr(win,y,x,str,n)	(wmove((win),(y),(x)) == ERR ? ERR : waddnstr((win),(str),(n)))
+#define mvwaddstr(win,y,x,str)		(wmove((win),(y),(x)) == ERR ? ERR : waddnstr((win),(str),-1))
+#define mvwdelch(win,y,x)		(wmove((win),(y),(x)) == ERR ? ERR : wdelch(win))
+#define mvwchgat(win,y,x,n,a,c,o)	(wmove((win),(y),(x)) == ERR ? ERR : wchgat((win),(n),(a),(c),(o)))
+#define mvwgetch(win,y,x)		(wmove((win),(y),(x)) == ERR ? ERR : wgetch(win))
+#define mvwgetnstr(win,y,x,str,n)	(wmove((win),(y),(x)) == ERR ? ERR : wgetnstr((win),(str),(n)))
+#define mvwgetstr(win,y,x,str)		(wmove((win),(y),(x)) == ERR ? ERR : wgetstr((win),(str)))
+#define mvwhline(win,y,x,c,n)		(wmove((win),(y),(x)) == ERR ? ERR : whline((win),(c),(n)))
+#define mvwinch(win,y,x)		(wmove((win),(y),(x)) == ERR ? NCURSES_CAST(chtype, ERR) : winch(win))
+#define mvwinchnstr(win,y,x,s,n)	(wmove((win),(y),(x)) == ERR ? ERR : winchnstr((win),(s),(n)))
+#define mvwinchstr(win,y,x,s)		(wmove((win),(y),(x)) == ERR ? ERR : winchstr((win),(s)))
+#define mvwinnstr(win,y,x,s,n)		(wmove((win),(y),(x)) == ERR ? ERR : winnstr((win),(s),(n)))
+#define mvwinsch(win,y,x,c)		(wmove((win),(y),(x)) == ERR ? ERR : winsch((win),(c)))
+#define mvwinsnstr(win,y,x,s,n)		(wmove((win),(y),(x)) == ERR ? ERR : winsnstr((win),(s),(n)))
+#define mvwinsstr(win,y,x,s)		(wmove((win),(y),(x)) == ERR ? ERR : winsstr((win),(s)))
+#define mvwinstr(win,y,x,s)		(wmove((win),(y),(x)) == ERR ? ERR : winstr((win),(s)))
+#define mvwvline(win,y,x,c,n)		(wmove((win),(y),(x)) == ERR ? ERR : wvline((win),(c),(n)))
 
-#define mvaddch(y,x,ch)			mvwaddch(stdscr,y,x,ch)
-#define mvaddchnstr(y,x,str,n)		mvwaddchnstr(stdscr,y,x,str,n)
-#define mvaddchstr(y,x,str)		mvwaddchstr(stdscr,y,x,str)
-#define mvaddnstr(y,x,str,n)		mvwaddnstr(stdscr,y,x,str,n)
-#define mvaddstr(y,x,str)		mvwaddstr(stdscr,y,x,str)
-#define mvchgat(y,x,n,a,c,o)		mvwchgat(stdscr,y,x,n,a,c,o)
-#define mvdelch(y,x)			mvwdelch(stdscr,y,x)
-#define mvgetch(y,x)			mvwgetch(stdscr,y,x)
-#define mvgetnstr(y,x,str,n)		mvwgetnstr(stdscr,y,x,str,n)
-#define mvgetstr(y,x,str)		mvwgetstr(stdscr,y,x,str)
-#define mvhline(y,x,c,n)		mvwhline(stdscr,y,x,c,n)
-#define mvinch(y,x)			mvwinch(stdscr,y,x)
-#define mvinchnstr(y,x,s,n)		mvwinchnstr(stdscr,y,x,s,n)
-#define mvinchstr(y,x,s)		mvwinchstr(stdscr,y,x,s)
-#define mvinnstr(y,x,s,n)		mvwinnstr(stdscr,y,x,s,n)
-#define mvinsch(y,x,c)			mvwinsch(stdscr,y,x,c)
-#define mvinsnstr(y,x,s,n)		mvwinsnstr(stdscr,y,x,s,n)
-#define mvinsstr(y,x,s)			mvwinsstr(stdscr,y,x,s)
-#define mvinstr(y,x,s)			mvwinstr(stdscr,y,x,s)
-#define mvvline(y,x,c,n)		mvwvline(stdscr,y,x,c,n)
+#define mvaddch(y,x,ch)			mvwaddch(stdscr,(y),(x),(ch))
+#define mvaddchnstr(y,x,str,n)		mvwaddchnstr(stdscr,(y),(x),(str),(n))
+#define mvaddchstr(y,x,str)		mvwaddchstr(stdscr,(y),(x),(str))
+#define mvaddnstr(y,x,str,n)		mvwaddnstr(stdscr,(y),(x),(str),(n))
+#define mvaddstr(y,x,str)		mvwaddstr(stdscr,(y),(x),(str))
+#define mvchgat(y,x,n,a,c,o)		mvwchgat(stdscr,(y),(x),(n),(a),(c),(o))
+#define mvdelch(y,x)			mvwdelch(stdscr,(y),(x))
+#define mvgetch(y,x)			mvwgetch(stdscr,(y),(x))
+#define mvgetnstr(y,x,str,n)		mvwgetnstr(stdscr,(y),(x),(str),(n))
+#define mvgetstr(y,x,str)		mvwgetstr(stdscr,(y),(x),(str))
+#define mvhline(y,x,c,n)		mvwhline(stdscr,(y),(x),(c),(n))
+#define mvinch(y,x)			mvwinch(stdscr,(y),(x))
+#define mvinchnstr(y,x,s,n)		mvwinchnstr(stdscr,(y),(x),(s),(n))
+#define mvinchstr(y,x,s)		mvwinchstr(stdscr,(y),(x),(s))
+#define mvinnstr(y,x,s,n)		mvwinnstr(stdscr,(y),(x),(s),(n))
+#define mvinsch(y,x,c)			mvwinsch(stdscr,(y),(x),(c))
+#define mvinsnstr(y,x,s,n)		mvwinsnstr(stdscr,(y),(x),(s),(n))
+#define mvinsstr(y,x,s)			mvwinsstr(stdscr,(y),(x),(s))
+#define mvinstr(y,x,s)			mvwinstr(stdscr,(y),(x),(s))
+#define mvvline(y,x,c,n)		mvwvline(stdscr,(y),(x),(c),(n))
 
 /*
  * Some wide-character functions can be implemented without the extensions.
  */
 #if !NCURSES_OPAQUE
-#define getbkgd(win)                    ((win)->_bkgd)
+#define getbkgd(win)                    ((win) ? ((win)->_bkgd) : 0)
 #endif /* NCURSES_OPAQUE */
 
 #define slk_attr_off(a,v)		((v) ? ERR : slk_attroff(a))
 #define slk_attr_on(a,v)		((v) ? ERR : slk_attron(a))
 
 #if !NCURSES_OPAQUE
-#if defined(NCURSES_WIDECHAR) && 0
-#define wattr_set(win,a,p,opts)		((win)->_attrs = ((a) & ~A_COLOR), \
-					 (win)->_color = (p), \
+#if NCURSES_WIDECHAR && 1
+#define wattr_set(win,a,p,opts)		(((win) \
+					  ? ((win)->_attrs = ((a) & ~A_COLOR), \
+					     (win)->_color = (p)) \
+					  : OK), \
 					 OK)
-#define wattr_get(win,a,p,opts)		((void)((a) != (void *)0 && (*(a) = (win)->_attrs)), \
-					 (void)((p) != (void *)0 && (*(p) = (short)(win)->_color)), \
+#define wattr_get(win,a,p,opts)		((void)(((a) != (void *)0) ? (*(a) = (win) ? (win)->_attrs : 0) : OK), \
+					 (void)(((p) != (void *)0) ? (*(p) = (NCURSES_PAIRS_T) ((win) ? (win)->_color : 0)) : OK), \
 					 OK)
 #else
-#define wattr_set(win,a,p,opts)		((win)->_attrs = (((a) & ~A_COLOR) | (attr_t)COLOR_PAIR(p)), OK)
-#define wattr_get(win,a,p,opts)		((void)((a) != (void *)0 && (*(a) = (win)->_attrs)), \
-					 (void)((p) != (void *)0 && (*(p) = (short)PAIR_NUMBER((win)->_attrs))), \
+#define wattr_set(win,a,p,opts)		(((win) \
+					  ? ((win)->_attrs = (((a) & ~A_COLOR) | (attr_t)COLOR_PAIR(p))) \
+					  : OK), \
+					 OK)
+#define wattr_get(win,a,p,opts)		((void)(((a) != (void *)0) ? (*(a) = (win) ? (win)->_attrs : 0) : OK), \
+					 (void)(((p) != (void *)0) ? (*(p) = (NCURSES_PAIRS_T) ((win) ? PAIR_NUMBER((win)->_attrs) : 0)) : OK), \
 					 OK)
 #endif
 #endif /* NCURSES_OPAQUE */
@@ -1312,6 +1348,7 @@ NCURSES_EXPORT(int) vsscanf(const char *, const char *, va_list);
 #define is_scrollok(win)	((win) ? (win)->_scroll : FALSE)
 #define is_subwin(win)		((win) ? ((win)->_flags & _SUBWIN) != 0 : FALSE)
 #define is_syncok(win)		((win) ? (win)->_sync : FALSE)
+#define wgetdelay(win)		((win) ? (win)->_delay : 0)
 #define wgetparent(win)		((win) ? (win)->_parent : 0)
 #define wgetscrreg(win,t,b)	((win) ? (*(t) = (win)->_regtop, *(b) = (win)->_regbottom, OK) : ERR)
 #endif
@@ -1384,7 +1421,7 @@ extern NCURSES_EXPORT_VAR(int) TABSIZE;
 #define KEY_SRESET	0530		/* Soft (partial) reset (unreliable) */
 #define KEY_RESET	0531		/* Reset or hard reset (unreliable) */
 /*
- * These definitions were generated by ../../ncurses-5.9/include/MKkey_defs.sh ../../ncurses-5.9/include/Caps
+ * These definitions were generated by ./MKkey_defs.sh ./Caps
  */
 #define KEY_DOWN	0402		/* down-arrow key */
 #define KEY_UP		0403		/* up-arrow key */
@@ -1478,7 +1515,7 @@ extern NCURSES_EXPORT_VAR(int) TABSIZE;
 #define KEY_EVENT	0633		/* We were interrupted by an event */
 
 #define KEY_MAX		0777		/* Maximum key value is 0633 */
-/* $Id: curses.wide,v 1.42 2010/03/30 00:39:41 tom Exp $ */
+/* $Id: curses.wide,v 1.46 2014/02/01 22:00:32 tom Exp $ */
 /*
  * vile:cmode:
  * This file is part of ncurses, designed to be appended after curses.h.in
@@ -1486,11 +1523,11 @@ extern NCURSES_EXPORT_VAR(int) TABSIZE;
  */
 #define _XOPEN_CURSES 1
 
-#ifdef NCURSES_WIDECHAR
+#if NCURSES_WIDECHAR
 
 extern NCURSES_EXPORT_VAR(cchar_t *) _nc_wacs;
 
-#define NCURSES_WACS(c)	(&_nc_wacs[(unsigned char)c])
+#define NCURSES_WACS(c)	(&_nc_wacs[NCURSES_CAST(unsigned char,(c))])
 
 #define WACS_BSSB	NCURSES_WACS('l')
 #define WACS_SSBB	NCURSES_WACS('m')
@@ -1615,7 +1652,7 @@ extern NCURSES_EXPORT(int) erasewchar (wchar_t*);			/* implemented */
 extern NCURSES_EXPORT(int) get_wch (wint_t *);				/* generated:WIDEC */
 extern NCURSES_EXPORT(int) get_wstr (wint_t *);				/* generated:WIDEC */
 extern NCURSES_EXPORT(int) getbkgrnd (cchar_t *);			/* generated:WIDEC */
-extern NCURSES_EXPORT(int) getcchar (const cchar_t *, wchar_t*, attr_t*, short*, void*);	/* implemented */
+extern NCURSES_EXPORT(int) getcchar (const cchar_t *, wchar_t*, attr_t*, NCURSES_PAIRS_T*, void*);	/* implemented */
 extern NCURSES_EXPORT(int) getn_wstr (wint_t *, int);			/* generated:WIDEC */
 extern NCURSES_EXPORT(int) hline_set (const cchar_t *, int);		/* generated:WIDEC */
 extern NCURSES_EXPORT(int) in_wch (cchar_t *);				/* generated:WIDEC */
@@ -1665,12 +1702,12 @@ extern NCURSES_EXPORT(int) mvwins_wstr (WINDOW *, int, int, const wchar_t *);	/*
 extern NCURSES_EXPORT(int) mvwinwstr (WINDOW *, int, int, wchar_t *);		/* generated:WIDEC */
 extern NCURSES_EXPORT(int) mvwvline_set (WINDOW *, int,int, const cchar_t *,int); /* generated:WIDEC */
 extern NCURSES_EXPORT(int) pecho_wchar (WINDOW *, const cchar_t *);	/* implemented */
-extern NCURSES_EXPORT(int) setcchar (cchar_t *, const wchar_t *, const attr_t, short, const void *);	/* implemented */
+extern NCURSES_EXPORT(int) setcchar (cchar_t *, const wchar_t *, const attr_t, NCURSES_PAIRS_T, const void *);	/* implemented */
 extern NCURSES_EXPORT(int) slk_wset (int, const wchar_t *, int);	/* implemented */
 extern NCURSES_EXPORT(attr_t) term_attrs (void);			/* implemented */
 extern NCURSES_EXPORT(int) unget_wch (const wchar_t);			/* implemented */
-extern NCURSES_EXPORT(int) vid_attr (attr_t, short, void *);		/* implemented */
-extern NCURSES_EXPORT(int) vid_puts (attr_t, short, void *, NCURSES_OUTC); /* implemented */
+extern NCURSES_EXPORT(int) vid_attr (attr_t, NCURSES_PAIRS_T, void *);		/* implemented */
+extern NCURSES_EXPORT(int) vid_puts (attr_t, NCURSES_PAIRS_T, void *, NCURSES_OUTC); /* implemented */
 extern NCURSES_EXPORT(int) vline_set (const cchar_t *, int);		/* generated:WIDEC */
 extern NCURSES_EXPORT(int) wadd_wch (WINDOW *,const cchar_t *);		/* implemented */
 extern NCURSES_EXPORT(int) wadd_wchnstr (WINDOW *,const cchar_t *,int);	/* implemented */
@@ -1701,8 +1738,8 @@ extern NCURSES_EXPORT(int) wvline_set (WINDOW *, const cchar_t *, int);	/* imple
 extern NCURSES_EXPORT(attr_t) NCURSES_SP_NAME(term_attrs) (SCREEN*);		/* implemented:SP_FUNC */
 extern NCURSES_EXPORT(int) NCURSES_SP_NAME(unget_wch) (SCREEN*, const wchar_t);	/* implemented:SP_FUNC */
 extern NCURSES_EXPORT(wchar_t*) NCURSES_SP_NAME(wunctrl) (SCREEN*, cchar_t *);	/* implemented:SP_FUNC */
-extern NCURSES_EXPORT(int) NCURSES_SP_NAME(vid_attr) (SCREEN*, attr_t, short, void *);	/* implemented:SP_FUNC */
-extern NCURSES_EXPORT(int) NCURSES_SP_NAME(vid_puts) (SCREEN*, attr_t, short, void *, NCURSES_SP_OUTC);	/* implemented:SP_FUNC */
+extern NCURSES_EXPORT(int) NCURSES_SP_NAME(vid_attr) (SCREEN*, attr_t, NCURSES_PAIRS_T, void *);	/* implemented:SP_FUNC */
+extern NCURSES_EXPORT(int) NCURSES_SP_NAME(vid_puts) (SCREEN*, attr_t, NCURSES_PAIRS_T, void *, NCURSES_SP_OUTC);	/* implemented:SP_FUNC */
 #endif
 
 #ifndef NCURSES_NOMACROS
@@ -1710,77 +1747,77 @@ extern NCURSES_EXPORT(int) NCURSES_SP_NAME(vid_puts) (SCREEN*, attr_t, short, vo
 /*
  * XSI curses macros for XPG4 conformance.
  */
-#define add_wch(c)			wadd_wch(stdscr,c)
-#define add_wchnstr(str,n)		wadd_wchnstr(stdscr,str,n)
-#define add_wchstr(str)			wadd_wchstr(stdscr,str)
-#define addnwstr(wstr,n)		waddnwstr(stdscr,wstr,n)
-#define addwstr(wstr)			waddwstr(stdscr,wstr)
-#define bkgrnd(c)			wbkgrnd(stdscr,c)
-#define bkgrndset(c)			wbkgrndset(stdscr,c)
-#define border_set(l,r,t,b,tl,tr,bl,br) wborder_set(stdscr,l,r,t,b,tl,tr,bl,br)
-#define box_set(w,v,h)			wborder_set(w,v,v,h,h,0,0,0,0)
-#define echo_wchar(c)			wecho_wchar(stdscr,c)
-#define get_wch(c)			wget_wch(stdscr,c)
-#define get_wstr(t)			wget_wstr(stdscr,t)
-#define getbkgrnd(wch)			wgetbkgrnd(stdscr,wch)
-#define getn_wstr(t,n)			wgetn_wstr(stdscr,t,n)
-#define hline_set(c,n)			whline_set(stdscr,c,n)
-#define in_wch(c)			win_wch(stdscr,c)
-#define in_wchnstr(c,n)			win_wchnstr(stdscr,c,n)
-#define in_wchstr(c)			win_wchstr(stdscr,c)
-#define innwstr(c,n)			winnwstr(stdscr,c,n)
-#define ins_nwstr(t,n)			wins_nwstr(stdscr,t,n)
-#define ins_wch(c)			wins_wch(stdscr,c)
-#define ins_wstr(t)			wins_wstr(stdscr,t)
-#define inwstr(c)			winwstr(stdscr,c)
-#define vline_set(c,n)			wvline_set(stdscr,c,n)
-#define wadd_wchstr(win,str)		wadd_wchnstr(win,str,-1)
-#define waddwstr(win,wstr)		waddnwstr(win,wstr,-1)
-#define wget_wstr(w,t)			wgetn_wstr(w,t,-1)
-#define win_wchstr(w,c)			win_wchnstr(w,c,-1)
-#define wins_wstr(w,t)			wins_nwstr(w,t,-1)
+#define add_wch(c)			wadd_wch(stdscr,(c))
+#define add_wchnstr(str,n)		wadd_wchnstr(stdscr,(str),(n))
+#define add_wchstr(str)			wadd_wchstr(stdscr,(str))
+#define addnwstr(wstr,n)		waddnwstr(stdscr,(wstr),(n))
+#define addwstr(wstr)			waddwstr(stdscr,(wstr))
+#define bkgrnd(c)			wbkgrnd(stdscr,(c))
+#define bkgrndset(c)			wbkgrndset(stdscr,(c))
+#define border_set(l,r,t,b,tl,tr,bl,br) wborder_set(stdscr,(l),(r),(t),(b),tl,tr,bl,br)
+#define box_set(w,v,h)			wborder_set((w),(v),(v),(h),(h),0,0,0,0)
+#define echo_wchar(c)			wecho_wchar(stdscr,(c))
+#define get_wch(c)			wget_wch(stdscr,(c))
+#define get_wstr(t)			wget_wstr(stdscr,(t))
+#define getbkgrnd(wch)			wgetbkgrnd(stdscr,(wch))
+#define getn_wstr(t,n)			wgetn_wstr(stdscr,(t),(n))
+#define hline_set(c,n)			whline_set(stdscr,(c),(n))
+#define in_wch(c)			win_wch(stdscr,(c))
+#define in_wchnstr(c,n)			win_wchnstr(stdscr,(c),(n))
+#define in_wchstr(c)			win_wchstr(stdscr,(c))
+#define innwstr(c,n)			winnwstr(stdscr,(c),(n))
+#define ins_nwstr(t,n)			wins_nwstr(stdscr,(t),(n))
+#define ins_wch(c)			wins_wch(stdscr,(c))
+#define ins_wstr(t)			wins_wstr(stdscr,(t))
+#define inwstr(c)			winwstr(stdscr,(c))
+#define vline_set(c,n)			wvline_set(stdscr,(c),(n))
+#define wadd_wchstr(win,str)		wadd_wchnstr((win),(str),-1)
+#define waddwstr(win,wstr)		waddnwstr((win),(wstr),-1)
+#define wget_wstr(w,t)			wgetn_wstr((w),(t),-1)
+#define win_wchstr(w,c)			win_wchnstr((w),(c),-1)
+#define wins_wstr(w,t)			wins_nwstr((w),(t),-1)
 
 #if !NCURSES_OPAQUE
-#define wgetbkgrnd(win,wch)		(*wch = win->_bkgrnd, OK)
+#define wgetbkgrnd(win,wch)		((win) ? (*(wch) = (win)->_bkgrnd) : *(wch), OK)
 #endif
 
-#define mvadd_wch(y,x,c)		mvwadd_wch(stdscr,y,x,c)
-#define mvadd_wchnstr(y,x,s,n)		mvwadd_wchnstr(stdscr,y,x,s,n)
-#define mvadd_wchstr(y,x,s)		mvwadd_wchstr(stdscr,y,x,s)
-#define mvaddnwstr(y,x,wstr,n)		mvwaddnwstr(stdscr,y,x,wstr,n)
-#define mvaddwstr(y,x,wstr)		mvwaddwstr(stdscr,y,x,wstr)
-#define mvget_wch(y,x,c)		mvwget_wch(stdscr,y,x,c)
-#define mvget_wstr(y,x,t)		mvwget_wstr(stdscr,y,x,t)
-#define mvgetn_wstr(y,x,t,n)		mvwgetn_wstr(stdscr,y,x,t,n)
-#define mvhline_set(y,x,c,n)		mvwhline_set(stdscr,y,x,c,n)
-#define mvin_wch(y,x,c)			mvwin_wch(stdscr,y,x,c)
-#define mvin_wchnstr(y,x,c,n)		mvwin_wchnstr(stdscr,y,x,c,n)
-#define mvin_wchstr(y,x,c)		mvwin_wchstr(stdscr,y,x,c)
-#define mvinnwstr(y,x,c,n)		mvwinnwstr(stdscr,y,x,c,n)
-#define mvins_nwstr(y,x,t,n)		mvwins_nwstr(stdscr,y,x,t,n)
-#define mvins_wch(y,x,c)		mvwins_wch(stdscr,y,x,c)
-#define mvins_wstr(y,x,t)		mvwins_wstr(stdscr,y,x,t)
-#define mvinwstr(y,x,c)			mvwinwstr(stdscr,y,x,c)
-#define mvvline_set(y,x,c,n)		mvwvline_set(stdscr,y,x,c,n)
+#define mvadd_wch(y,x,c)		mvwadd_wch(stdscr,(y),(x),(c))
+#define mvadd_wchnstr(y,x,s,n)		mvwadd_wchnstr(stdscr,(y),(x),(s),(n))
+#define mvadd_wchstr(y,x,s)		mvwadd_wchstr(stdscr,(y),(x),(s))
+#define mvaddnwstr(y,x,wstr,n)		mvwaddnwstr(stdscr,(y),(x),(wstr),(n))
+#define mvaddwstr(y,x,wstr)		mvwaddwstr(stdscr,(y),(x),(wstr))
+#define mvget_wch(y,x,c)		mvwget_wch(stdscr,(y),(x),(c))
+#define mvget_wstr(y,x,t)		mvwget_wstr(stdscr,(y),(x),(t))
+#define mvgetn_wstr(y,x,t,n)		mvwgetn_wstr(stdscr,(y),(x),(t),(n))
+#define mvhline_set(y,x,c,n)		mvwhline_set(stdscr,(y),(x),(c),(n))
+#define mvin_wch(y,x,c)			mvwin_wch(stdscr,(y),(x),(c))
+#define mvin_wchnstr(y,x,c,n)		mvwin_wchnstr(stdscr,(y),(x),(c),(n))
+#define mvin_wchstr(y,x,c)		mvwin_wchstr(stdscr,(y),(x),(c))
+#define mvinnwstr(y,x,c,n)		mvwinnwstr(stdscr,(y),(x),(c),(n))
+#define mvins_nwstr(y,x,t,n)		mvwins_nwstr(stdscr,(y),(x),(t),(n))
+#define mvins_wch(y,x,c)		mvwins_wch(stdscr,(y),(x),(c))
+#define mvins_wstr(y,x,t)		mvwins_wstr(stdscr,(y),(x),(t))
+#define mvinwstr(y,x,c)			mvwinwstr(stdscr,(y),(x),(c))
+#define mvvline_set(y,x,c,n)		mvwvline_set(stdscr,(y),(x),(c),(n))
 
-#define mvwadd_wch(win,y,x,c)		(wmove(win,y,x) == ERR ? ERR : wadd_wch(win,c))
-#define mvwadd_wchnstr(win,y,x,s,n)	(wmove(win,y,x) == ERR ? ERR : wadd_wchnstr(win,s,n))
-#define mvwadd_wchstr(win,y,x,s)	(wmove(win,y,x) == ERR ? ERR : wadd_wchstr(win,s))
-#define mvwaddnwstr(win,y,x,wstr,n)	(wmove(win,y,x) == ERR ? ERR : waddnwstr(win,wstr,n))
-#define mvwaddwstr(win,y,x,wstr)	(wmove(win,y,x) == ERR ? ERR : waddwstr(win,wstr))
-#define mvwget_wch(win,y,x,c)		(wmove(win,y,x) == ERR ? ERR : wget_wch(win,c))
-#define mvwget_wstr(win,y,x,t)		(wmove(win,y,x) == ERR ? ERR : wget_wstr(win,t))
-#define mvwgetn_wstr(win,y,x,t,n)	(wmove(win,y,x) == ERR ? ERR : wgetn_wstr(win,t,n))
-#define mvwhline_set(win,y,x,c,n)	(wmove(win,y,x) == ERR ? ERR : whline_set(win,c,n))
-#define mvwin_wch(win,y,x,c)		(wmove(win,y,x) == ERR ? ERR : win_wch(win,c))
-#define mvwin_wchnstr(win,y,x,c,n)	(wmove(win,y,x) == ERR ? ERR : win_wchnstr(win,c,n))
-#define mvwin_wchstr(win,y,x,c)		(wmove(win,y,x) == ERR ? ERR : win_wchstr(win,c))
-#define mvwinnwstr(win,y,x,c,n)		(wmove(win,y,x) == ERR ? ERR : winnwstr(win,c,n))
-#define mvwins_nwstr(win,y,x,t,n)	(wmove(win,y,x) == ERR ? ERR : wins_nwstr(win,t,n))
-#define mvwins_wch(win,y,x,c)		(wmove(win,y,x) == ERR ? ERR : wins_wch(win,c))
-#define mvwins_wstr(win,y,x,t)		(wmove(win,y,x) == ERR ? ERR : wins_wstr(win,t))
-#define mvwinwstr(win,y,x,c)		(wmove(win,y,x) == ERR ? ERR : winwstr(win,c))
-#define mvwvline_set(win,y,x,c,n)	(wmove(win,y,x) == ERR ? ERR : wvline_set(win,c,n))
+#define mvwadd_wch(win,y,x,c)		(wmove(win,(y),(x)) == ERR ? ERR : wadd_wch((win),(c)))
+#define mvwadd_wchnstr(win,y,x,s,n)	(wmove(win,(y),(x)) == ERR ? ERR : wadd_wchnstr((win),(s),(n)))
+#define mvwadd_wchstr(win,y,x,s)	(wmove(win,(y),(x)) == ERR ? ERR : wadd_wchstr((win),(s)))
+#define mvwaddnwstr(win,y,x,wstr,n)	(wmove(win,(y),(x)) == ERR ? ERR : waddnwstr((win),(wstr),(n)))
+#define mvwaddwstr(win,y,x,wstr)	(wmove(win,(y),(x)) == ERR ? ERR : waddwstr((win),(wstr)))
+#define mvwget_wch(win,y,x,c)		(wmove(win,(y),(x)) == ERR ? ERR : wget_wch((win),(c)))
+#define mvwget_wstr(win,y,x,t)		(wmove(win,(y),(x)) == ERR ? ERR : wget_wstr((win),(t)))
+#define mvwgetn_wstr(win,y,x,t,n)	(wmove(win,(y),(x)) == ERR ? ERR : wgetn_wstr((win),(t),(n)))
+#define mvwhline_set(win,y,x,c,n)	(wmove(win,(y),(x)) == ERR ? ERR : whline_set((win),(c),(n)))
+#define mvwin_wch(win,y,x,c)		(wmove(win,(y),(x)) == ERR ? ERR : win_wch((win),(c)))
+#define mvwin_wchnstr(win,y,x,c,n)	(wmove(win,(y),(x)) == ERR ? ERR : win_wchnstr((win),(c),(n)))
+#define mvwin_wchstr(win,y,x,c)		(wmove(win,(y),(x)) == ERR ? ERR : win_wchstr((win),(c)))
+#define mvwinnwstr(win,y,x,c,n)		(wmove(win,(y),(x)) == ERR ? ERR : winnwstr((win),(c),(n)))
+#define mvwins_nwstr(win,y,x,t,n)	(wmove(win,(y),(x)) == ERR ? ERR : wins_nwstr((win),(t),(n)))
+#define mvwins_wch(win,y,x,c)		(wmove(win,(y),(x)) == ERR ? ERR : wins_wch((win),(c)))
+#define mvwins_wstr(win,y,x,t)		(wmove(win,(y),(x)) == ERR ? ERR : wins_wstr((win),(t)))
+#define mvwinwstr(win,y,x,c)		(wmove(win,(y),(x)) == ERR ? ERR : winwstr((win),(c)))
+#define mvwvline_set(win,y,x,c,n)	(wmove(win,(y),(x)) == ERR ? ERR : wvline_set((win),(c),(n)))
 
 #endif /* NCURSES_NOMACROS */
 
@@ -1790,7 +1827,7 @@ extern NCURSES_EXPORT(const char *) _nc_viswibuf(const wint_t *);
 #endif
 
 #endif /* NCURSES_WIDECHAR */
-/* $Id: curses.tail,v 1.20 2010/03/28 19:10:55 tom Exp $ */
+/* $Id: curses.tail,v 1.21 2011/10/29 20:03:22 tom Exp $ */
 /*
  * vile:cmode:
  * This file is part of ncurses, designed to be appended after curses.h.in
@@ -1925,7 +1962,7 @@ extern NCURSES_EXPORT(char *) _nc_tracebits (void);
 extern NCURSES_EXPORT(char *) _tracechar (int);
 extern NCURSES_EXPORT(char *) _tracechtype (chtype);
 extern NCURSES_EXPORT(char *) _tracechtype2 (int, chtype);
-#ifdef NCURSES_WIDECHAR
+#if NCURSES_WIDECHAR
 #define _tracech_t		_tracecchar_t
 extern NCURSES_EXPORT(char *) _tracecchar_t (const cchar_t *);
 #define _tracech_t2		_tracecchar_t2

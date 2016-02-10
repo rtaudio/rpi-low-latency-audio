@@ -1,0 +1,5 @@
+%FILES%
+boot/
+boot/fixup_x.dat
+boot/start_x.elf
+

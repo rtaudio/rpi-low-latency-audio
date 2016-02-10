@@ -1,0 +1,47 @@
+%NAME%
+gettext
+
+%VERSION%
+0.19.6-2
+
+%DESC%
+GNU internationalization library
+
+%URL%
+http://www.gnu.org/software/gettext/
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1449796874
+
+%INSTALLDATE%
+1454655300
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu4@archlinuxarm.org>
+
+%SIZE%
+8104960
+
+%GROUPS%
+base
+base-devel
+
+%LICENSE%
+GPL
+
+%VALIDATION%
+sha256
+
+%DEPENDS%
+gcc-libs
+acl
+sh
+glib2
+libunistring
+
+%OPTDEPENDS%
+git: for autopoint infrastructure updates
+

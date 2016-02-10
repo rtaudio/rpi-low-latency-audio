@@ -34,6 +34,7 @@ sub _convert($$)
   
   $self->{'level'}++;
   $self->{'command_type_nr'}++;
+  $self->_update_count_context();
   my $bytes_before = $self->{'count_context'}->[-1]->{'bytes'};
   my $number_before = "($self->{'count_context'}->[-1]->{'bytes'},$self->{'count_context'}->[-1]->{'lines'})";
   my $command_nr = '['.$self->{'command_type_nr'}.']';
@@ -88,6 +89,7 @@ sub _convert($$)
   }
   #push @{$self->{'debug_count_strings'}}, ' ' x $self->{'level'}. "TEXT: $text|\n"
   #  if ($self->{'count_context'}->[-1]->{'bytes'} > $bytes_before);
+  $self->_update_count_context();
   my $number_after = "($self->{'count_context'}->[-1]->{'bytes'},$self->{'count_context'}->[-1]->{'lines'})";
   my $string_after = ' ' x $self->{'level'}. "$command_nr $number_after\n";
   $string_after .= " locations $all_locations_string"

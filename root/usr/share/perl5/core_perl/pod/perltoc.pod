@@ -2792,24 +2792,24 @@ expression, non-capture>, Other Modifiers
 
 =item Extended Patterns
 
-C<(?#text)> X<(?#)>, C<(?adlupimsx-imsx)>, C<(?^alupimsx)> X<(?)> X<(?^)>,
-C<(?:pattern)> X<(?:)>, C<(?adluimsx-imsx:pattern)>, C<(?^aluimsx:pattern)>
-X<(?^:)>, C<(?|pattern)> X<(?|)> X<Branch reset>, Look-Around Assertions
-X<look-around assertion> X<lookaround assertion> X<look-around>
-X<lookaround>, C<(?=pattern)> X<(?=)> X<look-ahead, positive> X<lookahead,
-positive>, C<(?!pattern)> X<(?!)> X<look-ahead, negative> X<lookahead,
-negative>, C<(?<=pattern)> C<\K> X<(?<=)> X<look-behind, positive>
-X<lookbehind, positive> X<\K>, C<(?<!pattern)> X<(?<!)> X<look-behind,
-negative> X<lookbehind, negative>, C<(?'NAME'pattern)>, C<<
-(?<NAME>pattern) >> X<< (?<NAME>) >> X<(?'NAME')> X<named capture>
-X<capture>, C<< \k<NAME> >>, C<< \k'NAME' >>, C<(?{ code })> X<(?{})>
-X<regex, code in> X<regexp, code in> X<regular expression, code in>, C<(??{
-code })> X<(??{})> X<regex, postponed> X<regexp, postponed> X<regular
-expression, postponed>, C<(?I<PARNO>)> C<(?-I<PARNO>)> C<(?+I<PARNO>)>
-C<(?R)> C<(?0)> X<(?PARNO)> X<(?1)> X<(?R)> X<(?0)> X<(?-1)> X<(?+1)>
-X<(?-PARNO)> X<(?+PARNO)> X<regex, recursive> X<regexp, recursive>
-X<regular expression, recursive> X<regex, relative recursion> X<GOSUB>
-X<GOSTART>, C<(?&NAME)> X<(?&NAME)>,
+C<(?#text)> X<(?#)>, C<(?adlupimnsx-imnsx)>, C<(?^alupimnsx)> X<(?)>
+X<(?^)>, C<(?:pattern)> X<(?:)>, C<(?adluimnsx-imnsx:pattern)>,
+C<(?^aluimnsx:pattern)> X<(?^:)>, C<(?|pattern)> X<(?|)> X<Branch reset>,
+Look-Around Assertions X<look-around assertion> X<lookaround assertion>
+X<look-around> X<lookaround>, C<(?=pattern)> X<(?=)> X<look-ahead,
+positive> X<lookahead, positive>, C<(?!pattern)> X<(?!)> X<look-ahead,
+negative> X<lookahead, negative>, C<(?<=pattern)> C<\K> X<(?<=)>
+X<look-behind, positive> X<lookbehind, positive> X<\K>, C<(?<!pattern)>
+X<(?<!)> X<look-behind, negative> X<lookbehind, negative>,
+C<(?'NAME'pattern)>, C<< (?<NAME>pattern) >> X<< (?<NAME>) >> X<(?'NAME')>
+X<named capture> X<capture>, C<< \k<NAME> >>, C<< \k'NAME' >>, C<(?{ code
+})> X<(?{})> X<regex, code in> X<regexp, code in> X<regular expression,
+code in>, C<(??{ code })> X<(??{})> X<regex, postponed> X<regexp,
+postponed> X<regular expression, postponed>, C<(?I<PARNO>)> C<(?-I<PARNO>)>
+C<(?+I<PARNO>)> C<(?R)> C<(?0)> X<(?PARNO)> X<(?1)> X<(?R)> X<(?0)>
+X<(?-1)> X<(?+1)> X<(?-PARNO)> X<(?+PARNO)> X<regex, recursive> X<regexp,
+recursive> X<regular expression, recursive> X<regex, relative recursion>
+X<GOSUB> X<GOSTART>, C<(?&NAME)> X<(?&NAME)>,
 C<(?(condition)yes-pattern|no-pattern)> X<(?()>,
 C<(?(condition)yes-pattern)>, (1) (2) .., (<NAME>) ('NAME'), (?=...)
 (?!...) (?<=...) (?<!...), (?{ CODE }), (R), (R1) (R2) .., (R&NAME),
@@ -7474,8 +7474,10 @@ I<Programming Pearls>, I<More Programming Pearls>
 
 =item Websites
 
-L<http://perl.com/>, L<http://blogs.perl.org/>, L<http://use.perl.org/>,
-L<http://www.perlmonks.org/>, L<http://stackoverflow.com/>
+L<http://perl.com/>, L<http://blogs.perl.org/>, L<http://perlsphere.net/>,
+L<http://perlweekly.com/>, L<http://use.perl.org/>,
+L<http://www.perlmonks.org/>, L<http://stackoverflow.com/>,
+L<http://prepan.org/>
 
 =item User Groups
 
@@ -7553,7 +7555,187 @@ B<-i>, B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.22.0
+=head2 perldelta - what is new for perl v5.22.1
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=over 4
+
+=item Bounds Checking Constructs
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item Updated Modules and Pragmata
+
+=back
+
+=item Documentation
+
+=over 4
+
+=item Changes to Existing Documentation
+
+=back
+
+=item Diagnostics
+
+=over 4
+
+=item Changes to Existing Diagnostics
+
+=back
+
+=item Configuration and Compilation
+
+=item Platform Support
+
+=over 4
+
+=item Platform-Specific Notes
+
+IRIX
+
+=back
+
+=item Selected Bug Fixes
+
+=item Acknowledgements
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl5221delta, perldelta - what is new for perl v5.22.1
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=over 4
+
+=item Bounds Checking Constructs
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item Updated Modules and Pragmata
+
+=back
+
+=item Documentation
+
+=over 4
+
+=item Changes to Existing Documentation
+
+=back
+
+=item Diagnostics
+
+=over 4
+
+=item Changes to Existing Diagnostics
+
+=back
+
+=item Configuration and Compilation
+
+=item Platform Support
+
+=over 4
+
+=item Platform-Specific Notes
+
+IRIX
+
+=back
+
+=item Selected Bug Fixes
+
+=item Acknowledgements
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl5221delta, perldelta - what is new for perl v5.22.1
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=over 4
+
+=item Bounds Checking Constructs
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item Updated Modules and Pragmata
+
+=back
+
+=item Documentation
+
+=over 4
+
+=item Changes to Existing Documentation
+
+=back
+
+=item Diagnostics
+
+=over 4
+
+=item Changes to Existing Diagnostics
+
+=back
+
+=item Configuration and Compilation
+
+=item Platform Support
+
+=over 4
+
+=item Platform-Specific Notes
+
+IRIX
+
+=back
+
+=item Selected Bug Fixes
+
+=item Acknowledgements
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl5220delta - what is new for perl v5.22.0
 
 =over 4
 
@@ -7765,134 +7947,13 @@ EBCDIC, HP-UX, Android, VMS, Win32, OpenBSD, Solaris
 
 =back
 
-=head2 perl5220delta, perldelta - what is new for perl v5.22.0
+=head2 perl5203delta - what is new for perl v5.20.3
 
 =over 4
 
 =item DESCRIPTION
 
-=item Core Enhancements
-
-=over 4
-
-=item New bitwise operators
-
-=item New double-diamond operator
-
-=item New C<\b> boundaries in regular expressions
-
-=item Non-Capturing Regular Expression Flag
-
-=item C<use re 'strict'>
-
-=item Unicode 7.0 (with correction) is now supported
-
-=item S<C<use locale>> can restrict which locale categories are affected
-
-=item Perl now supports POSIX 2008 locale currency additions
-
-=item Better heuristics on older platforms for determining locale UTF-8ness
-
-=item Aliasing via reference
-
-=item C<prototype> with no arguments
-
-=item New C<:const> subroutine attribute
-
-=item C<fileno> now works on directory handles
-
-=item List form of pipe open implemented for Win32
-
-=item Assignment to list repetition
-
-=item Infinity and NaN (not-a-number) handling improved
-
-=item Floating point parsing has been improved
-
-=item Packing infinity or not-a-number into a character is now fatal
-
-=item Experimental C Backtrace API
-
-=back
-
-=item Security
-
-=over 4
-
-=item Perl is now compiled with C<-fstack-protector-strong> if available
-
-=item The L<Safe> module could allow outside packages to be replaced
-
-=item Perl is now always compiled with C<-D_FORTIFY_SOURCE=2> if available
-
-=back
-
 =item Incompatible Changes
-
-=over 4
-
-=item Subroutine signatures moved before attributes
-
-=item C<&> and C<\&> prototypes accepts only subs
-
-=item C<use encoding> is now lexical
-
-=item List slices returning empty lists
-
-=item C<\N{}> with a sequence of multiple spaces is now a fatal error
-
-=item S<C<use UNIVERSAL '...'>> is now a fatal error
-
-=item In double-quotish C<\cI<X>>, I<X> must now be a printable ASCII
-character
-
-=item Splitting the tokens C<(?> and C<(*> in regular expressions is now a
-fatal compilation error.
-
-=item C<qr/foo/x> now ignores all Unicode pattern white space
-
-=item Comment lines within S<C<(?[ ])>> are now ended only by a C<\n>
-
-=item C<(?[...])> operators now follow standard Perl precedence
-
-=item Omitting C<%> and C<@> on hash and array names is no longer permitted
-
-=item C<"$!"> text is now in English outside the scope of C<use locale>
-
-=item C<"$!"> text will be returned in UTF-8 when appropriate
-
-=item Support for C<?PATTERN?> without explicit operator has been removed
-
-=item C<defined(@array)> and C<defined(%hash)> are now fatal errors
-
-=item Using a hash or an array as a reference are now fatal errors
-
-=item Changes to the C<*> prototype
-
-=back
-
-=item Deprecations
-
-=over 4
-
-=item Setting C<${^ENCODING}> to anything but C<undef>
-
-=item Use of non-graphic characters in single-character variable names
-
-=item Inlining of C<sub () { $var }> with observable side-effects
-
-=item Use of multiple C</x> regexp modifiers
-
-=item Using a NO-BREAK space in a character alias for C<\N{...}> is now
-deprecated
-
-=item A literal C<"{"> should now be escaped in a pattern
-
-=item Making all warnings fatal is discouraged
-
-=back
-
-=item Performance Enhancements
 
 =item Modules and Pragmata
 
@@ -7900,29 +7961,13 @@ deprecated
 
 =item Updated Modules and Pragmata
 
-=item Removed Modules and Pragmata
-
 =back
 
 =item Documentation
 
 =over 4
 
-=item New Documentation
-
 =item Changes to Existing Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=item Changes to Existing Diagnostics
-
-=item Diagnostic Removals
 
 =back
 
@@ -7930,80 +7975,7 @@ deprecated
 
 =over 4
 
-=item F<find2perl>, F<s2p> and F<a2p> removal
-
 =item L<h2ph>
-
-=item L<encguess>
-
-=back
-
-=item Configuration and Compilation
-
-=item Testing
-
-=item Platform Support
-
-=over 4
-
-=item Regained Platforms
-
-IRIX and Tru64 platforms are working again, z/OS running EBCDIC Code Page
-1047
-
-=item Discontinued Platforms
-
-NeXTSTEP/OPENSTEP
-
-=item Platform-Specific Notes
-
-EBCDIC, HP-UX, Android, VMS, Win32, OpenBSD, Solaris
-
-=back
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Known Problems
-
-=item Obituary
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl52111delta - what is new for perl v5.21.11
-
-=over 4
-
-=item DESCRIPTION
-
-=item Deprecations
-
-=over 4
-
-=item Making all warnings fatal is discouraged
-
-=back
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item Changes to Existing Documentation
 
 =back
 
@@ -8019,899 +7991,7 @@ Win32
 
 =back
 
-=item Internal Changes
-
 =item Selected Bug Fixes
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl52110delta - what is new for perl v5.21.10
-
-=over 4
-
-=item DESCRIPTION
-
-=item Incompatible Changes
-
-=over 4
-
-=item C<(?[...])> operators now follow standard Perl precedence
-
-=back
-
-=item Performance Enhancements
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item Changes to Existing Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=back
-
-=item Testing
-
-=item Platform Support
-
-=over 4
-
-=item New Platforms
-
-z/OS running EBCDIC Code Page 1047
-
-=item Platform-Specific Notes
-
-HP-UX
-
-=back
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Known Problems
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5219delta - what is new for perl v5.21.9
-
-=over 4
-
-=item DESCRIPTION
-
-=item Notice
-
-=item Core Enhancements
-
-=over 4
-
-=item qr/\b{gcb}/ is now handled in regular expressions
-
-=item qr/\b{wb}/ is now handled in regular expressions
-
-=item qr/\b{sb}/ is now handled in regular expressions
-
-=item New bitwise operators
-
-=item C<no re> covers more and is lexical
-
-=back
-
-=item Incompatible Changes
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item New Documentation
-
-=item Changes to Existing Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=item Changes to Existing Diagnostics
-
-=back
-
-=item Utility Changes
-
-=over 4
-
-=item L<h2ph>
-
-=item L<encguess>
-
-=back
-
-=item Configuration and Compilation
-
-=item Testing
-
-=item Deprecations
-
-=over 4
-
-=item Support for new warnings categories outside of "all"
-
-=back
-
-=item Platform Support
-
-=over 4
-
-=item Platform-Specific Notes
-
-=back
-
-=item Selected Bug Fixes
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5218delta - what is new for perl v5.21.8
-
-=over 4
-
-=item DESCRIPTION
-
-=item Notice
-
-=item Core Enhancements
-
-=over 4
-
-=item The warnings pragma now supports warnings outside of "all"
-
-=item Non-Capturing Regular Expression Flag
-
-=item C<prototype> with no arguments
-
-=item C<use re 'strict'>
-
-=item New "const" subroutine attribute
-
-=back
-
-=item Incompatible Changes
-
-=over 4
-
-=item sub signatures moved before attributes
-
-=back
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item New Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=item Changes to Existing Diagnostics
-
-=back
-
-=item Configuration and Compilation
-
-=item Testing
-
-=item Platform Support
-
-=over 4
-
-=item Platform-Specific Notes
-
-Win32
-
-=back
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5217delta - what is new for perl v5.21.7
-
-=over 4
-
-=item DESCRIPTION
-
-=item Core Enhancements
-
-=over 4
-
-=item faster array and hash lookups
-
-=item C<fileno> now works on directory handles
-
-=back
-
-=item Incompatible Changes
-
-=over 4
-
-=item C<&> and C<\&> prototypes accepts only subs
-
-=item C<use encoding> is now lexical
-
-=item List slices returning empty lists
-
-=back
-
-=item Deprecations
-
-=over 4
-
-=item Setting C<${^ENCODING}> to anything but C<undef>
-
-=back
-
-=item Performance Enhancements
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item Changes to Existing Diagnostics
-
-=back
-
-=item Platform Support
-
-=over 4
-
-=item Platform-Specific Notes
-
-=back
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5216delta - what is new for perl v5.21.6
-
-=over 4
-
-=item DESCRIPTION
-
-=item Core Enhancements
-
-=over 4
-
-=item List form of pipe open implemented for Win32
-
-=item Assignment to list repetition
-
-=item C<close> now sets C<$!>
-
-=back
-
-=item Deprecations
-
-=over 4
-
-=item Use of non-graphic characters in single-character variable names
-
-=item Inlining of C<sub () { $var }> with observable side-effects
-
-=back
-
-=item Performance Enhancements
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item Changes to Existing Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=item Changes to Existing Diagnostics
-
-=back
-
-=item Configuration and Compilation
-
-=item Platform Support
-
-=over 4
-
-=item Platform-Specific Notes
-
-=back
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Known Problems
-
-=item Errata From Previous Releases
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5215delta - what is new for perl v5.21.5
-
-=over 4
-
-=item DESCRIPTION
-
-=item Core Enhancements
-
-=over 4
-
-=item New double-diamond operator
-
-=item Aliasing via reference
-
-=item Perl now supports POSIX 2008 locale currency additions.
-
-=item Packing infinity or not-a-number into a character is now fatal
-
-=item Inf and NaN
-
-=back
-
-=item Security
-
-=over 4
-
-=item Perl is now compiled with -fstack-protector-strong if available
-
-=back
-
-=item Deprecations
-
-=over 4
-
-=item Use of multiple /x regexp modifiers
-
-=back
-
-=item Performance Enhancements
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item Changes to Existing Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=item Changes to Existing Diagnostics
-
-=back
-
-=item Testing
-
-=item Platform Support
-
-=over 4
-
-=item Regained Platforms
-
-=item Platform-Specific Notes
-
-EBCDIC
-
-=back
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5214delta - what is new for perl v5.21.4
-
-=over 4
-
-=item DESCRIPTION
-
-=item Core Enhancements
-
-=over 4
-
-=item Infinity and NaN (not-a-number) handling improved
-
-=back
-
-=item Security
-
-=over 4
-
-=item Perl is now compiled with -fstack-protector-strong if available
-
-=back
-
-=item Incompatible Changes
-
-=over 4
-
-=item Changes to the C<*> prototype
-
-=back
-
-=item Performance Enhancements
-
-=item Modules and Pragmata
-
-=over 4
-
-=item New Modules and Pragmata
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item Changes to Existing Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=item Changes to Existing Diagnostics
-
-=item Diagnostic Removals
-
-=back
-
-=item Configuration and Compilation
-
-=item Testing
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5213delta - what is new for perl v5.21.3
-
-=over 4
-
-=item DESCRIPTION
-
-=item Core Enhancements
-
-=over 4
-
-=item C<defined(@array = LIST)> is no longer fatal
-
-=item Floating point parsing has been improved
-
-=back
-
-=item Security
-
-=over 4
-
-=item The L<Safe> module could allow outside packages to be replaced
-
-=back
-
-=item Incompatible Changes
-
-=over 4
-
-=item S<C<use UNIVERSAL '...'>> is now a fatal error
-
-=back
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item Changes to Existing Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=item Changes to Existing Diagnostics
-
-=back
-
-=item Configuration and Compilation
-
-=item Platform Support
-
-=over 4
-
-=item Platform-Specific Notes
-
-Android, Solaris, VMS, Windows
-
-=back
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5212delta - what is new for perl v5.21.2
-
-=over 4
-
-=item DESCRIPTION
-
-=item Core Enhancements
-
-=over 4
-
-=item Better heuristics on older platforms for determining locale UTF8ness
-
-=back
-
-=item Security
-
-=over 4
-
-=item Perl is now always compiled with -D_FORTIFY_SOURCE=2 if available
-
-=back
-
-=item Deprecations
-
-=over 4
-
-=item C<< /\C/ >> character class
-
-=back
-
-=item Performance Enhancements
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item Changes to Existing Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=back
-
-=item Configuration and Compilation
-
-=item Testing
-
-=item Platform Support
-
-=over 4
-
-=item Platform-Specific Notes
-
-Solaris
-
-=back
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5211delta - what is new for perl v5.21.1
-
-=over 4
-
-=item DESCRIPTION
-
-=item Notice
-
-=item Core Enhancements
-
-=over 4
-
-=item Unicode 7.0 is now supported
-
-=item Experimental C Backtrace API
-
-=item C<qr/foo/x> now ignores any Unicode pattern white space
-
-=item S<C<use locale>> can restrict which locale categories are affected
-
-=back
-
-=item Incompatible Changes
-
-=over 4
-
-=item C<\N{}> with a sequence of multiple spaces is now a fatal error.
-
-=item In double-quotish C<\cI<X>>, I<X> must now be a printable ASCII
-character
-
-=item Splitting the tokens C<(?> and C<(*> in regular expressions is
-now a fatal compilation error.
-
-=item 5 additional characters are treated as white space under C</x> in
-regex patterns (unless escaped)
-
-=item Comment lines within S<C<(?[ ])>> now are ended only by a C<\n>
-
-=item Omitting % and @ on hash and array names is no longer permitted
-
-=item C<"$!"> text is now in English outside C<"use locale"> scope
-
-=item C<"$!"> text will be returned in UTF-8 when appropriate
-
-=item Support for C<?PATTERN?> without explicit operator has been removed
-
-=item C<defined(@array)> and C<defined(%hash)> are now fatal errors
-
-=item Using a hash or an array as a reference are now fatal errors.
-
-=back
-
-=item Deprecations
-
-=over 4
-
-=item Using a NO-BREAK space in a character alias for C<\N{...}> is now
-deprecated
-
-=item A literal C<"{"> should now be escaped in a pattern
-
-=back
-
-=item Performance Enhancements
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=back
-
-=item Documentation
-
-=over 4
-
-=item Changes to Existing Documentation
-
-=back
-
-=item Diagnostics
-
-=over 4
-
-=item New Diagnostics
-
-=item Changes to Existing Diagnostics
-
-=back
-
-=item Utility Changes
-
-=over 4
-
-=item F<x2p/>
-
-=back
-
-=item Configuration and Compilation
-
-=item Platform Support
-
-=over 4
-
-=item Discontinued Platforms
-
-NeXTSTEP/OPENSTEP
-
-=item Platform-Specific Notes
-
-OpenBSD
-
-=back
-
-=item Internal Changes
-
-=item Selected Bug Fixes
-
-=item Acknowledgements
-
-=item Reporting Bugs
-
-=item SEE ALSO
-
-=back
-
-=head2 perl5210delta - what is new for perl v5.21.0
-
-=over 4
-
-=item DESCRIPTION
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules and Pragmata
-
-=item Removed Modules and Pragmata
-
-=back
 
 =item Acknowledgements
 
@@ -14904,7 +13984,7 @@ utime LIST, waitpid PID,FLAGS
 
 =item DESCRIPTION
 
-L<http://mingw.org>, L<http://mingw-w64.sf.net>
+L<http://mingw.org>, L<http://mingw-w64.org>
 
 =over 4
 
@@ -29797,7 +28877,7 @@ C<fseek>, C<fsetpos>, C<fstat>, C<fsync>, C<ftell>, C<fwrite>, C<getc>,
 C<getchar>, C<getcwd>, C<getegid>, C<getenv>, C<geteuid>, C<getgid>,
 C<getgrgid>, C<getgrnam>, C<getgroups>, C<getlogin>, C<getpgrp>, C<getpid>,
 C<getppid>, C<getpwnam>, C<getpwuid>, C<gets>, C<getuid>, C<gmtime>,
-C<hypot>, C<ilogb>, C<isalnum>, C<isalpha>, C<isatty>, C<iscntrl>,
+C<hypot>, C<ilogb>, C<Inf>, C<isalnum>, C<isalpha>, C<isatty>, C<iscntrl>,
 C<isdigit>, C<isfinite>, C<isgraph>, C<isgreater>, C<isinf>, C<islower>,
 C<isnan>, C<isnormal>, C<isprint>, C<ispunct>, C<isspace>, C<isupper>,
 C<isxdigit>, C<j0>, C<j1>, C<jn>, C<y0>, C<y1>, C<yn>, C<kill>, C<labs>,
@@ -29805,7 +28885,7 @@ C<lchown>, C<ldexp>, C<ldiv>, C<lgamma>, C<log1p>, C<log2>, C<logb>,
 C<link>, C<localeconv>, C<localtime>, C<log>, C<log10>, C<longjmp>,
 C<lseek>, C<lrint>, C<lround>, C<malloc>, C<mblen>, C<mbstowcs>, C<mbtowc>,
 C<memchr>, C<memcmp>, C<memcpy>, C<memmove>, C<memset>, C<mkdir>,
-C<mkfifo>, C<mktime>, C<modf>, C<nan>, C<nearbyint>, C<nextafter>,
+C<mkfifo>, C<mktime>, C<modf>, C<NaN>, C<nan>, C<nearbyint>, C<nextafter>,
 C<nexttoward>, C<nice>, C<offsetof>, C<open>, C<opendir>, C<pathconf>,
 C<pause>, C<perror>, C<pipe>, C<pow>, C<printf>, C<putc>, C<putchar>,
 C<puts>, C<qsort>, C<raise>, C<rand>, C<read>, C<readdir>, C<realloc>,

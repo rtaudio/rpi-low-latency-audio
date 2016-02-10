@@ -3,7 +3,7 @@
 #   makepkg - make packages compatible for use with pacman
 #   Generated from makepkg.sh.in; do not edit by hand.
 #
-#   Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
+#   Copyright (c) 2006-2016 Pacman Development Team <pacman-dev@archlinux.org>
 #   Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
 #   Copyright (c) 2005 by Aurelien Foret <orelien@chez.com>
 #   Copyright (c) 2006 by Miklos Vajna <vmiklos@frugalware.org>
@@ -41,22 +41,20 @@ unset CDPATH
 # Ensure GREP_OPTIONS doesn't screw with our grep calls
 unset GREP_OPTIONS
 
-declare -r makepkg_version='4.2.1'
+declare -r makepkg_version='5.0.0'
 declare -r confdir='/etc'
 declare -r BUILDSCRIPT='PKGBUILD'
 declare -r startdir="$PWD"
 
-LIBRARY=${LIBRARY:-'/usr/lib/makepkg'}
+LIBRARY=${LIBRARY:-'/usr/share/makepkg'}
 
-packaging_options=('strip' 'docs' 'libtool' 'staticlibs' 'emptydirs' 'zipman'
-                   'purge' 'upx' 'debug')
-other_options=('ccache' 'distcc' 'buildflags' 'makeflags')
+build_options=('ccache' 'distcc' 'buildflags' 'makeflags')
 splitpkg_overrides=('pkgdesc' 'arch' 'url' 'license' 'groups' 'depends'
                     'optdepends' 'provides' 'conflicts' 'replaces' 'backup'
                     'options' 'install' 'changelog')
-readonly -a packaging_options other_options splitpkg_overrides
+readonly -a build_options splitpkg_overrides
 
-known_hash_algos=('md5' 'sha1' 'sha224' 'sha256' 'sha384' 'sha512')
+known_hash_algos=('md5' 'sha1' 'sha224' 'sha256' 'sha384' 'sha512' 'whirlpool')
 
 # Options
 ASDEPS=0
@@ -78,7 +76,6 @@ NOBUILD=0
 NODEPS=0
 NOEXTRACT=0
 PKGFUNC=0
-PKGLIST=()
 PKGVERFUNC=0
 PREPAREFUNC=0
 REPKG=0
@@ -90,41 +87,16 @@ SPLITPKG=0
 SOURCEONLY=0
 VERIFYSOURCE=0
 
-# Forces the pkgver of the current PKGBUILD. Used by the fakeroot call
-# when dealing with svn/cvs/etc PKGBUILDs.
-FORCE_VER=""
-
 PACMAN_OPTS=
 
 shopt -s extglob
 
 ### SUBROUTINES ###
 
-plain() {
-	local mesg=$1; shift
-	printf "${BOLD}    ${mesg}${ALL_OFF}\n" "$@" >&2
-}
-
-msg() {
-	local mesg=$1; shift
-	printf "${GREEN}==>${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
-}
-
-msg2() {
-	local mesg=$1; shift
-	printf "${BLUE}  ->${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
-}
-
-warning() {
-	local mesg=$1; shift
-	printf "${YELLOW}==> $(gettext "WARNING:")${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
-}
-
-error() {
-	local mesg=$1; shift
-	printf "${RED}==> $(gettext "ERROR:")${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
-}
-
+# Import libmakepkg
+for lib in "$LIBRARY"/*.sh; do
+	source "$lib"
+done
 
 ##
 # Special exit call for traps, Don't print any error messages when inside,
@@ -193,661 +165,16 @@ clean_up() {
 	remove_deps
 }
 
-
 enter_fakeroot() {
 	msg "$(gettext "Entering %s environment...")" "fakeroot"
 	fakeroot -- $0 -F "${ARGLIST[@]}" || exit $?
-}
-
-
-# a source entry can have two forms :
-# 1) "filename::http://path/to/file"
-# 2) "http://path/to/file"
-
-# Return the absolute filename of a source entry
-get_filepath() {
-	local file="$(get_filename "$1")"
-	local proto="$(get_protocol "$1")"
-
-	case $proto in
-		bzr*|git*|hg*|svn*)
-			if [[ -d "$startdir/$file" ]]; then
-				file="$startdir/$file"
-			elif [[ -d "$SRCDEST/$file" ]]; then
-				file="$SRCDEST/$file"
-			else
-				return 1
-			fi
-			;;
-		*)
-			if [[ -f "$startdir/$file" ]]; then
-				file="$startdir/$file"
-			elif [[ -f "$SRCDEST/$file" ]]; then
-				file="$SRCDEST/$file"
-			else
-				return 1
-			fi
-			;;
-	esac
-
-	printf "%s\n" "$file"
-}
-
-# extract the filename from a source entry
-get_filename() {
-	local netfile=$1
-
-	# if a filename is specified, use it
-	if [[ $netfile = *::* ]]; then
-		printf "%s\n" ${netfile%%::*}
-		return
-	fi
-
-	local proto=$(get_protocol "$netfile")
-
-	case $proto in
-		bzr*|git*|hg*|svn*)
-			filename=${netfile%%#*}
-			filename=${filename%/}
-			filename=${filename##*/}
-			if [[ $proto = bzr* ]]; then
-				filename=${filename#*lp:}
-			fi
-			if [[ $proto = git* ]]; then
-				filename=${filename%%.git*}
-			fi
-			;;
-		*)
-			# if it is just an URL, we only keep the last component
-			filename="${netfile##*/}"
-			;;
-	esac
-	printf "%s\n" "${filename}"
-}
-
-# extract the URL from a source entry
-get_url() {
-	# strip an eventual filename
-	printf "%s\n" "${1#*::}"
-}
-
-# extract the protocol from a source entry - return "local" for local sources
-get_protocol() {
-	if [[ $1 = *://* ]]; then
-		# strip leading filename
-		local proto="${1#*::}"
-		printf "%s\n" "${proto%%://*}"
-	elif [[ $1 = *lp:* ]]; then
-		local proto="${1#*::}"
-		printf "%s\n" "${proto%%lp:*}"
-	else
-		printf "%s\n" local
-	fi
-}
-
-get_downloadclient() {
-	local proto=$1
-
-	# loop through DOWNLOAD_AGENTS variable looking for protocol
-	local i
-	for i in "${DLAGENTS[@]}"; do
-		local handler="${i%%::*}"
-		if [[ $proto = "$handler" ]]; then
-			local agent="${i#*::}"
-			break
-		fi
-	done
-
-	# if we didn't find an agent, return an error
-	if [[ -z $agent ]]; then
-		error "$(gettext "Unknown download protocol: %s")" "$proto"
-		plain "$(gettext "Aborting...")"
-		exit 1 # $E_CONFIG_ERROR
-	fi
-
-	# ensure specified program is installed
-	local program="${agent%% *}"
-	if [[ ! -x $program ]]; then
-		local baseprog="${program##*/}"
-		error "$(gettext "The download program %s is not installed.")" "$baseprog"
-		plain "$(gettext "Aborting...")"
-		exit 1 # $E_MISSING_PROGRAM
-	fi
-
-	printf "%s\n" "$agent"
-}
-
-download_local() {
-	local netfile=$1
-	local filepath=$(get_filepath "$netfile")
-
-	if [[ -n "$filepath" ]]; then
-		msg2 "$(gettext "Found %s")" "${filepath##*/}"
-	else
-		local filename=$(get_filename "$netfile")
-		error "$(gettext "%s was not found in the build directory and is not a URL.")" "$filename"
-		exit 1 # $E_MISSING_FILE
-	fi
-}
-
-download_file() {
-	local netfile=$1
-
-	local filepath=$(get_filepath "$netfile")
-	if [[ -n "$filepath" ]]; then
-		msg2 "$(gettext "Found %s")" "${filepath##*/}"
-		return
-	fi
-
-	local proto=$(get_protocol "$netfile")
-
-	# find the client we should use for this URL
-	local -a cmdline
-	IFS=' ' read -a cmdline < <(get_downloadclient "$proto")
-	(( ${#cmdline[@]} )) || exit
-
-	local filename=$(get_filename "$netfile")
-	local url=$(get_url "$netfile")
-
-	if [[ $proto = "scp" ]]; then
-		# scp downloads should not pass the protocol in the url
-		url="${url##*://}"
-	fi
-
-	msg2 "$(gettext "Downloading %s...")" "$filename"
-
-	# temporary download file, default to last component of the URL
-	local dlfile="${url##*/}"
-
-	# replace %o by the temporary dlfile if it exists
-	if [[ ${cmdline[*]} = *%o* ]]; then
-		dlfile=$filename.part
-		cmdline=("${cmdline[@]//%o/$dlfile}")
-	fi
-	# add the URL, either in place of %u or at the end
-	if [[ ${cmdline[*]} = *%u* ]]; then
-		cmdline=("${cmdline[@]//%u/$url}")
-	else
-		cmdline+=("$url")
-	fi
-
-	if ! command -- "${cmdline[@]}" >&2; then
-		[[ ! -s $dlfile ]] && rm -f -- "$dlfile"
-		error "$(gettext "Failure while downloading %s")" "$filename"
-		plain "$(gettext "Aborting...")"
-		exit 1
-	fi
-
-	# rename the temporary download file to the final destination
-	if [[ $dlfile != "$filename" ]]; then
-		mv -f "$SRCDEST/$dlfile" "$SRCDEST/$filename"
-	fi
-}
-
-extract_file() {
-	local file=$1
-
-	local filepath=$(get_filepath "$file")
-	rm -f "$srcdir/${file}"
-	ln -s "$filepath" "$srcdir/"
-
-	if in_array "$file" "${noextract[@]}"; then
-		# skip source files in the noextract=() array
-		# these are marked explicitly to NOT be extracted
-		return 0
-	fi
-
-	# do not rely on extension for file type
-	local file_type=$(file -bizL "$file")
-	local ext=${file##*.}
-	local cmd=''
-	case "$file_type" in
-		*application/x-tar*|*application/zip*|*application/x-zip*|*application/x-cpio*)
-			cmd="bsdtar" ;;
-		*application/x-gzip*)
-			case "$ext" in
-				gz|z|Z) cmd="gzip" ;;
-				*) return;;
-			esac ;;
-		*application/x-bzip*)
-			case "$ext" in
-				bz2|bz) cmd="bzip2" ;;
-				*) return;;
-			esac ;;
-		*application/x-xz*)
-			case "$ext" in
-				xz) cmd="xz" ;;
-				*) return;;
-			esac ;;
-		*)
-			# See if bsdtar can recognize the file
-			if bsdtar -tf "$file" -q '*' &>/dev/null; then
-				cmd="bsdtar"
-			else
-				return 0
-			fi ;;
-	esac
-
-	local ret=0
-	msg2 "$(gettext "Extracting %s with %s")" "$file" "$cmd"
-	if [[ $cmd = "bsdtar" ]]; then
-		$cmd -xf "$file" || ret=$?
-	else
-		rm -f -- "${file%.*}"
-		$cmd -dcf "$file" > "${file%.*}" || ret=$?
-	fi
-	if (( ret )); then
-		error "$(gettext "Failed to extract %s")" "$file"
-		plain "$(gettext "Aborting...")"
-		exit 1
-	fi
-
-	if (( EUID == 0 )); then
-		# change perms of all source files to root user & root group
-		chown -R 0:0 "$srcdir"
-	fi
-}
-
-download_bzr() {
-	local netfile=$1
-
-	local url=$(get_url "$netfile")
-	if [[ $url != bzr+ssh* ]]; then
-		url=${url#bzr+}
-	fi
-	url=${url%%#*}
-
-	local repo=$(get_filename "$netfile")
-	local displaylocation="$url"
-
-	local dir=$(get_filepath "$netfile")
-	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
-
-	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
-		msg2 "$(gettext "Branching %s ...")" "${displaylocation}"
-		if ! bzr branch "$url" "$dir" --no-tree --use-existing-dir; then
-			error "$(gettext "Failure while branching %s")" "${displaylocation}"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-	elif (( ! HOLDVER )); then
-		msg2 "$(gettext "Pulling %s ...")" "${displaylocation}"
-		cd_safe "$dir"
-		if ! bzr pull "$url"; then
-			# only warn on failure to allow offline builds
-			warning "$(gettext "Failure while pulling %s")" "${displaylocation}"
-		fi
-	fi
-}
-
-extract_bzr() {
-	local netfile=$1
-
-	local repo=$(get_filename "$netfile")
-	local fragment=${netfile#*#}
-	if [[ $fragment = "$netfile" ]]; then
-		unset fragment
-	fi
-
-	rev="last:1"
-	if [[ -n $fragment ]]; then
-		case ${fragment%%=*} in
-			revision)
-				rev="${fragment#*=}"
-				displaylocation="$url -r ${fragment#*=}"
-				;;
-			*)
-				error "$(gettext "Unrecognized reference: %s")" "${fragment}"
-				plain "$(gettext "Aborting...")"
-				exit 1
-		esac
-	fi
-
-	local dir=$(get_filepath "$netfile")
-	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
-
-	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "bzr"
-	pushd "$srcdir" &>/dev/null
-
-	if [[ -d "${dir##*/}" ]]; then
-		cd_safe "${dir##*/}"
-		if ! (bzr pull "$dir" -q --overwrite -r "$rev" && bzr clean-tree -q --detritus --force); then
-			error "$(gettext "Failure while updating working copy of %s %s repo")" "${repo}" "bzr"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-	elif ! bzr checkout "$dir" -r "$rev"; then
-		error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "bzr"
-		plain "$(gettext "Aborting...")"
-		exit 1
-	fi
-
-	popd &>/dev/null
-}
-
-download_git() {
-	local netfile=$1
-
-	local dir=$(get_filepath "$netfile")
-	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
-
-	local repo=$(get_filename "$netfile")
-
-	local url=$(get_url "$netfile")
-	url=${url#git+}
-	url=${url%%#*}
-
-	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
-		msg2 "$(gettext "Cloning %s %s repo...")" "${repo}" "git"
-		if ! git clone --mirror "$url" "$dir"; then
-			error "$(gettext "Failure while downloading %s %s repo")" "${repo}" "git"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-	elif (( ! HOLDVER )); then
-		cd_safe "$dir"
-		# Make sure we are fetching the right repo
-		if [[ "$url" != "$(git config --get remote.origin.url)" ]] ; then
-			error "$(gettext "%s is not a clone of %s")" "$dir" "$url"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-		msg2 "$(gettext "Updating %s %s repo...")" "${repo}" "git"
-		if ! git fetch --all -p; then
-			# only warn on failure to allow offline builds
-			warning "$(gettext "Failure while updating %s %s repo")" "${repo}" "git"
-		fi
-	fi
-}
-
-extract_git() {
-	local netfile=$1
-
-	local fragment=${netfile#*#}
-	if [[ $fragment = "$netfile" ]]; then
-		unset fragment
-	fi
-
-	local repo=${netfile##*/}
-	repo=${repo%%#*}
-	repo=${repo%%.git*}
-
-	local dir=$(get_filepath "$netfile")
-	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
-
-	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "git"
-	pushd "$srcdir" &>/dev/null
-
-	local updating=0
-	if [[ -d "${dir##*/}" ]]; then
-		updating=1
-		cd_safe "${dir##*/}"
-		if ! git fetch; then
-			error "$(gettext "Failure while updating working copy of %s %s repo")" "${repo}" "git"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-		cd_safe "$srcdir"
-	elif ! git clone "$dir" "${dir##*/}"; then
-		error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "git"
-		plain "$(gettext "Aborting...")"
-		exit 1
-	fi
-
-	cd_safe "${dir##*/}"
-
-	local ref=origin/HEAD
-	if [[ -n $fragment ]]; then
-		case ${fragment%%=*} in
-			commit|tag)
-				ref=${fragment##*=}
-				;;
-			branch)
-				ref=origin/${fragment##*=}
-				;;
-			*)
-				error "$(gettext "Unrecognized reference: %s")" "${fragment}"
-				plain "$(gettext "Aborting...")"
-				exit 1
-		esac
-	fi
-
-	if [[ $ref != "origin/HEAD" ]] || (( updating )) ; then
-		if ! git checkout --force --no-track -B makepkg $ref; then
-			error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "git"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-	fi
-
-	popd &>/dev/null
-}
-
-download_hg() {
-	local netfile=$1
-
-	local dir=$(get_filepath "$netfile")
-	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
-
-	local repo=$(get_filename "$netfile")
-
-	local url=$(get_url "$netfile")
-	url=${url#hg+}
-	url=${url%%#*}
-
-	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
-		msg2 "$(gettext "Cloning %s %s repo...")" "${repo}" "hg"
-		if ! hg clone -U "$url" "$dir"; then
-			error "$(gettext "Failure while downloading %s %s repo")" "${repo}" "hg"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-	elif (( ! HOLDVER )); then
-		msg2 "$(gettext "Updating %s %s repo...")" "${repo}" "hg"
-		cd_safe "$dir"
-		if ! hg pull; then
-			# only warn on failure to allow offline builds
-			warning "$(gettext "Failure while updating %s %s repo")" "${repo}" "hg"
-		fi
-	fi
-}
-
-extract_hg() {
-	local netfile=$1
-
-	local fragment=${netfile#*#}
-	if [[ $fragment = "$netfile" ]]; then
-		unset fragment
-	fi
-
-	local dir=$(get_filepath "$netfile")
-	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
-
-	local repo=${netfile##*/}
-	repo=${repo%%#*}
-
-	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "hg"
-	pushd "$srcdir" &>/dev/null
-
-	local ref=tip
-	if [[ -n $fragment ]]; then
-		case ${fragment%%=*} in
-			branch|revision|tag)
-				ref="${fragment##*=}"
-				;;
-			*)
-				error "$(gettext "Unrecognized reference: %s")" "${fragment}"
-				plain "$(gettext "Aborting...")"
-				exit 1
-		esac
-	fi
-
-	if [[ -d "${dir##*/}" ]]; then
-		cd_safe "${dir##*/}"
-		if ! (hg pull && hg update -C -r "$ref"); then
-			error "$(gettext "Failure while updating working copy of %s %s repo")" "${repo}" "hg"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-	elif ! hg clone -u "$ref" "$dir" "${dir##*/}"; then
-		error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "hg"
-		plain "$(gettext "Aborting...")"
-		exit 1
-	fi
-
-	popd &>/dev/null
-}
-
-download_svn() {
-	local netfile=$1
-
-	local fragment=${netfile#*#}
-	if [[ $fragment = "$netfile" ]]; then
-		unset fragment
-	fi
-
-	local dir=$(get_filepath "$netfile")
-	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
-
-	local repo=$(get_filename "$netfile")
-
-	local url=$(get_url "$netfile")
-	if [[ $url != svn+ssh* ]]; then
-		url=${url#svn+}
-	fi
-	url=${url%%#*}
-
-	local ref=HEAD
-	if [[ -n $fragment ]]; then
-		case ${fragment%%=*} in
-			revision)
-				ref="${fragment##*=}"
-				;;
-			*)
-				error "$(gettext "Unrecognized reference: %s")" "${fragment}"
-				plain "$(gettext "Aborting...")"
-				exit 1
-		esac
-	fi
-
-	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
-		msg2 "$(gettext "Cloning %s %s repo...")" "${repo}" "svn"
-		mkdir -p "$dir/.makepkg"
-		if ! svn checkout -r ${ref} --config-dir "$dir/.makepkg" "$url" "$dir"; then
-			error "$(gettext "Failure while downloading %s %s repo")" "${repo}" "svn"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-	elif (( ! HOLDVER )); then
-		msg2 "$(gettext "Updating %s %s repo...")" "${repo}" "svn"
-		cd_safe "$dir"
-		if ! svn update -r ${ref}; then
-			# only warn on failure to allow offline builds
-			warning "$(gettext "Failure while updating %s %s repo")" "${repo}" "svn"
-		fi
-	fi
-}
-
-extract_svn() {
-	local netfile=$1
-
-	local dir=$(get_filepath "$netfile")
-	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
-
-	local repo=${netfile##*/}
-	repo=${repo%%#*}
-
-	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "svn"
-
-	cp -au "$dir" "$srcdir"
-}
-
-get_all_sources() {
-	local aggregate l a
-
-	if array_build l 'source'; then
-		aggregate+=("${l[@]}")
-	fi
-
-	for a in "${arch[@]}"; do
-		if array_build l "source_$a"; then
-			aggregate+=("${l[@]}")
-		fi
-	done
-
-	array_build "$1" "aggregate"
-}
-
-get_all_sources_for_arch() {
-	local aggregate l
-
-	if array_build l 'source'; then
-		aggregate+=("${l[@]}")
-	fi
-
-	if array_build l "source_$CARCH"; then
-		aggregate+=("${l[@]}")
-	fi
-
-	array_build "$1" "aggregate"
-}
-
-download_sources() {
-	local netfile all_sources
-	local get_source_fn=get_all_sources_for_arch get_vcs=1
-
-	msg "$(gettext "Retrieving sources...")"
-
-	while true; do
-		case $1 in
-			allarch)
-				get_source_fn=get_all_sources
-				;;
-			novcs)
-				get_vcs=0
-				;;
-			*)
-				break 2
-				;;
-		esac
-		shift
-	done
-
-	"$get_source_fn" 'all_sources'
-	for netfile in "${all_sources[@]}"; do
-		pushd "$SRCDEST" &>/dev/null
-
-		local proto=$(get_protocol "$netfile")
-		case "$proto" in
-			local)
-				download_local "$netfile"
-				;;
-			bzr*)
-				(( get_vcs )) && download_bzr "$netfile"
-				;;
-			git*)
-				(( get_vcs )) && download_git "$netfile"
-				;;
-			hg*)
-				(( get_vcs )) && download_hg "$netfile"
-				;;
-			svn*)
-				(( get_vcs )) && download_svn "$netfile"
-				;;
-			*)
-				download_file "$netfile"
-				;;
-		esac
-
-		popd &>/dev/null
-	done
 }
 
 # Automatically update pkgver variable if a pkgver() function is provided
 # Re-sources the PKGBUILD afterwards to allow for other variables that use $pkgver
 update_pkgver() {
 	newpkgver=$(run_function_safe pkgver)
-	if ! validate_pkgver "$newpkgver"; then
+	if ! check_pkgver "$newpkgver"; then
 		error "$(gettext "pkgver() generated an invalid version: %s")" "$newpkgver"
 		exit 1
 	fi
@@ -877,141 +204,6 @@ missing_source_file() {
 	exit 1 # $E_MISSING_FILE
 }
 
-##
-#  usage : get_full_version()
-# return : full version spec, including epoch (if necessary), pkgver, pkgrel
-##
-get_full_version() {
-	if (( epoch > 0 )); then
-		printf "%s\n" "$epoch:$pkgver-$pkgrel"
-	else
-		printf "%s\n" "$pkgver-$pkgrel"
-	fi
-}
-
-##
-#  usage : get_pkg_arch( [$pkgname] )
-# return : architecture of the package
-##
-get_pkg_arch() {
-	if [[ -z $1 ]]; then
-		if [[ $arch = "any" ]]; then
-			printf "%s\n" "any"
-		else
-			printf "%s\n" "$CARCH"
-		fi
-	else
-		local arch_override
-		pkgbuild_get_attribute "$1" arch 0 arch_override
-		(( ${#arch_override[@]} == 0 )) && arch_override=("${arch[@]}")
-		if [[ $arch_override = "any" ]]; then
-			printf "%s\n" "any"
-		else
-			printf "%s\n" "$CARCH"
-		fi
-	fi
-}
-
-##
-# Checks to see if options are present in makepkg.conf or PKGBUILD;
-# PKGBUILD options always take precedence.
-#
-#  usage : check_option( $option, $expected_val )
-# return : 0   - matches expected
-#          1   - does not match expected
-#          127 - not found
-##
-check_option() {
-	in_opt_array "$1" ${options[@]}
-	case $? in
-		0) # assert enabled
-			[[ $2 = y ]]
-			return ;;
-		1) # assert disabled
-			[[ $2 = n ]]
-			return
-	esac
-
-	# fall back to makepkg.conf options
-	in_opt_array "$1" ${OPTIONS[@]}
-	case $? in
-		0) # assert enabled
-			[[ $2 = y ]]
-			return ;;
-		1) # assert disabled
-			[[ $2 = n ]]
-			return
-	esac
-
-	# not found
-	return 127
-}
-
-
-##
-# Check if option is present in BUILDENV
-#
-#  usage : check_buildenv( $option, $expected_val )
-# return : 0   - matches expected
-#          1   - does not match expected
-#          127 - not found
-##
-check_buildenv() {
-	in_opt_array "$1" ${BUILDENV[@]}
-	case $? in
-		0) # assert enabled
-			[[ $2 = "y" ]]
-			return ;;
-		1) # assert disabled
-			[[ $2 = "n" ]]
-			return ;;
-	esac
-
-	# not found
-	return 127
-}
-
-
-##
-#  usage : in_opt_array( $needle, $haystack )
-# return : 0   - enabled
-#          1   - disabled
-#          127 - not found
-##
-in_opt_array() {
-	local needle=$1; shift
-
-	local i opt
-	for (( i = $#; i > 0; i-- )); do
-		opt=${!i}
-		if [[ $opt = "$needle" ]]; then
-			# enabled
-			return 0
-		elif [[ $opt = "!$needle" ]]; then
-			# disabled
-			return 1
-		fi
-	done
-
-	# not found
-	return 127
-}
-
-
-##
-#  usage : in_array( $needle, $haystack )
-# return : 0 - found
-#          1 - not found
-##
-in_array() {
-	local needle=$1; shift
-	local item
-	for item in "$@"; do
-		[[ $item = "$needle" ]] && return 0 # Found
-	done
-	return 1 # Not Found
-}
-
 source_has_signatures() {
 	local file all_sources
 
@@ -1031,7 +223,7 @@ run_pacman() {
 	else
 		cmd=("$PACMAN_PATH" "$@")
 	fi
-	if [[ $1 != -@(T|Qq) ]]; then
+	if [[ $1 != -@(T|Qq|Q) ]]; then
 		if type -p sudo >/dev/null; then
 			cmd=(sudo "${cmd[@]}")
 		else
@@ -1267,22 +459,23 @@ verify_integrity_one() {
 }
 
 verify_integrity_sums() {
-	local integ=$1 arch=$2 integrity_sums=() sources=()
+	local integ=$1 arch=$2 integrity_sums=() sources=() srcname
 
 	if [[ $arch ]]; then
 		array_build integrity_sums "${integ}sums_$arch"
-		array_build sources "source_$arch"
+		srcname=source_$arch
 	else
 		array_build integrity_sums "${integ}sums"
-		array_build sources source
+		srcname=source
 	fi
 
+	array_build sources "$srcname"
 	if (( ${#integrity_sums[@]} == 0 && ${#sources[@]} == 0 )); then
 		return 1
 	fi
 
 	if (( ${#integrity_sums[@]} == ${#sources[@]} )); then
-		msg "$(gettext "Validating source files with %s...")" "${integ}sums"
+		msg "$(gettext "Validating %s files with %s...")" "$srcname" "${integ}sums"
 		local idx errors=0
 		for (( idx = 0; idx < ${#sources[*]}; idx++ )); do
 			verify_integrity_one "${sources[idx]}" "$integ" "${integrity_sums[idx]}" || errors=1
@@ -1335,7 +528,7 @@ check_checksums() {
 	done
 
 	if (( ${#correlation[*]} )); then
-		error "$(gettext "Integrity checks are missing.")"
+		error "$(gettext "Integrity checks are missing for: %s")" "${!correlation[*]}"
 		exit 1 # TODO: error code
 	fi
 }
@@ -1532,34 +725,6 @@ check_source_integrity() {
 	fi
 }
 
-extract_sources() {
-	msg "$(gettext "Extracting sources...")"
-	local netfile all_sources
-
-	get_all_sources_for_arch 'all_sources'
-	for netfile in "${all_sources[@]}"; do
-		local file=$(get_filename "$netfile")
-		local proto=$(get_protocol "$netfile")
-		case "$proto" in
-			bzr*)
-				extract_bzr "$netfile"
-				;;
-			git*)
-				extract_git "$netfile"
-				;;
-			hg*)
-				extract_hg "$netfile"
-				;;
-			svn*)
-				extract_svn "$netfile"
-				;;
-			*)
-				extract_file "$file"
-				;;
-		esac
-	done
-}
-
 error_function() {
 	if [[ -p $logpipe ]]; then
 		rm "$logpipe"
@@ -1570,14 +735,6 @@ error_function() {
 		plain "$(gettext "Aborting...")"
 	fi
 	exit 2 # $E_BUILD_FAILED
-}
-
-cd_safe() {
-	if ! cd "$1"; then
-		error "$(gettext "Failed to change to directory %s")" "$1"
-		plain "$(gettext "Aborting...")"
-		exit 1
-	fi
 }
 
 source_safe() {
@@ -1604,10 +761,6 @@ merge_arch_attrs() {
 
 source_buildfile() {
 	source_safe "$@"
-
-	if (( !SOURCEONLY )); then
-		merge_arch_attrs
-	fi
 }
 
 run_function_safe() {
@@ -1694,15 +847,23 @@ run_prepare() {
 }
 
 run_build() {
-	# use distcc if it is requested (check buildenv and PKGBUILD opts)
-	if check_buildenv "distcc" "y" && ! check_option "distcc" "n"; then
-		[[ -d /usr/lib/distcc/bin ]] && export PATH="/usr/lib/distcc/bin:$PATH"
-		export DISTCC_HOSTS
-	fi
+	local ccache=0
 
 	# use ccache if it is requested (check buildenv and PKGBUILD opts)
-	if check_buildenv "ccache" "y" && ! check_option "ccache" "n"; then
-		[[ -d /usr/lib/ccache/bin ]] && export PATH="/usr/lib/ccache/bin:$PATH"
+	if check_buildoption "ccache" "y" && [[ -d /usr/lib/ccache/bin ]]; then
+		export PATH="/usr/lib/ccache/bin:$PATH"
+		ccache=1
+	fi
+
+	# use distcc if it is requested (check buildenv and PKGBUILD opts)
+	if check_buildoption "distcc" "y"; then
+		if (( ccache )); then
+			export CCACHE_PREFIX="${CCACHE_PREFIX:+$CCACHE_PREFIX }distcc"
+			export CCACHE_BASEDIR="$srcdir"
+		elif [[ -d /usr/lib/distcc/bin ]]; then
+			export PATH="/usr/lib/distcc/bin:$PATH"
+		fi
+		export DISTCC_HOSTS
 	fi
 
 	run_function_safe "build"
@@ -1721,185 +882,6 @@ run_package() {
 	fi
 
 	run_function_safe "$pkgfunc"
-}
-
-build_id() {
-	LANG=C readelf -n $1 | sed -n '/Build ID/ { s/.*: //p; q; }'
-}
-
-strip_file() {
-	local binary=$1; shift
-
-	if check_option "debug" "y"; then
-		local bid=$(build_id "$binary")
-
-		# has this file already been stripped
-		if [[ -n "$bid" ]]; then
-			if [[ -f "$dbgdir/.build-id/${bid:0:2}/${bid:2}.debug" ]]; then
-				return
-			fi
-		elif [[ -f "$dbgdir/$binary.debug" ]]; then
-			return
-		fi
-
-		mkdir -p "$dbgdir/${binary%/*}"
-		objcopy --only-keep-debug "$binary" "$dbgdir/$binary.debug"
-		objcopy --add-gnu-debuglink="$dbgdir/${binary#/}.debug" "$binary"
-
-		# create any needed hardlinks
-		while read -rd '' file ; do
-			if [[ "${binary}" -ef "${file}" && ! -f "$dbgdir/${file}.debug" ]]; then
-				mkdir -p "$dbgdir/${file%/*}"
-				ln "$dbgdir/${binary}.debug" "$dbgdir/${file}.debug"
-			fi
-		done < <(find . -type f -perm -u+w -print0 2>/dev/null)
-
-		if [[ -n "$bid" ]]; then
-			local target
-			mkdir -p "$dbgdir/.build-id/${bid:0:2}"
-
-			target="../../../../../${binary#./}"
-			target="${target/..\/..\/usr\/lib\/}"
-			target="${target/..\/usr\/}"
-			ln -s "$target" "$dbgdir/.build-id/${bid:0:2}/${bid:2}"
-
-			target="../../${binary#./}.debug"
-			ln -s "$target" "$dbgdir/.build-id/${bid:0:2}/${bid:2}.debug"
-		fi
-	fi
-
-	strip $@ "$binary"
-}
-
-tidy_install() {
-	cd_safe "$pkgdir"
-	msg "$(gettext "Tidying install...")"
-
-	if check_option "docs" "n" && [[ -n ${DOC_DIRS[*]} ]]; then
-		msg2 "$(gettext "Removing doc files...")"
-		rm -rf -- ${DOC_DIRS[@]}
-	fi
-
-	if check_option "purge" "y" && [[ -n ${PURGE_TARGETS[*]} ]]; then
-		msg2 "$(gettext "Purging unwanted files...")"
-		local pt
-		for pt in "${PURGE_TARGETS[@]}"; do
-			if [[ ${pt} = "${pt//\/}" ]]; then
-				find . ! -type d -name "${pt}" -exec rm -f -- '{}' +
-			else
-				rm -f ${pt}
-			fi
-		done
-	fi
-
-	if check_option "libtool" "n"; then
-		msg2 "$(gettext "Removing "%s" files...")" "libtool"
-		find . ! -type d -name "*.la" -exec rm -f -- '{}' +
-	fi
-
-	if check_option "staticlibs" "n"; then
-		msg2 "$(gettext "Removing static library files...")"
-		local l
-		while read -rd '' l; do
-			if [[ -f "${l%.a}.so" || -h "${l%.a}.so" ]]; then
-				rm "$l"
-			fi
-		done < <(find . ! -type d -name "*.a" -print0)
-	fi
-
-	if check_option "emptydirs" "n"; then
-		msg2 "$(gettext "Removing empty directories...")"
-		find . -depth -type d -exec rmdir '{}' + 2>/dev/null
-	fi
-
-	# check existence of backup files
-	local file
-	for file in "${backup[@]}"; do
-		if [[ ! -f $file ]]; then
-			warning "$(gettext "%s entry file not in package : %s")" "backup" "$file"
-		fi
-	done
-
-	# check for references to the build and package directory
-	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -I "${srcdir}" ; then
-		warning "$(gettext "Package contains reference to %s")" "\$srcdir"
-	fi
-	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -I "${pkgdirbase}" ; then
-		warning "$(gettext "Package contains reference to %s")" "\$pkgdir"
-	fi
-
-	if check_option "zipman" "y" && [[ -n ${MAN_DIRS[*]} ]]; then
-		msg2 "$(gettext "Compressing man and info pages...")"
-		local file files inode link
-		while read -rd ' ' inode; do
-			read file
-			find ${MAN_DIRS[@]} -type l 2>/dev/null |
-			while read -r link ; do
-				if [[ "${file}" -ef "${link}" ]] ; then
-					rm -f "$link" "${link}.gz"
-					if [[ ${file%/*} = ${link%/*} ]]; then
-						ln -s -- "${file##*/}.gz" "${link}.gz"
-					else
-						ln -s -- "/${file}.gz" "${link}.gz"
-					fi
-				fi
-			done
-			if [[ -z ${files[$inode]} ]]; then
-				files[$inode]=$file
-				gzip -9 -n -f "$file"
-			else
-				rm -f "$file"
-				ln "${files[$inode]}.gz" "${file}.gz"
-				chmod 644 "${file}.gz"
-			fi
-		done < <(find ${MAN_DIRS[@]} -type f \! -name "*.gz" \! -name "*.bz2" \
-			-exec stat -c '%i %n' '{}' + 2>/dev/null)
-	fi
-
-	if check_option "strip" "y"; then
-		msg2 "$(gettext "Stripping unneeded symbols from binaries and libraries...")"
-		# make sure library stripping variables are defined to prevent excess stripping
-		[[ -z ${STRIP_SHARED+x} ]] && STRIP_SHARED="-S"
-		[[ -z ${STRIP_STATIC+x} ]] && STRIP_STATIC="-S"
-
-		if check_option "debug" "y"; then
-			dbgdir="$pkgdir-debug/usr/lib/debug"
-			mkdir -p "$dbgdir"
-		fi
-
-		local binary strip_flags
-		find . -type f -perm -u+w -print0 2>/dev/null | while read -rd '' binary ; do
-			case "$(file -bi "$binary")" in
-				*application/x-sharedlib*)  # Libraries (.so)
-					strip_flags="$STRIP_SHARED";;
-				*application/x-archive*)    # Libraries (.a)
-					strip_flags="$STRIP_STATIC";;
-				*application/x-object*)
-					case "$binary" in
-						*.ko)                   # Kernel module
-							strip_flags="$STRIP_SHARED";;
-						*)
-							continue;;
-					esac;;
-				*application/x-executable*) # Binaries
-					strip_flags="$STRIP_BINARIES";;
-				*)
-					continue ;;
-			esac
-			strip_file "$binary" ${strip_flags}
-		done
-	fi
-
-	if check_option "upx" "y"; then
-		msg2 "$(gettext "Compressing binaries with %s...")" "UPX"
-		local binary
-		find . -type f -perm -u+w 2>/dev/null | while read -r binary ; do
-			if [[ $(file -bi "$binary") = *'application/x-executable'* ]]; then
-				upx $UPXFLAGS "$binary" &>/dev/null ||
-						warning "$(gettext "Could not compress binary : %s")" "${binary/$pkgdir\//}"
-			fi
-		done
-	fi
 }
 
 find_libdepends() {
@@ -2046,7 +1028,7 @@ pkgbuild_extract_to_srcinfo() {
 
 	local pkgname=$1 attrname=$2 isarray=$3 outvalue=
 
-	if pkgbuild_get_attribute "$pkgname" "$attrname" "$isarray" 'outvalue'; then
+	if get_pkgbuild_attribute "$pkgname" "$attrname" "$isarray" 'outvalue'; then
 		srcinfo_write_attr "$attrname" "${outvalue[@]}"
 	fi
 }
@@ -2065,7 +1047,7 @@ srcinfo_write_section_details() {
 		pkgbuild_extract_to_srcinfo "$1" "$attr" 1
 	done
 
-	pkgbuild_get_attribute "$1" 'arch' 1 'package_arch'
+	get_pkgbuild_attribute "$1" 'arch' 1 'package_arch'
 	for a in "${package_arch[@]}"; do
 		# 'any' is special. there's no support for, e.g. depends_any.
 		[[ $a = any ]] && continue
@@ -2081,7 +1063,7 @@ srcinfo_write_global() {
 	local multivalued=(arch groups license checkdepends makedepends
 	                   depends optdepends provides conflicts replaces
 	                   noextract options backup
-	                   source {md5,sha{1,224,256,384,512}}sums)
+	                   source validpgpkeys {md5,sha{1,224,256,384,512}}sums)
 
 	srcinfo_open_section 'pkgbase' "${pkgbase:-$pkgname}"
 	srcinfo_write_section_details ''
@@ -2165,19 +1147,23 @@ write_pkginfo() {
 	[[ $optdepends ]]   && printf "optdepend = %s\n"   "${optdepends[@]//+([[:space:]])/ }"
 	[[ $makedepends ]]  && printf "makedepend = %s\n"  "${makedepends[@]}"
 	[[ $checkdepends ]] && printf "checkdepend = %s\n" "${checkdepends[@]}"
+}
 
-	local it
-	for it in "${packaging_options[@]}"; do
-		check_option "$it" "y"
-		case $? in
-			0)
-				printf "makepkgopt = %s\n" "$it"
-				;;
-			1)
-				printf "makepkgopt = %s\n" "!$it"
-				;;
-		esac
-	done
+write_buildinfo() {
+	msg2 "$(gettext "Generating %s file...")" ".BUILDINFO"
+
+	printf "builddir = %s\n"  "${BUILDDIR}"
+
+	local sum="$(openssl dgst -sha256 "${BUILDFILE}")"
+	sum=${sum##* }
+
+	printf "pkgbuild_sha256sum = %s\n" $sum
+
+	printf "buildenv = %s\n" "${BUILDENV[@]}"
+	printf "options = %s\n" "${OPTIONS[@]}"
+
+	local pkglist=($(run_pacman -Q | sed "s# #-#"))
+	printf "installed = %s\n" "${pkglist[@]}"
 }
 
 create_package() {
@@ -2194,8 +1180,9 @@ create_package() {
 
 	pkgarch=$(get_pkg_arch)
 	write_pkginfo > .PKGINFO
+	write_buildinfo > .BUILDINFO
 
-	local comp_files=('.PKGINFO')
+	local comp_files=('.PKGINFO' '.BUILDINFO')
 
 	# check for changelog/install files
 	for i in 'changelog/.CHANGELOG' 'install/.INSTALL'; do
@@ -2349,7 +1336,7 @@ create_srcpackage() {
 
 		[[ ${!i} ]] && files+=("${!i}")
 		for name in "${pkgname[@]}"; do
-			if extract_function_var "package_$name" "$i" 0 file; then
+			if extract_function_variable "package_$name" "$i" 0 file; then
 				files+=("$file")
 			fi
 		done
@@ -2393,8 +1380,8 @@ create_srcpackage() {
 		ln -s "${pkg_file}" "${pkg_file/$SRCPKGDEST/$startdir}"
 		ret=$?
 		if [[ -f $pkg_file.sig ]]; then
-			rm -f "${pkg_file/$PKGDEST/$startdir}.sig"
-			ln -s "$pkg_file.sig" "${pkg_file/$PKGDEST/$startdir}.sig"
+			rm -f "${pkg_file/$SRCPKGDEST/$startdir}.sig"
+			ln -s "$pkg_file.sig" "${pkg_file/$SRCPKGDEST/$startdir}.sig"
 		fi
 	fi
 
@@ -2436,426 +1423,6 @@ install_package() {
 	fi
 }
 
-have_function() {
-	declare -f "$1" >/dev/null
-}
-
-array_build() {
-	local dest=$1 src=$2 i keys values
-
-	# it's an error to try to copy a value which doesn't exist.
-	declare -p "$2" &>/dev/null || return 1
-
-	# Build an array of the indicies of the source array.
-	eval "keys=(\"\${!$2[@]}\")"
-
-	# Clear the destination array
-	eval "$dest=()"
-
-	# Read values indirectly via their index. This approach gives us support
-	# for associative arrays, sparse arrays, and empty strings as elements.
-	for i in "${keys[@]}"; do
-		values+=("printf -v '$dest[$i]' %s \"\${$src[$i]}\";")
-	done
-
-	eval "${values[*]}"
-}
-
-funcgrep() {
-	{ declare -f "$1" || declare -f package; } 2>/dev/null | grep -E "$2"
-}
-
-extract_global_var() {
-	# $1: variable name
-	# $2: multivalued
-	# $3: name of output var
-
-	local attr=$1 isarray=$2 outputvar=$3 ref
-
-	if (( isarray )); then
-		array_build ref "$attr"
-		[[ ${ref[@]} ]] && array_build "$outputvar" "$attr"
-	else
-		[[ ${!attr} ]] && printf -v "$outputvar" %s "${!attr}"
-	fi
-}
-
-extract_function_var() {
-	# $1: function name
-	# $2: variable name
-	# $3: multivalued
-	# $4: name of output var
-
-	local funcname=$1 attr=$2 isarray=$3 outputvar=$4 attr_regex= decl= r=1
-
-	if (( isarray )); then
-		printf -v attr_regex '^[[:space:]]* %s\+?=\(' "$2"
-	else
-		printf -v attr_regex '^[[:space:]]* %s\+?=[^(]' "$2"
-	fi
-
-	while read -r; do
-		# strip leading whitespace and any usage of declare
-		decl=${REPLY##*([[:space:]])}
-		eval "${decl/#$attr/$outputvar}"
-
-		# entering this loop at all means we found a match, so notify the caller.
-		r=0
-	done < <(funcgrep "$funcname" "$attr_regex")
-
-	return $r
-}
-
-pkgbuild_get_attribute() {
-	# $1: package name
-	# $2: attribute name
-	# $3: multivalued
-	# $4: name of output var
-
-	local pkgname=$1 attrname=$2 isarray=$3 outputvar=$4
-
-	printf -v "$outputvar" %s ''
-
-	if [[ $pkgname ]]; then
-		extract_global_var "$attrname" "$isarray" "$outputvar"
-		extract_function_var "package_$pkgname" "$attrname" "$isarray" "$outputvar"
-	else
-		extract_global_var "$attrname" "$isarray" "$outputvar"
-	fi
-}
-
-lint_pkgbase() {
-	if [[ ${pkgbase:0:1} = "-" ]]; then
-		error "$(gettext "%s is not allowed to start with a hyphen.")" "pkgname"
-		return 1
-	fi
-}
-
-lint_pkgname() {
-	local ret=0 i
-
-	for i in "${pkgname[@]}"; do
-		if [[ -z $i ]]; then
-			error "$(gettext "%s is not allowed to be empty.")" "pkgname"
-			ret=1
-			continue
-		fi
-		if [[ ${i:0:1} = "-" ]]; then
-			error "$(gettext "%s is not allowed to start with a hyphen.")" "pkgname"
-			ret=1
-		fi
-		if [[ ${i:0:1} = "." ]]; then
-			error "$(gettext "%s is not allowed to start with a dot.")" "pkgname"
-			ret=1
-		fi
-		if [[ $i = *[^[:alnum:]+_.@-]* ]]; then
-			error "$(gettext "%s contains invalid characters: '%s'")" \
-					'pkgname' "${i//[[:alnum:]+_.@-]}"
-			ret=1
-		fi
-	done
-
-	return $ret
-}
-
-lint_pkgrel() {
-	if [[ -z $pkgrel ]]; then
-		error "$(gettext "%s is not allowed to be empty.")" "pkgrel"
-		return 1
-	fi
-
-	if [[ $pkgrel != +([0-9])?(.+([0-9])) ]]; then
-		error "$(gettext "%s must be a decimal, not %s.")" "pkgrel" "$pkgrel"
-		return 1
-	fi
-}
-
-lint_pkgver() {
-	if (( PKGVERFUNC )); then
-		# defer check to after getting version from pkgver function
-		return 0
-	fi
-
-	check_pkgver
-}
-
-lint_epoch() {
-	if [[ $epoch != *([[:digit:]]) ]]; then
-		error "$(gettext "%s must be an integer, not %s.")" "epoch" "$epoch"
-		return 1
-	fi
-}
-
-lint_arch() {
-	local a name list
-
-	if [[ $arch == 'any' ]]; then
-		return 0
-	fi
-
-	for a in "${arch[@]}"; do
-		if [[ $a = *[![:alnum:]_]* ]]; then
-			error "$(gettext "%s contains invalid characters: '%s'")" \
-					'arch' "${a//[[:alnum:]_]}"
-			ret=1
-		fi
-	done
-
-	if (( ! IGNOREARCH )) && ! in_array "$CARCH" "${arch[@]}"; then
-		error "$(gettext "%s is not available for the '%s' architecture.")" "$pkgbase" "$CARCH"
-		plain "$(gettext "Note that many packages may need a line added to their %s")" "$BUILDSCRIPT"
-		plain "$(gettext "such as %s.")" "arch=('$CARCH')"
-		return 1
-	fi
-
-	for name in "${pkgname[@]}"; do
-		pkgbuild_get_attribute "$name" 'arch' 1 list
-		if [[ $list && $list != 'any' ]] && ! in_array $CARCH "${list[@]}"; then
-			if (( ! IGNOREARCH )); then
-				error "$(gettext "%s is not available for the '%s' architecture.")" "$name" "$CARCH"
-				ret=1
-			fi
-		fi
-	done
-}
-
-lint_provides() {
-	local a list name provides_list ret=0
-
-	provides_list=("${provides[@]}")
-	for a in "${arch[@]}"; do
-		array_build list "provides_$a"
-		provides_list+=("${list[@]}")
-	done
-
-	for name in "${pkgname[@]}"; do
-		if extract_function_var "package_$name" provides 1 list; then
-			provides_list+=("${list[@]}")
-		fi
-
-		for a in "${arch[@]}"; do
-			if extract_function_var "package_$name" "provides_$a" 1 list; then
-				provides_list+=("${list[@]}")
-			fi
-		done
-	done
-
-	for provide in "${provides_list[@]}"; do
-		if [[ $provide == *['<>']* ]]; then
-			error "$(gettext "%s array cannot contain comparison (< or >) operators.")" "provides"
-			ret=1
-		fi
-	done
-
-	return $ret
-}
-
-lint_backup() {
-	local list name backup_list ret=0
-
-	backup_list=("${backup[@]}")
-	for name in "${pkgname[@]}"; do
-		if extract_function_var "package_$name" backup 1 list; then
-			backup_list+=("${list[@]}")
-		fi
-	done
-
-	for name in "${backup_list[@]}"; do
-		if [[ ${name:0:1} = "/" ]]; then
-			error "$(gettext "%s entry should not contain leading slash : %s")" "backup" "$name"
-			ret=1
-		fi
-	done
-
-	return $ret
-}
-
-lint_optdepends() {
-	local a list name optdepends_list ret=0
-
-	optdepends_list=("${optdepends[@]}")
-	for a in "${arch[@]}"; do
-		array_build list "optdepends_$a"
-		optdepends_list+=("${list[@]}")
-	done
-
-	for name in "${pkgname[@]}"; do
-		if extract_function_var "package_$name" optdepends 1 list; then
-			optdepends_list+=("${list[@]}")
-		fi
-
-		for a in "${arch[@]}"; do
-			if extract_function_var "package_$name" "optdepends_$a" 1 list; then
-				optdepends_list+=("${list[@]}")
-			fi
-		done
-	done
-
-	for name in "${optdepends_list[@]}"; do
-		local pkg=${name%%:[[:space:]]*}
-		# the '-' character _must_ be first or last in the character range
-		if [[ $pkg != +([-[:alnum:]><=.+_:]) ]]; then
-			error "$(gettext "Invalid syntax for %s: '%s'")" "optdepend" "$name"
-			ret=1
-		fi
-	done
-
-	return $ret
-}
-
-check_files_exist() {
-	local kind=$1 files=("${@:2}") file ret
-
-	for file in "${files[@]}"; do
-		if [[ $file && ! -f $file ]]; then
-			error "$(gettext "%s file (%s) does not exist or is not a regular file.")" \
-				"$kind" "$file"
-			ret=1
-		fi
-	done
-
-	return $ret
-}
-
-lint_install() {
-	local list file name install_list ret=0
-
-	install_list=("${install[@]}")
-	for name in "${pkgname[@]}"; do
-		extract_function_var "package_$name" install 0 file
-		install_list+=("$file")
-	done
-
-	check_files_exist 'install' "${install_list[@]}"
-}
-
-lint_changelog() {
-	local list name file changelog_list ret=0
-
-	changelog_list=("${changelog[@]}")
-	for name in "${pkgname[@]}"; do
-		if extract_function_var "package_$name" changelog 0 file; then
-			changelog_list+=("$file")
-		fi
-	done
-
-	check_files_exist 'changelog' "${changelog_list[@]}"
-}
-
-lint_options() {
-	local ret=0 list name kopt options_list
-
-	options_list=("${options[@]}")
-	for name in "${pkgname[@]}"; do
-		if extract_function_var "package_$name" options 1 list; then
-			options_list+=("${list[@]}")
-		fi
-	done
-
-	for i in "${options_list[@]}"; do
-		# check if option matches a known option or its inverse
-		for kopt in "${packaging_options[@]}" "${other_options[@]}"; do
-			if [[ $i = "$kopt" || $i = "!$kopt" ]]; then
-				# continue to the next $i
-				continue 2
-			fi
-		done
-
-		error "$(gettext "%s array contains unknown option '%s'")" "options" "$i"
-		ret=1
-	done
-
-	return $ret
-}
-
-lint_source() {
-	local idx=("${!source[@]}")
-
-	if (( ${#source[*]} > 0 && (idx[-1] + 1) != ${#source[*]} )); then
-		error "$(gettext "Sparse arrays are not allowed for source")"
-		return 1
-	fi
-}
-
-lint_pkglist() {
-	local i ret=0
-
-	for i in "${PKGLIST[@]}"; do
-		if ! in_array "$i" "${pkgname[@]}"; then
-			error "$(gettext "Requested package %s is not provided in %s")" "$i" "$BUILDFILE"
-			ret=1
-		fi
-	done
-
-	return $ret
-}
-
-lint_packagefn() {
-	local i ret=0
-
-	if (( ${#pkgname[@]} == 1 )); then
-		if have_function 'build' && ! { have_function 'package' || have_function "package_$pkgname"; }; then
-			error "$(gettext "Missing %s function in %s")" "package()" "$BUILDFILE"
-			ret=1
-		fi
-	else
-		for i in "${pkgname[@]}"; do
-			if ! have_function "package_$i"; then
-				error "$(gettext "Missing %s function for split package '%s'")" "package_$i()" "$i"
-				ret=1
-			fi
-		done
-	fi
-
-	return $ret
-}
-
-check_sanity() {
-	# check for no-no's in the build script
-	local ret=0
-	local lintfn lint_functions
-
-	lint_functions=(
-		lint_pkgbase
-		lint_pkgname
-		lint_pkgver
-		lint_pkgrel
-		lint_epoch
-		lint_arch
-		lint_provides
-		lint_backup
-		lint_optdepends
-		lint_changelog
-		lint_install
-		lint_options
-		lint_packagefn
-		lint_pkglist
-		lint_source
-	)
-
-	for lintfn in "${lint_functions[@]}"; do
-		"$lintfn" || ret=1
-	done
-
-	return $ret
-}
-
-validate_pkgver() {
-	if [[ $1 = *[[:space:]:-]* ]]; then
-		error "$(gettext "%s is not allowed to contain colons, hyphens or whitespace.")" "pkgver"
-		return 1
-	fi
-}
-
-check_pkgver() {
-	if [[ -z ${pkgver} ]]; then
-		error "$(gettext "%s is not allowed to be empty.")" "pkgver"
-		return 1
-	fi
-
-	validate_pkgver "$pkgver"
-}
-
 get_vcsclient() {
 	local proto=${1%%+*}
 
@@ -2893,10 +1460,10 @@ check_vcs_software() {
 
 	# we currently only use global depends/makedepends arrays for --syncdeps
 	for attr in depends makedepends; do
-		pkgbuild_get_attribute "$pkg" "$attr" 1 'deps'
+		get_pkgbuild_attribute "$pkg" "$attr" 1 'deps'
 		all_deps+=("${deps[@]}")
 
-		pkgbuild_get_attribute "$pkg" "${attr}_$CARCH" 1 'deps'
+		get_pkgbuild_attribute "$pkg" "${attr}_$CARCH" 1 'deps'
 		all_deps+=("${deps[@]}")
 	done
 
@@ -2977,7 +1544,7 @@ check_software() {
 	# openssl - checksum operations
 	if (( ! SKIPCHECKSUMS )); then
 		if ! type -p openssl >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for validating sourcefile checksums.")" "openssl"
+			error "$(gettext "Cannot find the %s binary required for validating source file checksums.")" "openssl"
 			ret=1
 		fi
 	fi
@@ -2990,8 +1557,16 @@ check_software() {
 		fi
 	fi
 
+	# optipng - PNG image optimization
+	if check_option "optipng" "y"; then
+		if ! type -p optipng >/dev/null; then
+			error "$(gettext "Cannot find the %s binary required for optimizing PNG images.")" "optipng"
+			ret=1
+		fi
+	fi
+
 	# distcc - compilation with distcc
-	if check_buildenv "distcc" "y" && ! check_option "distcc" "n"; then
+	if check_buildoption "distcc" "y"; then
 		if ! type -p distcc >/dev/null; then
 			error "$(gettext "Cannot find the %s binary required for distributed compilation.")" "distcc"
 			ret=1
@@ -2999,7 +1574,7 @@ check_software() {
 	fi
 
 	# ccache - compilation with ccache
-	if check_buildenv "ccache" "y" && ! check_option "ccache" "n"; then
+	if check_buildoption "ccache" "y"; then
 		if ! type -p ccache >/dev/null; then
 			error "$(gettext "Cannot find the %s binary required for compiler cache usage.")" "ccache"
 			ret=1
@@ -3098,40 +1673,19 @@ restore_package_variables() {
 }
 
 run_split_packaging() {
-	local pkgname_backup=${pkgname[@]}
+	local pkgname_backup=("${pkgname[@]}")
 	for pkgname in ${pkgname_backup[@]}; do
 		pkgdir="$pkgdirbase/$pkgname"
 		mkdir "$pkgdir"
 		backup_package_variables
 		run_package $pkgname
 		tidy_install
+		lint_package
 		create_package
 		create_debug_package
 		restore_package_variables
 	done
-	pkgname=${pkgname_backup[@]}
-}
-
-# Canonicalize a directory path if it exists
-canonicalize_path() {
-	local path="$1";
-
-	if [[ -d $path ]]; then
-		(
-			cd_safe "$path"
-			pwd -P
-		)
-	else
-		printf "%s\n" "$path"
-	fi
-}
-
-dir_is_empty() {
-	(
-		shopt -s dotglob nullglob
-		files=("$1"/*)
-		(( ${#files} == 0 ))
-	)
+	pkgname=("${pkgname_backup[@]}")
 }
 
 # getopt-like parser
@@ -3308,7 +1862,8 @@ usage() {
 	printf -- "$(gettext "  --nocheck        Do not run the %s function in the %s")\n" "check()" "$BUILDSCRIPT"
 	printf -- "$(gettext "  --noprepare      Do not run the %s function in the %s")\n" "prepare()" "$BUILDSCRIPT"
 	printf -- "$(gettext "  --nosign         Do not create a signature for the package")\n"
-	printf -- "$(gettext "  --pkg <list>     Only build listed packages from a split package")\n"
+	printf -- "$(gettext "  --packagelist    Only list packages that would be produced, without PKGEXT")\n"
+	printf -- "$(gettext "  --printsrcinfo   Print the generated SRCINFO and exit")\n"
 	printf -- "$(gettext "  --sign           Sign the resulting package with %s")\n" "gpg"
 	printf -- "$(gettext "  --skipchecksums  Do not verify checksums of the source files")\n"
 	printf -- "$(gettext "  --skipinteg      Do not perform any verification checks on source files")\n"
@@ -3329,7 +1884,7 @@ usage() {
 version() {
 	printf "makepkg (pacman) %s\n" "$makepkg_version"
 	printf -- "$(gettext "\
-Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>.\n\
+Copyright (c) 2006-2016 Pacman Development Team <pacman-dev@archlinux.org>.\n\
 Copyright (C) 2002-2006 Judd Vinet <jvinet@zeroflux.org>.\n\n\
 This is free software; see the source for copying conditions.\n\
 There is NO WARRANTY, to the extent permitted by law.\n")"
@@ -3353,9 +1908,9 @@ ARGLIST=("$@")
 OPT_SHORT="AcCdefFghiLmop:rRsSV"
 OPT_LONG=('allsource' 'check' 'clean' 'cleanbuild' 'config:' 'force' 'geninteg'
           'help' 'holdver' 'ignorearch' 'install' 'key:' 'log' 'noarchive' 'nobuild'
-          'nocolor' 'nocheck' 'nodeps' 'noextract' 'noprepare' 'nosign' 'pkg:' 'repackage'
-          'rmdeps' 'sign' 'skipchecksums' 'skipinteg' 'skippgpcheck' 'source' 'syncdeps'
-          'verifysource' 'version')
+          'nocolor' 'nocheck' 'nodeps' 'noextract' 'noprepare' 'nosign' 'packagelist'
+          'pkg:' 'printsrcinfo' 'repackage' 'rmdeps' 'sign' 'skipchecksums' 'skipinteg'
+          'skippgpcheck' 'source' 'syncdeps' 'verifysource' 'version')
 
 # Pacman Options
 OPT_LONG+=('asdeps' 'noconfirm' 'needed' 'noprogressbar')
@@ -3397,7 +1952,8 @@ while true; do
 		--nosign)         SIGNPKG='n' ;;
 		-o|--nobuild)     NOBUILD=1 ;;
 		-p)               shift; BUILDFILE=$1 ;;
-		--pkg)            shift; IFS=, read -ra p <<<"$1"; PKGLIST+=("${p[@]}"); unset p ;;
+		--packagelist)    PACKAGELIST=1 IGNOREARCH=1;;
+		--printsrcinfo)   PRINTSRCINFO=1 ;;
 		-r|--rmdeps)      RMDEPS=1 ;;
 		-R|--repackage)   REPKG=1 ;;
 		--sign)           SIGNPKG='y' ;;
@@ -3475,26 +2031,12 @@ PACMAN=${PACMAN:-pacman}
 PACMAN_PATH=$(type -P $PACMAN)
 
 # check if messages are to be printed using color
-unset ALL_OFF BOLD BLUE GREEN RED YELLOW
 if [[ -t 2 && $USE_COLOR != "n" ]] && check_buildenv "color" "y"; then
-	# prefer terminal safe colored and bold text when tput is supported
-	if tput setaf 0 &>/dev/null; then
-		ALL_OFF="$(tput sgr0)"
-		BOLD="$(tput bold)"
-		BLUE="${BOLD}$(tput setaf 4)"
-		GREEN="${BOLD}$(tput setaf 2)"
-		RED="${BOLD}$(tput setaf 1)"
-		YELLOW="${BOLD}$(tput setaf 3)"
-	else
-		ALL_OFF="\e[0m"
-		BOLD="\e[1m"
-		BLUE="${BOLD}\e[34m"
-		GREEN="${BOLD}\e[32m"
-		RED="${BOLD}\e[31m"
-		YELLOW="${BOLD}\e[33m"
-	fi
+	colorize
+else
+	unset ALL_OFF BOLD BLUE GREEN RED YELLOW
 fi
-readonly ALL_OFF BOLD BLUE GREEN RED YELLOW
+
 
 # override settings with an environment variable for batch processing
 BUILDDIR=${_BUILDDIR:-$BUILDDIR}
@@ -3600,8 +2142,15 @@ else
 	source_buildfile "$BUILDFILE"
 fi
 
-# set defaults if they weren't specified in buildfile
 pkgbase=${pkgbase:-${pkgname[0]}}
+
+# check the PKGBUILD for some basic requirements
+lint_pkgbuild || exit 1
+
+if (( !SOURCEONLY )); then
+	merge_arch_attrs
+fi
+
 basever=$(get_full_version)
 
 if [[ $BUILDDIR = "$startdir" ]]; then
@@ -3628,9 +2177,6 @@ fi
 if have_function pkgver; then
 	PKGVERFUNC=1
 fi
-
-# check the PKGBUILD for some basic requirements
-check_sanity || exit 1
 
 # check we have the software required to process the PKGBUILD
 check_software || exit 1
@@ -3661,11 +2207,6 @@ elif [[ $SPLITPKG -eq 0 ]] && have_function package_${pkgname}; then
 	SPLITPKG=1
 fi
 
-if [[ -n "${PKGLIST[@]}" ]]; then
-	unset pkgname
-	pkgname=("${PKGLIST[@]}")
-fi
-
 # check if gpg signature is to be created and if signing key is valid
 if { [[ -z $SIGNPKG ]] && check_buildenv "sign" "y"; } || [[ $SIGNPKG == 'y' ]]; then
 	SIGNPKG='y'
@@ -3677,6 +2218,16 @@ if { [[ -z $SIGNPKG ]] && check_buildenv "sign" "y"; } || [[ $SIGNPKG == 'y' ]];
 		fi
 		exit 1
 	fi
+fi
+
+if (( PACKAGELIST )); then
+	print_all_package_names
+	exit 0
+fi
+
+if (( PRINTSRCINFO )); then
+	write_srcinfo
+	exit 0
 fi
 
 if (( ! PKGVERFUNC )); then
@@ -3699,6 +2250,7 @@ if (( INFAKEROOT )); then
 			run_package
 		fi
 		tidy_install
+		lint_package
 		create_package
 		create_debug_package
 	else
@@ -3739,7 +2291,6 @@ if (( SOURCEONLY )); then
 fi
 
 if (( NODEPS || ( VERIFYSOURCE && !DEP_BIN ) )); then
-	# no warning message needed for nobuild
 	if (( NODEPS )); then
 		warning "$(gettext "Skipping dependency checks.")"
 	fi
@@ -3778,19 +2329,22 @@ mkdir -p "$srcdir"
 chmod a-s "$srcdir"
 cd_safe "$srcdir"
 
-if (( NOEXTRACT && ! VERIFYSOURCE )); then
-	warning "$(gettext "Using existing %s tree")" "\$srcdir/"
-elif (( !REPKG )); then
-	download_sources
-	check_source_integrity
-	(( VERIFYSOURCE )) && exit 0 # $E_OK
+if (( !REPKG )); then
+	if (( NOEXTRACT && ! VERIFYSOURCE )); then
+		warning "$(gettext "Using existing %s tree")" "\$srcdir/"
+	else
+		download_sources
+		check_source_integrity
+		(( VERIFYSOURCE )) && exit 0 # $E_OK
 
-	if (( CLEANBUILD )); then
-		msg "$(gettext "Removing existing %s directory...")" "\$srcdir/"
-		rm -rf "$srcdir"/*
+		if (( CLEANBUILD )); then
+			msg "$(gettext "Removing existing %s directory...")" "\$srcdir/"
+			rm -rf "$srcdir"/*
+		fi
+
+		extract_sources
 	fi
 
-	extract_sources
 	if (( PKGVERFUNC )); then
 		update_pkgver
 		basever=$(get_full_version)
@@ -3805,13 +2359,16 @@ if (( NOBUILD )); then
 	msg "$(gettext "Sources are ready.")"
 	exit 0 #E_OK
 else
-	# clean existing pkg directory
+	# clean existing pkg directories
 	if [[ -d $pkgdirbase ]]; then
 		msg "$(gettext "Removing existing %s directory...")" "\$pkgdir/"
-		rm -rf "$pkgdirbase"
+		for pkg in "${pkgname[@]}"; do
+			rm -rf "$pkgdirbase/$pkg"
+		done
+		unset pkg
 	fi
 	mkdir -p "$pkgdirbase"
-	chmod a-srwx "$pkgdirbase"
+	chmod a-srw "$pkgdirbase"
 	cd_safe "$startdir"
 
 	if (( ! REPKG )); then

@@ -3,7 +3,7 @@
 <?oxygen RNGSchema="protocol-numbers.rng" type="xml"?>
 <registry xmlns="http://www.iana.org/assignments" id="protocol-numbers">
   <title>Protocol Numbers</title>
-  <updated>2015-04-10</updated>
+  <updated>2015-10-06</updated>
   <registry id="protocol-numbers-1">
     <title>Assigned Internet Protocol Numbers</title>
     <xref type="rfc" data="rfc5237"/><xref type="rfc" data="rfc7045"/>
@@ -101,9 +101,9 @@ CSL-79-10, July 1979; also in IEEE Transactions on
 Communication, Volume COM-28, Number 4, April 1980.</xref>
       <xref type="text">[XEROX]</xref>
     </record>
-    <record>
+    <record updated="2015-10-06">
       <value>13</value>
-      <name>ARGUS</name>
+      <name>ARGUS (deprecated)</name>
       <description>ARGUS</description>
       <xref type="person" data="Robert_W_Scheifler"/>
     </record>
@@ -691,11 +691,11 @@ University of California at Berkeley, June 1986.</xref>
       <description>PNNI over IP</description>
       <xref type="person" data="Ross_Callon"/>
     </record>
-    <record date="1996-03">
+    <record date="1996-03" updated="2015-08-25">
       <value>103</value>
       <name>PIM</name>
       <description>Protocol Independent Multicast</description>
-      <xref type="rfc" data="rfc4601"/>
+      <xref type="draft" data="RFC-ietf-pim-rfc4601bis-06"/>
       <xref type="person" data="Dino_Farinacci"/>
     </record>
     <record date="1997-01">
@@ -806,9 +806,9 @@ University of California at Berkeley, June 1986.</xref>
       <description>Simple Message Protocol</description>
       <xref type="person" data="Leif_Ekblad"/>
     </record>
-    <record date="1999-06">
+    <record date="1999-06" updated="2015-06-23">
       <value>122</value>
-      <name>SM</name>
+      <name>SM (deprecated)</name>
       <description>Simple Multicast Protocol</description>
       <xref type="person" data="Jon_Crowcroft"/>
       <xref type="draft" data="draft-perlman-simple-multicast"/>
@@ -1200,7 +1200,9 @@ University of California at Berkeley, June 1986.</xref>
     </person>
     <person id="Robert_W_Scheifler">
       <name>Robert W. Scheifler</name>
-      <uri>mailto:RWS&amp;xx.lcs.mit.edu</uri>
+      <uri>mailto:rscheifler&amp;comcast.net</uri>
+      <updated>2015-10-06</updated>
+      
     </person>
     <person id="Robert_Woodburn">
       <name>Robert Woodburn</name>

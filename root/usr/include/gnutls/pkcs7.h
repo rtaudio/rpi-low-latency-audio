@@ -54,6 +54,9 @@ int gnutls_pkcs7_export2(gnutls_pkcs7_t pkcs7,
 			 gnutls_x509_crt_fmt_t format,
 			 gnutls_datum_t * out);
 
+int gnutls_pkcs7_get_signature_count(gnutls_pkcs7_t pkcs7);
+int gnutls_pkcs7_get_embedded_data(gnutls_pkcs7_t pkcs7, unsigned idx, gnutls_datum_t *data);
+
 int gnutls_pkcs7_get_crt_count(gnutls_pkcs7_t pkcs7);
 int gnutls_pkcs7_get_crt_raw(gnutls_pkcs7_t pkcs7, int indx,
 			     void *certificate, size_t * certificate_size);
@@ -100,10 +103,22 @@ int gnutls_pkcs7_add_attr(gnutls_pkcs7_attrs_t *list, const char *oid, gnutls_da
 void gnutls_pkcs7_attrs_deinit(gnutls_pkcs7_attrs_t list);
 int gnutls_pkcs7_get_attr(gnutls_pkcs7_attrs_t list, unsigned idx, char **oid, gnutls_datum_t *data, unsigned flags);
 
-#define GNUTLS_PKCS7_EMBED_DATA 1
-#define GNUTLS_PKCS7_INCLUDE_TIME (1<<1)
-#define GNUTLS_PKCS7_INCLUDE_CERT (1<<2)
-#define GNUTLS_PKCS7_WRITE_SPKI (1<<3)
+/**
+ * gnutls_pkcs7_sign_flags:
+ * @GNUTLS_PKCS7_EMBED_DATA: The signed data will be embedded in the structure.
+ * @GNUTLS_PKCS7_INCLUDE_TIME: The signing time will be included in the structure.
+ * @GNUTLS_PKCS7_INCLUDE_CERT: The signer's certificate will be included in the cert list.
+ * @GNUTLS_PKCS7_WRITE_SPKI: Use the signer's key identifier instead of name.
+ *
+ * Enumeration of the different PKCS #7 signature flags.
+ */
+typedef enum gnutls_pkcs7_sign_flags {
+	GNUTLS_PKCS7_EMBED_DATA = 1,
+	GNUTLS_PKCS7_INCLUDE_TIME = (1<<1),
+	GNUTLS_PKCS7_INCLUDE_CERT = (1<<2),
+	GNUTLS_PKCS7_WRITE_SPKI = (1<<3)
+} gnutls_pkcs7_sign_flags;
+
 int gnutls_pkcs7_sign(gnutls_pkcs7_t pkcs7,
 		      gnutls_x509_crt_t signer,
 		      gnutls_privkey_t signer_key,

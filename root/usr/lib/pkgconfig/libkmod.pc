@@ -5,7 +5,7 @@ includedir=/usr/include
 
 Name: libkmod
 Description: Library to deal with kernel modules
-Version: 21
+Version: 22
 Libs: -L${libdir} -lkmod
-Libs.private: -llzma  -L/usr/lib -lz 
+Libs.private: -llzma -lz
 Cflags: -I${includedir}

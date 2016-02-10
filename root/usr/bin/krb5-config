@@ -25,7 +25,7 @@
 #
 
 # Configurable parameters set by autoconf
-version_string="Kerberos 5 release 1.13.1"
+version_string="Kerberos 5 release 1.13.2"
 
 prefix=/usr
 exec_prefix=${prefix}

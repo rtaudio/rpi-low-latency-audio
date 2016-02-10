@@ -1,6 +1,6 @@
 # Report.pm: prepare error messages and translate strings.
 #
-# Copyright 2010, 2011, 2012 Free Software Foundation, Inc.
+# Copyright 2010, 2011, 2012, 2014 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -398,7 +398,8 @@ sub gdt($$;$$)
         if (defined($current_parser->{$duplicated_conf}));
     }
   }
-  my $parser = Texinfo::Parser::parser($parser_conf);
+  #my $parser = Texinfo::Parser::parser($parser_conf);
+  my $parser = Texinfo::Parser::simple_parser($parser_conf);
   if ($parser->{'DEBUG'}) {
     print STDERR "GDT $translation_result\n";
   }
@@ -445,18 +446,18 @@ Texinfo::Report - Error storing and string translations for Texinfo modules
 
 =head1 DESCRIPTION
 
-The Texinfo::Report module helps with string translations and errors 
-handling.  It is used by Texinfo modules, Texinfo::Parser and 
+The Texinfo::Report module helps with string translations and error 
+handling.  It is used by the Texinfo modules Texinfo::Parser and 
 Texinfo::Convert::Converter.  To use this module, the usual way is
-to inherit Texinfo::Report methods and initialize Texinfo::Report
-variables for a I<$converter> object, by calling 
+to inherit Texinfo::Report methods and initialize the Texinfo::Report
+variables for a I<$converter> object. This is done by calling 
 C<Texinfo::Report::new()> on the I<$converter> object.  This is done by 
 Texinfo::Convert::Converter, for instance, so every module that inherits
 Texinfo::Convert::Converter can automatically use the Texinfo::Report
-methods in an object oriented way.
+methods in an object-oriented way.
 
-Besides the C<new> method, C<gdt> is used for strings translations, 
-C<errors> to report errors and the other methods to store errors
+Besides the C<new> method, C<gdt> is used for string translations, 
+C<errors> for reporting errors, and the other methods to store errors
 (and warnings).
 
 =head1 METHODS
@@ -481,13 +482,13 @@ translation.  I<$replaced_substrings> is an optional
 hash reference specifying some 
 substitution to be done after the translation.  The key of 
 the I<$replaced_substrings> hash reference identifies what is to 
-be substituted, the value is some string, texinfo tree or array content 
+be substituted, and the value is some string, texinfo tree or array content 
 that is substituted in the resulting texinfo tree.
 In the string to be translated word in brace matching keys of 
 I<$replaced_substrings> are replaced.
 
 I<$mode> is an optional string which may modify how the function
-behave.  The possible values are
+behaves.  The possible values are
 
 =over 
 
@@ -519,13 +520,13 @@ encoding and documentlanguage.  More precisely,
 C<< $converter->{'encoding_name'} >>, C<< $converter->{'perl_encoding'} >>
 and C<< $converter->get_conf('documentlanguage') >> are used.
 
-C<gdt> use a gettext-like infrastructure to retrieve the 
+C<gdt> uses a gettext-like infrastructure to retrieve the 
 translated strings, using the I<texinfo_document> domain.
 
 =back
 
 The errors collected are available through the C<errors> method, the other
-methods allow to register errors and warnings.
+methods allow registering errors and warnings.
 
 =over
 

@@ -6824,7 +6824,7 @@ Examples:
     # same thing, but much more efficiently;
     # we'll build auxiliary indices instead
     # for speed
-    my @nums = @caps = ();
+    my (@nums, @caps);
     for (@old) {
         push @nums, ( /=(\d+)/ ? $1 : undef );
         push @caps, fc($_);
@@ -7956,6 +7956,8 @@ FILEHANDLE.  If FILEHANDLE is an expression, its value is used as the real
 filehandle wanted; an undefined scalar will be suitably autovivified.  This
 function calls the underlying operating system's I<open>(2) function with the
 parameters FILENAME, MODE, and PERMS.
+
+Returns true on success and C<undef> otherwise.
 
 The possible values and flag bits of the MODE parameter are
 system-dependent; they are available via the standard module C<Fcntl>.  See

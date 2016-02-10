@@ -8,7 +8,7 @@ disk:x:6:root
 lp:x:7:daemon
 mem:x:8:
 kmem:x:9:
-wheel:x:10:root
+wheel:x:10:root,alarm
 ftp:x:11:
 mail:x:12:
 uucp:x:14:
@@ -40,7 +40,6 @@ systemd-timesync:x:192:
 systemd-network:x:193:
 systemd-bus-proxy:x:194:
 systemd-resolve:x:195:
-systemd-journal-upload:x:999:
-systemd-journal-remote:x:998:
-dnsmasq:x:996:
-realtime:x:1000:root
+systemd-journal-remote:x:999:
+systemd-journal-upload:x:998:
+alarm:x:1000:

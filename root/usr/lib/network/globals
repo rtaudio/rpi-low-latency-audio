@@ -1,4 +1,4 @@
-NETCTL_VERSION=1.10
+NETCTL_VERSION=1.11
 PROFILE_DIR="/etc/netctl"
 SUBR_DIR="/usr/lib/network"
 STATE_DIR="/run/network"

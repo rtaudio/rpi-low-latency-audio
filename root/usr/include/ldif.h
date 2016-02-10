@@ -1,7 +1,7 @@
 /* $OpenLDAP$ */
 /* This work is part of OpenLDAP Software <http://www.openldap.org/>.
  *
- * Copyright 1998-2014 The OpenLDAP Foundation.
+ * Copyright 1998-2015 The OpenLDAP Foundation.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,12 +52,12 @@ LDAP_LDIF_V (int) ldif_debug;
  */
 #define LDIF_SIZE_NEEDED(nlen,vlen) \
     ((nlen) + 4 + LDIF_BASE64_LEN(vlen) \
-    + ((LDIF_BASE64_LEN(vlen) + (nlen) + 3) / LDIF_LINE_WIDTH * 2 ))
+    + ((LDIF_BASE64_LEN(vlen) + (nlen) + 3) / (LDIF_LINE_WIDTH-1) * 2 ))
 
 #define LDIF_SIZE_NEEDED_WRAP(nlen,vlen,wrap) \
     ((nlen) + 4 + LDIF_BASE64_LEN(vlen) \
-    + ((wrap) == 0 ? ((LDIF_BASE64_LEN(vlen) + (nlen) + 3) / ( LDIF_LINE_WIDTH ) * 2 ) : \
-	((wrap) == LDIF_LINE_WIDTH_MAX ? 0 : ((LDIF_BASE64_LEN(vlen) + (nlen) + 3) / (wrap) * 2 ))))
+    + ((wrap) == 0 ? ((LDIF_BASE64_LEN(vlen) + (nlen) + 3) / ( LDIF_LINE_WIDTH-1 ) * 2 ) : \
+	((wrap) == LDIF_LINE_WIDTH_MAX ? 0 : ((LDIF_BASE64_LEN(vlen) + (nlen) + 3) / (wrap-1) * 2 ))))
 
 LDAP_LDIF_F( int )
 ldif_parse_line LDAP_P((

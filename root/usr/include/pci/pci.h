@@ -16,7 +16,7 @@
 #include "header.h"
 #include "types.h"
 
-#define PCI_LIB_VERSION 0x030301
+#define PCI_LIB_VERSION 0x030400
 
 #ifndef PCI_ABI
 #define PCI_ABI
@@ -39,7 +39,7 @@ enum pci_access_type {
   PCI_ACCESS_AIX_DEVICE,		/* /dev/pci0, /dev/bus0, etc. */
   PCI_ACCESS_NBSD_LIBPCI,		/* NetBSD libpci */
   PCI_ACCESS_OBSD_DEVICE,		/* OpenBSD /dev/pci */
-  PCI_ACCESS_DUMP,			    /* Dump file */
+  PCI_ACCESS_DUMP,			/* Dump file */
   PCI_ACCESS_DARWIN,			/* Darwin */
   PCI_ACCESS_MAX
 };
@@ -135,6 +135,7 @@ struct pci_dev {
   char *phy_slot;			/* Physical slot */
   char *module_alias;			/* Linux kernel module alias */
   char *label;				/* Device name as exported by BIOS */
+  int numa_node;			/* NUMA node */
 
   /* Fields used internally: */
   struct pci_access *access;
@@ -161,18 +162,19 @@ int pci_write_block(struct pci_dev *, int pos, u8 *buf, int len) PCI_ABI;
 
 int pci_fill_info(struct pci_dev *, int flags) PCI_ABI; /* Fill in device information */
 
-#define PCI_FILL_IDENT		1
-#define PCI_FILL_IRQ		2
-#define PCI_FILL_BASES		4
-#define PCI_FILL_ROM_BASE	8
-#define PCI_FILL_SIZES		16
-#define PCI_FILL_CLASS		32
-#define PCI_FILL_CAPS		64
-#define PCI_FILL_EXT_CAPS	128
-#define PCI_FILL_PHYS_SLOT	256
-#define PCI_FILL_MODULE_ALIAS	512
-#define PCI_FILL_LABEL		1024
-#define PCI_FILL_RESCAN		0x10000
+#define PCI_FILL_IDENT		0x0001
+#define PCI_FILL_IRQ		0x0002
+#define PCI_FILL_BASES		0x0004
+#define PCI_FILL_ROM_BASE	0x0008
+#define PCI_FILL_SIZES		0x0010
+#define PCI_FILL_CLASS		0x0020
+#define PCI_FILL_CAPS		0x0040
+#define PCI_FILL_EXT_CAPS	0x0080
+#define PCI_FILL_PHYS_SLOT	0x0100
+#define PCI_FILL_MODULE_ALIAS	0x0200
+#define PCI_FILL_LABEL		0x0400
+#define PCI_FILL_NUMA_NODE	0x0800
+#define PCI_FILL_RESCAN		0x00010000
 
 void pci_setup_cache(struct pci_dev *, u8 *cache, int len) PCI_ABI;
 

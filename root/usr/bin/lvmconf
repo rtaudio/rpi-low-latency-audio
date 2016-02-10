@@ -10,7 +10,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #
 # Edit an lvm.conf file to adjust various properties
@@ -133,6 +133,11 @@ function parse_args
                 exit 1
         esac
     done
+
+    if [ "$LOCKINGLIBDIR" -o "$LOCKINGLIB" ]; then
+        LOCKING_TYPE=2
+        USE_LVMETAD=0
+    fi
 }
 
 function validate_args
@@ -412,12 +417,12 @@ if [ "$HANDLE_SERVICES" == "1" ]; then
 
         if [ "$LOCKING_TYPE" = "3" ]; then
             set_service systemd activate lvm2-cluster-activation.service
-            if [ "$HANDLE_CMIRROR_SERVICE" ]; then
+            if [ "$HANDLE_MIRROR_SERVICE" = "1" ]; then
                 set_service activate lvm2-cmirrord.service
             fi
         else
             set_service systemd deactivate lvm2-cluster-activation.service
-            if [ "$HANDLE_CMIRROR_SERVICE" ]; then
+            if [ "$HANDLE_MIRROR_SERVICE" = "1" ]; then
                 set_service systemd deactivate lvm2-cmirrord.service
             fi
         fi

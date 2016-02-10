@@ -12,8 +12,9 @@ with the <span class="emphasis"><em>exec</em></span> builtin:</p><p>    exec dbu
 D-Bus session, to avoid either interfering with the "real" D-Bus session
 or relying on there already being a D-Bus session active, for instance:</p><p>    dbus-run-session -- make check</p><p>or (in
 <span class="citerefentry"><span class="refentrytitle">automake</span>(1)</span>):</p><div class="literallayout"><p><br>
-    TESTS_ENVIRONMENT = MY_DEBUG=all dbus-run-session --<br>
-<br>
+  AM_TESTS_ENVIRONMENT = export MY_DEBUG=all;<br>
+  LOG_COMPILER = dbus-run-session<br>
+  AM_LOG_FLAGS = --<br>
 </p></div></div><div class="refsect1"><a name="options"></a><h2>OPTIONS</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="option">--config-file=</code><em class="replaceable"><code>FILENAME</code></em>, <code class="option">--config-file</code> <em class="replaceable"><code>FILENAME</code></em></span></dt><dd><p>Pass
 <code class="option">--config-file=</code><em class="replaceable"><code>FILENAME</code></em>
 to the bus daemon, instead of passing it the

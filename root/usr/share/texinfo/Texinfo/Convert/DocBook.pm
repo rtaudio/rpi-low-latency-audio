@@ -1,6 +1,7 @@
+# $Id: DocBook.pm 6363 2015-06-26 12:36:32Z gavin $
 # DocBook.pm: output tree as DocBook.
 #
-# Copyright 2011, 2012 Free Software Foundation, Inc.
+# Copyright 2011, 2012, 2013, 2014, 2015 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,15 +54,15 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 @EXPORT = qw(
 );
 
-$VERSION = '5.1.90';
+$VERSION = '6.0';
 
+my $nbsp = '&#'.hex('00A0').';';
 my $mdash = '&#'.hex('2014').';';
 my $ndash = '&#'.hex('2013').';';
 my $ldquo = '&#'.hex('201C').';';
 my $rdquo = '&#'.hex('201D').';';
-my $rsquo = '&#'.hex('2019').';';
 my $lsquo = '&#'.hex('2018').';';
-my $nbsp = '&#'.hex('00A0').';';
+my $rsquo = '&#'.hex('2019').';';
 
 my %defaults = (
   #'ENABLE_ENCODING'      => 0,
@@ -81,13 +82,14 @@ my @docbook_image_extensions
   = ('eps', 'gif', 'jpg', 'jpeg', 'pdf', 'png', 'svg');
 
 my %docbook_special_quotations;
-foreach my $special_quotation ('note', 'caution', 'important', 'tip', 'warning') {
+foreach my $special_quotation (
+    'caution', 'important', 'note', 'tip', 'warning') {
   $docbook_special_quotations{$special_quotation} = 1;
 }
 
 # For '*', there is no line break in DocBook, except in cmdsynopsis (in this
-# case it is <sbr>.  But currently we don't use cmdsynopsis, and it is unlikely
-# that cmdsynopsis is ever used.
+# case it is <sbr>).  But currently we don't use cmdsynopsis, and it is
+# unlikely we ever will.
 my %docbook_specific_formatting = (
   'TeX' => '&tex;',
   'LaTeX' => '&latex;',
@@ -113,8 +115,14 @@ my %quoted_style_commands = (
   'samp' => 1,
 );
 
+# FIXME allow customization? (as in HTML)
+my %upper_case_style_commands = (
+  'sc' => 1,
+);
+
 my @inline_elements = ('emphasis', 'abbrev', 'acronym', 'link', 
-  'inlinemediaobject', 'firstterm', 'footnote', 'replaceable', 'wordasword');
+  'inlinemediaobject', 'firstterm', 'footnote', 'replaceable',
+  'subscript', 'superscript', 'wordasword');
 my %inline_elements;
 foreach my $inline_element (@inline_elements) {
   $inline_elements{$inline_element} = 1;
@@ -130,22 +138,23 @@ my %style_attribute_commands;
       'emph'        => 'emphasis',
       'env'         => 'envar',
       'file'        => 'filename',
-      'headitemfont' => 'emphasis role="bold"', # not really that, in fact it is 
-                             # in <th> rather than <td>
+      'footnote'    => 'footnote',
+      'headitemfont' => 'emphasis role="bold"', # actually <th> instead of <td>
       'i'           => 'emphasis',
       'indicateurl' => 'literal',
-      'sansserif'   => '',
       'kbd'         => 'userinput',
       'key'         => 'keycap',
+      'math'        => 'mathphrase',
       'option'      => 'option',
-      'r'           => 'lineannotation',
+      'r'           => '',
       'samp'        => 'literal',
+      'sansserif'   => '',
       'strong'      => 'emphasis role="bold"',
+      'sub'         => 'subscript',
+      'sup'         => 'superscript',
       't'           => 'literal',
       'var'         => 'replaceable',
       'verb'        => 'literal',
-      'footnote'    => 'footnote',
-      'math'        => 'mathphrase',
 );
 
 # this weird construct does like uniq, it avoids duplicates.
@@ -154,7 +163,7 @@ my %style_attribute_commands;
 my @all_style_commands = keys %{{ map { $_ => 1 }
     (keys(%Texinfo::Common::style_commands), keys(%style_attribute_commands),
      'w', 'dmn', 'titlefont') }};
-# 'w' is special
+# special string for 'w'.
 my $w_command_mark = '<!-- /@w -->';
 
 my %style_commands_formatting;
@@ -166,6 +175,9 @@ foreach my $command(@all_style_commands) {
   }
   if ($quoted_style_commands{$command}) {
     $style_commands_formatting{$command}->{'quote'} = 1;
+  }
+  if ($upper_case_style_commands{$command}) {
+    $style_commands_formatting{$command}->{'upper_case'} = 1;
   }
 }
 
@@ -183,8 +195,8 @@ foreach my $command ('item', 'headitem', 'itemx', 'tab',
 }
 
 my %docbook_global_commands = (
-  'documentlanguage' => 1,
   'documentencoding' => 1,
+  'documentlanguage' => 1,
 );
 
 sub converter_global_commands($)
@@ -197,15 +209,15 @@ my %default_args_code_style
 my %regular_font_style_commands = %Texinfo::Common::regular_font_style_commands;
 
 my %defcommand_name_type = (
+ 'defcv'     => 'property',
  'deffn'     => 'function',
- 'defvr'     => 'varname',
+ 'defop'     => 'methodname',
+ 'deftp'     => 'structname',
+ 'deftypecv' => 'property',
  'deftypefn' => 'function',
  'deftypeop' => 'methodname',
  'deftypevr' => 'varname',
- 'defcv'     => 'property',
- 'deftypecv' => 'property',
- 'defop'     => 'methodname',
- 'deftp'     => 'structname',
+ 'defvr'     => 'varname',
 );
 
 my %def_argument_types_docbook = (
@@ -217,16 +229,18 @@ my %def_argument_types_docbook = (
 
 
 my %ignored_types;
-foreach my $type ('empty_line_after_command',
+foreach my $type (
+	    'empty_line_after_command',
+            'empty_space_at_end_def_bracketed',
+            'empty_spaces_after_close_brace', 
+            'empty_spaces_after_command', 
+            'empty_spaces_before_argument',
+            'empty_spaces_before_paragraph',
+            'menu_entry_leading_text',
+            'menu_entry_separator',
             'preamble',
             'preamble_before_setfilename',
-            'empty_spaces_after_command', 
             'spaces_at_end',
-            'empty_spaces_before_argument', 'empty_spaces_before_paragraph',
-            'empty_spaces_after_close_brace', 
-            'empty_space_at_end_def_bracketed',
-            'menu_entry_separator',
-            'menu_entry_leading_text',
   ) {
   $ignored_types{$type} = 1;
 }
@@ -266,11 +280,12 @@ sub converter_defaults($$)
   return %defaults;
 }
 
+
 sub converter_initialize($)
 {
   my $self = shift;
 
-  $self->{'document_context'} = [{'monospace' => [0]}];
+  $self->{'document_context'} = [{'monospace' => [0], 'upper_case' => [0]}];
   $self->{'context_block_commands'} = {%default_context_block_commands};
   foreach my $raw (keys (%Texinfo::Common::format_raw_commands)) {
     $self->{'context_block_commands'}->{$raw} = 1
@@ -401,7 +416,7 @@ sub _index_entry($$)
     my $index_entry = $root->{'extra'}->{'index_entry'};
     # FIXME DocBook 5 role->type
     my $result = "<indexterm role=\"$index_entry->{'index_name'}\"><primary>";
-    push @{$self->{'document_context'}}, {'monospace' => [0]};
+    push @{$self->{'document_context'}}, {'monospace' => [0], 'upper_case' => [0]};
     $self->{'document_context'}->[-1]->{'monospace'}->[-1] = 1
       if ($index_entry->{'in_code'});
     $result .= $self->_convert({'contents' => $index_entry->{'content'}});
@@ -439,8 +454,7 @@ sub _parse_attribute($)
   my $element = shift;
   return ('', '') if (!defined($element));
   my $attributes = '';
-  if ($element =~ /^(\w+)(\s+.*)/)
-  {
+  if ($element =~ /^(\w+)(\s+.*)/) {
     $element = $1;
     $attributes = $2;
   }
@@ -457,6 +471,7 @@ sub _protect_text($$)
   return $result;
 }
 
+
 sub _convert($$;$);
 
 sub _convert($$;$)
@@ -464,13 +479,13 @@ sub _convert($$;$)
   my $self = shift;
   my $root = shift;
 
-  if (0) {
   #if (1) {
-    print STDERR "root\n";
-    print STDERR "  Command: $root->{'cmdname'}\n" if ($root->{'cmdname'});
-    print STDERR "  Type: $root->{'type'}\n" if ($root->{'type'});
-    print STDERR "  Text: $root->{'text'}\n" if (defined($root->{'text'}));
-    #print STDERR "  Special def_command: $root->{'extra'}->{'def_command'}\n"
+  if (0) { # too verbose even for debugging, but for the bottom line ...
+    warn "root\n";
+    warn "  Command: $root->{'cmdname'}\n" if ($root->{'cmdname'});
+    warn "  Type: $root->{'type'}\n" if ($root->{'type'});
+    warn "  Text: $root->{'text'}\n" if (defined($root->{'text'}));
+    #warn "  Special def_command: $root->{'extra'}->{'def_command'}\n"
     #  if (defined($root->{'extra'}) and $root->{'extra'}->{'def_command'});
   }
 
@@ -482,7 +497,11 @@ sub _convert($$;$)
     } elsif ($self->{'document_context'}->[-1]->{'raw'}) {
       return $root->{'text'};
     }
-    $result = $self->_protect_text($root->{'text'});
+    $result = $root->{'text'};
+    if ($self->{'document_context'}->[-1]->{'upper_case'}->[-1]) {
+      $result = uc($result);
+    }
+    $result = $self->_protect_text($result);
     if (! defined($root->{'type'}) or $root->{'type'} ne 'raw') {
       if (!$self->{'document_context'}->[-1]->{'monospace'}->[-1]) {
         $result =~ s/``/$ldquo/g;
@@ -493,16 +512,25 @@ sub _convert($$;$)
         $result =~ s/--/$ndash/g;
       }
     }
+    #warn "had text `$root->{'text'}', returning $result\n";
     return $result;
   }
+
+  #warn " onto main conditional\n";
   my @close_elements;
   if ($root->{'cmdname'}) {
+    #warn "  got cmdname $root->{'cmdname'}\n";
     if (defined($docbook_commands_formatting{$root->{'cmdname'}})) {
+      #warn "  has commands_formatting \n";
       my $command;
       if ($root->{'cmdname'} eq 'click' 
           and $root->{'extra'} 
           and defined($root->{'extra'}->{'clickstyle'})) {
         $command = $root->{'extra'}->{'clickstyle'};
+      } elsif ($self->{'document_context'}->[-1]->{'upper_case'}->[-1]
+               and $Texinfo::Common::letter_no_arg_commands{$root->{'cmdname'}}
+               and $Texinfo::Common::letter_no_arg_commands{uc($root->{'cmdname'})}) {
+        $command = uc($root->{'cmdname'})
       } else {
         $command = $root->{'cmdname'};
       }
@@ -515,7 +543,8 @@ sub _convert($$;$)
     } elsif ($root->{'cmdname'} eq 'today') {
       return $self->_convert(Texinfo::Common::expand_today($self));
     } elsif ($Texinfo::Common::accent_commands{$root->{'cmdname'}}) {
-      return $self->convert_accents($root, \&docbook_accent);
+      return $self->convert_accents($root, \&docbook_accent,
+               $self->{'document_context'}->[-1]->{'upper_case'}->[-1]);
     } elsif ($root->{'cmdname'} eq 'item' or $root->{'cmdname'} eq 'itemx'
              or $root->{'cmdname'} eq 'headitem' or $root->{'cmdname'} eq 'tab') {
       if ($root->{'cmdname'} eq 'item'
@@ -532,8 +561,9 @@ sub _convert($$;$)
        #   $result .= $self->_convert({'contents'
        # => $root->{'parent'}->{'extra'}->{'block_command_line_contents'}->[0]})
        #     ." ";
-          $self->{'pending_prepend'} = $self->_convert({'contents'
-       => $root->{'parent'}->{'extra'}->{'block_command_line_contents'}->[0]}) ." ";
+          $self->{'pending_prepend'} = $self->_convert(
+            {'contents' => $root->{'parent'}->{'extra'}
+                           ->{'block_command_line_contents'}->[0]}) . " ";
         }
         push @close_elements, 'listitem';
       } elsif (($root->{'cmdname'} eq 'item' or $root->{'cmdname'} eq 'itemx')
@@ -555,7 +585,7 @@ sub _convert($$;$)
                      or $root->{'cmdname'} eq 'tab')
                     and $root->{'parent'}->{'type'}
                     and $root->{'parent'}->{'type'} eq 'row') {
-          print STDERR "BUG: multitable cell command not in a row "
+          warn "BUG: multitable cell command not in a row "
             .Texinfo::Parser::_print_current($root);
         }
         
@@ -574,7 +604,9 @@ sub _convert($$;$)
         $end_line = '';
       }
       return $self->_index_entry($root).${end_line};
+
     } elsif (exists($docbook_misc_commands{$root->{'cmdname'}})) {
+      #warn "  is dbk misc command\n";
       if ($docbook_global_commands{$root->{'cmdname'}}) {
         $self->_informative_command($root);
         return '';
@@ -631,6 +663,9 @@ sub _convert($$;$)
             chomp ($result);
             $result .= "\n";
           }
+          if ($command eq 'part' and !Texinfo::Common::is_content_empty($root)) {
+            $result .= "<partintro>\n";
+          }
         } elsif ($Texinfo::Common::sectioning_commands{$root->{'cmdname'}}) {
           if ($root->{'args'} and $root->{'args'}->[0]) {
             my ($arg, $end_line)
@@ -656,6 +691,7 @@ sub _convert($$;$)
             $result .= "\n";
             return $result;
           }
+          # misc commands not handled especially are ignored here.
           return '';
         }
       } elsif ($type eq 'skipline' or $type eq 'noarg') {
@@ -693,9 +729,9 @@ sub _convert($$;$)
           return '';
         }
       }
+
     } elsif ($root->{'type'}
              and $root->{'type'} eq 'definfoenclose_command') {
-
       my $in_monospace_not_normal;
       if (defined($default_args_code_style{$root->{'cmdname'}})
           and $default_args_code_style{$root->{'cmdname'}}->[0]) {
@@ -711,11 +747,15 @@ sub _convert($$;$)
                 .$self->xml_protect_text($root->{'extra'}->{'end'});
       pop @{$self->{'document_context'}->[-1]->{'monospace'}}
         if (defined($in_monospace_not_normal));
+
+
     } elsif ($root->{'args'}
              and exists($Texinfo::Common::brace_commands{$root->{'cmdname'}})) {
+      #debug_list (" brace command with args", $root->{'args'});
       if ($style_commands_formatting{$root->{'cmdname'}}) {
         if ($Texinfo::Common::context_brace_commands{$root->{'cmdname'}}) {
-          push @{$self->{'document_context'}}, {'monospace' => [0]};
+          push (@{$self->{'document_context'}},
+                {'monospace' => [0], 'upper_case' => [0]});
         }
         my $formatting = $style_commands_formatting{$root->{'cmdname'}};
 
@@ -725,6 +765,9 @@ sub _convert($$;$)
            $in_monospace_not_normal = 1;
         } elsif ($regular_font_style_commands{$root->{'cmdname'}}) {
           $in_monospace_not_normal = 0;
+        }
+        if ($formatting->{'upper_case'}) {
+          push @{$self->{'document_context'}->[-1]->{'upper_case'}}, 1;
         }
         push @{$self->{'document_context'}->[-1]->{'monospace'}}, 
           $in_monospace_not_normal
@@ -742,6 +785,9 @@ sub _convert($$;$)
         if (defined($formatting->{'quote'})) {
           $result = $self->get_conf('OPEN_QUOTE_SYMBOL') . $result
                    . $self->get_conf('CLOSE_QUOTE_SYMBOL');
+        }
+        if (defined($formatting->{'upper_case'})) {
+          pop @{$self->{'document_context'}->[-1]->{'upper_case'}};
         }
         pop @{$self->{'document_context'}->[-1]->{'monospace'}}
           if (defined($in_monospace_not_normal));
@@ -958,6 +1004,7 @@ sub _convert($$;$)
         } else {
           return '';
         }
+
       } elsif ($root->{'cmdname'} eq 'uref' or $root->{'cmdname'} eq 'url') {
         if ($root->{'extra'} and $root->{'extra'}->{'brace_command_contents'}) {
           my ($url_text, $url_content);
@@ -990,6 +1037,7 @@ sub _convert($$;$)
           # DocBook 5
           # return "<link xl:href=\"$url_text\">$replacement</link>";
         }
+
       } elsif ($root->{'cmdname'} eq 'abbr' or $root->{'cmdname'} eq 'acronym') {
         my $argument;
         if (scalar (@{$root->{'extra'}->{'brace_command_contents'}}) >= 1
@@ -1006,7 +1054,7 @@ sub _convert($$;$)
             $argument = "<$element>$arg</$element>";
           }
         }
-        
+        #
         if (scalar (@{$root->{'extra'}->{'brace_command_contents'}}) == 2
            and defined($root->{'extra'}->{'brace_command_contents'}->[-1])) {
           if (defined($argument)) {
@@ -1025,6 +1073,19 @@ sub _convert($$;$)
         } else {
           return '';
         }
+
+      } elsif ($root->{'cmdname'} eq 'U') {
+        my $argument = $root->{'extra'}->{'brace_command_contents'}->[0]
+                       ->[0]->{'text'};
+        if (defined($argument) && $argument) {
+          $result = "&#x$argument;";
+        } else {
+          $self->line_warn($self->__("no argument specified for \@U"),
+                           $root->{'line_nr'});
+          $result = '';
+        }
+        return $result;
+
       } elsif ($Texinfo::Common::inline_commands{$root->{'cmdname'}}) {
         my $expand = 0;
         if ($Texinfo::Common::inline_format_commands{$root->{'cmdname'}}) {
@@ -1039,7 +1100,7 @@ sub _convert($$;$)
         return '' if (! $expand);
         my $arg_index = 1;
         if ($root->{'cmdname'} eq 'inlineraw') {
-          push @{$self->{'document_context'}}, {'monospace' => [0]};
+          push @{$self->{'document_context'}}, {'monospace' => [0], 'upper_case' => [0]};
           $self->{'document_context'}->[-1]->{'raw'} = 1;
         } elsif ($root->{'cmdname'} eq 'inlinefmtifelse' 
                  and ! $self->{'expanded_formats_hash'}->{$root->{'extra'}->{'format'}}) {
@@ -1053,17 +1114,23 @@ sub _convert($$;$)
         if ($root->{'cmdname'} eq 'inlineraw') {
           pop @{$self->{'document_context'}};
         }
+        #warn "  returning braced cmd result $result\n";
         return $result;
       } else {
         # ignored brace command
+        #warn "  returning empty string for ignored braced cmd\n";
         return '';
       }
+
+
     # special case to ensure that @w leads to something even if empty
     } elsif ($root->{'cmdname'} eq 'w') {
       return $w_command_mark;
+
     } elsif (exists($Texinfo::Common::block_commands{$root->{'cmdname'}})) {
       if ($self->{'context_block_commands'}->{$root->{'cmdname'}}) {
-        push @{$self->{'document_context'}}, {'monospace' => [0]};
+        push (@{$self->{'document_context'}},
+              {'monospace' => [0], 'upper_case' => [0]});
       }
       my @attributes;
       my $appended = '';
@@ -1181,7 +1248,11 @@ sub _convert($$;$)
       $result .= $appended if (defined($appended));
     }
   }
+  #warn " end of cmdname\n";
+
+
   if ($root->{'type'}) {
+    #warn " have type $root->{'type'}\n"; 
     if (exists($docbook_preformatted_formats{$root->{'type'}})) {
       push @{$self->{'document_context'}->[-1]->{'preformatted_stack'}}, 
          $docbook_preformatted_formats{$root->{'type'}};
@@ -1194,7 +1265,7 @@ sub _convert($$;$)
     } elsif ($root->{'type'} eq 'def_line') {
       $result .= "<synopsis>";
       $result .= $self->_index_entry($root);
-      push @{$self->{'document_context'}}, {'monospace' => [1]};
+      push @{$self->{'document_context'}}, {'monospace' => [1], 'upper_case' => [0]};
       $self->{'document_context'}->[-1]->{'inline'}++;
       if ($root->{'extra'} and $root->{'extra'}->{'def_args'}) {
         my $main_command;
@@ -1214,7 +1285,7 @@ sub _convert($$;$)
             $result .= "<$defcommand_name_type{$main_command}>$content</$defcommand_name_type{$main_command}>";
           } else {
             if (!defined($def_argument_types_docbook{$type})) {
-              print STDERR "BUG: no def_argument_types_docbook for $type\n";
+              warn "BUG: no def_argument_types_docbook for $type";
               next;
             }
             foreach my $element (reverse (
@@ -1230,7 +1301,9 @@ sub _convert($$;$)
       $result .= "\n";
     }
   }
+
   if ($root->{'contents'}) {
+    #warn " have contents $root->{'contents'}\n";
     my $in_code;
     if ($root->{'cmdname'} 
         and $Texinfo::Common::preformatted_code_commands{$root->{'cmdname'}}) {
@@ -1251,6 +1324,7 @@ sub _convert($$;$)
     pop @{$self->{'document_context'}->[-1]->{'monospace'}}
       if ($in_code);
   }
+
   if ($root->{'type'}) {
     if (defined($type_elements{$root->{'type'}})) {
       $result .= "</$type_elements{$root->{'type'}}>";
@@ -1267,6 +1341,7 @@ sub _convert($$;$)
   foreach my $element (@close_elements) {
     $result .= "</$element>";
   }
+  
   if ($root->{'cmdname'} 
       and exists($Texinfo::Common::block_commands{$root->{'cmdname'}})) {
     # a pending_prepend still there may happen if a quotation is empty.
@@ -1285,10 +1360,12 @@ sub _convert($$;$)
     if ($self->{'context_block_commands'}->{$root->{'cmdname'}}) {
       pop @{$self->{'document_context'}};
     }
+
   } elsif ($root->{'type'} and exists($docbook_preformatted_formats{$root->{'type'}})) {
     my $format = pop @{$self->{'document_context'}->[-1]->{'preformatted_stack'}};
     die "BUG $format ne $docbook_preformatted_formats{$root->{'type'}}"
       if ($format ne $docbook_preformatted_formats{$root->{'type'}});
+
   # The command is closed either when the corresponding tree element
   # is done, and the command is not associated to an element, or when
   # the element is closed.
@@ -1305,6 +1382,9 @@ sub _convert($$;$)
       $root = $root->{'extra'}->{'element_command'};
     }
     my $command = $self->_docbook_section_element($root);
+    if ($command eq 'part' and !Texinfo::Common::is_content_empty($root)) {
+      $result .= "</partintro>\n";
+    }
     my $command_texi = $self->_level_corrected_section($root);
     if (!($root->{'section_childs'} and scalar(@{$root->{'section_childs'}}))
         or $command_texi eq 'top') {
@@ -1321,6 +1401,8 @@ sub _convert($$;$)
       }
     }
   }
+  
+  #warn " returning $result\n";
   return $result;
 }
 
@@ -1329,6 +1411,7 @@ sub _convert($$;$)
 1;
 
 __END__
+# $Id: DocBook.pm 6363 2015-06-26 12:36:32Z gavin $
 # Automatically generated from maintain/template.pod
 
 =head1 NAME
@@ -1341,6 +1424,8 @@ Texinfo::Convert::DocBook - Convert Texinfo tree to DocBook
     = Texinfo::Convert::DocBook->converter({'parser' => $parser});
 
   $converter->output($tree);
+  $converter->convert($tree);
+  $converter->convert_tree($tree);
 
 =head1 DESCRIPTION
 
@@ -1352,7 +1437,7 @@ Texinfo::Convert::DocBook converts a Texinfo tree to DocBook.
 
 =item $converter = Texinfo::Convert::DocBook->converter($options)
 
-Initialize an DocBook converter.  
+Initialize converter from Texinfo to DocBook.  
 
 The I<$options> hash reference holds options for the converter.  In
 this option hash reference a parser object may be associated with the 
@@ -1375,14 +1460,8 @@ the resulting output.
 =item $result = $converter->convert_tree($tree)
 
 Convert a Texinfo tree portion I<$tree> and return the resulting 
-output.  This function do not try to output a full document but only
-portions of document.  For a full document use C<convert>.
-
-=item $result = $converter->output_internal_links()
-
-Returns text representing the links in the document.  At present the format 
-should follow the C<--internal-links> option of texi2any/makeinfo specification
-and this is only relevant for HTML.
+output.  This function does not try to output a full document but only
+portions.  For a full document use C<convert>.
 
 =back
 
@@ -1392,7 +1471,7 @@ Patrice Dumas, E<lt>pertusus@free.frE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2012 Free Software Foundation, Inc.
+Copyright 2015 Free Software Foundation, Inc.
 
 This library is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

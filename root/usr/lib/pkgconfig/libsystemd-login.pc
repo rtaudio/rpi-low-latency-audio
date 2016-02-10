@@ -13,6 +13,6 @@ includedir=/usr/include
 Name: systemd
 Description: systemd Login Utility Library - deprecated
 URL: http://www.freedesktop.org/wiki/Software/systemd
-Version: 221
+Version: 228
 Libs: -L${libdir} -lsystemd
 Cflags: -I${includedir}

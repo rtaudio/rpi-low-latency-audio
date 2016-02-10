@@ -1489,7 +1489,8 @@ debug
 expose_authtok
 
     During authentication the calling command can read the password from stdin
-    (3).
+    (3). Only first PAM_MAX_RESP_SIZE bytes of a password are provided to the
+    command.
 
 log=file
 
@@ -4583,6 +4584,10 @@ thing to do, as many applications are not prepared to handle this signal from a
 child they didn't know was fork()d. The noreap module argument can be used to
 suppress this temporary shielding and may be needed for use with certain
 applications.
+
+The maximum length of a password supported by the pam_unix module via the
+helper binary is PAM_MAX_RESP_SIZE - currently 512 bytes. The rest of the
+password provided by the conversation function to the module will be ignored.
 
 The password component of this module performs the task of updating the user's
 password. The default encryption hash is taken from the ENCRYPT_METHOD variable

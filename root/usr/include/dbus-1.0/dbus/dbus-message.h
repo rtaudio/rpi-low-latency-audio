@@ -226,6 +226,9 @@ void        dbus_message_iter_recurse          (DBusMessageIter *iter,
 DBUS_EXPORT
 void        dbus_message_iter_get_basic        (DBusMessageIter *iter,
                                                 void            *value);
+DBUS_EXPORT
+int         dbus_message_iter_get_element_count(DBusMessageIter *iter);
+
 #ifndef DBUS_DISABLE_DEPRECATED
 /* This function returns the wire protocol size of the array in bytes,
  * you do not want to know that probably
@@ -301,6 +304,14 @@ DBusMessage* dbus_message_demarshal (const char *str,
 DBUS_EXPORT
 int          dbus_message_demarshal_bytes_needed (const char *str, 
                                                   int len);
+
+DBUS_EXPORT
+void dbus_message_set_allow_interactive_authorization (DBusMessage *message,
+    dbus_bool_t allow);
+
+DBUS_EXPORT
+dbus_bool_t dbus_message_get_allow_interactive_authorization (
+    DBusMessage *message);
 
 /** @} */
 

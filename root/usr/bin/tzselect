@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 PKGVERSION="(GNU libc) "
-TZVERSION="2.21"
+TZVERSION="2.22"
 REPORT_BUGS_TO="<https://github.com/archlinuxarm/PKGBUILDs/issues>"
 
 # Ask the user about the time zone, and output the resulting TZ value to stdout.

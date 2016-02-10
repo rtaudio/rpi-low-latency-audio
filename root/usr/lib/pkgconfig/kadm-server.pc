@@ -5,7 +5,7 @@ includedir=${prefix}/include
 
 Name: kadm-server
 Description: Kerberos administration server library
-Version: 1.13.1
+Version: 1.13.2
 Requires.private: kdb mit-krb5-gssapi
 Cflags: -I${includedir}
 Libs: -L${libdir} -lkadm5srv_mit

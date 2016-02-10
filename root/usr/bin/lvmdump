@@ -11,7 +11,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 # lvm_dump: This script is used to collect pertinent information for
 #           the debugging of lvm issues.
@@ -262,6 +262,9 @@ if (( $sysreport )); then
 						   lvm2-cluster-activation.service \
 						   lvm2-clvmd.service \
 						   lvm2-cmirrord.service \
+						   lvm2-activation-early.service \
+						   lvm2-activation.service \
+						   lvm2-activation-net.service \
 						   > \"$sysreport_dir/systemd_lvm2_services_status\" 2>> \"$log\""
 		log "$SYSTEMCTL list-units -l -a --no-legend --no-pager > \"$sysreport_dir/systemd_unit_list\" 2>> \"$log\""
 		for unit in $(cat $sysreport_dir/systemd_unit_list | grep lvm2-pvscan | cut -d " " -f 1); do

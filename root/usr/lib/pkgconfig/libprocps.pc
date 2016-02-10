@@ -5,7 +5,7 @@ includedir=${prefix}/include
 
 Name: libprocps
 Description: Library to control and query process state
-Version: 3.3.10
+Version: 3.3.11
 Libs: -L${libdir} -lprocps
 Libs.private:
 Cflags: -I${includedir}

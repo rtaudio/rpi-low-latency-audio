@@ -5,7 +5,7 @@ includedir=/usr/include
 
 Name: fdisk
 Description: fdisk library
-Version: 2.26.0
+Version: 2.27.0
 Requires.private: uuid blkid
 Cflags: -I${includedir}/libfdisk
 Libs: -L${libdir} -lfdisk

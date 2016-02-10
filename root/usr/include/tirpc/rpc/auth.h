@@ -191,22 +191,7 @@ typedef struct __auth {
 
 	} *ah_ops;
 	void *ah_private;
-	int ah_refcnt;
 } AUTH;
-
-static __inline int
-auth_get(AUTH *auth)
-{
-	return __sync_add_and_fetch(&auth->ah_refcnt, 1);
-}
-
-static __inline int
-auth_put(AUTH *auth)
-{
-	return __sync_sub_and_fetch(&auth->ah_refcnt, 1);
-}
-
-
 
 /*
  * Authentication ops.
@@ -236,19 +221,10 @@ auth_put(AUTH *auth)
 #define auth_refresh(auth, msg)		\
 		((*((auth)->ah_ops->ah_refresh))(auth, msg))
 
-#define AUTH_DESTROY(auth)						\
-		do {							\
-			int refs;					\
-			if ((refs = auth_put((auth))) == 0)		\
-				((*((auth)->ah_ops->ah_destroy))(auth));\
-		} while (0)
-
-#define auth_destroy(auth)						\
-		do {							\
-			int refs;					\
-			if ((refs = auth_put((auth))) == 0)		\
-				((*((auth)->ah_ops->ah_destroy))(auth));\
-		} while (0)
+#define AUTH_DESTROY(auth)		\
+		((*((auth)->ah_ops->ah_destroy))(auth));
+#define auth_destroy(auth)		\
+		((*((auth)->ah_ops->ah_destroy))(auth));
 
 #define AUTH_WRAP(auth, xdrs, xfunc, xwhere)            \
 		((*((auth)->ah_ops->ah_wrap))(auth, xdrs, \
@@ -313,6 +289,8 @@ extern AUTH *authnone_create(void);		/* takes no parameters */
 extern "C" {
 #endif
 extern AUTH *authdes_create (char *, u_int, struct sockaddr *, des_block *);
+extern AUTH *authdes_pk_create (char *, netobj *, u_int,
+				struct sockaddr *, des_block *);
 extern AUTH *authdes_seccreate (const char *, const u_int, const  char *,
     const  des_block *);
 #ifdef __cplusplus

@@ -1,0 +1,42 @@
+%NAME%
+vi
+
+%VERSION%
+1:070224-2
+
+%DESC%
+The original ex/vi text editor
+
+%URL%
+http://ex-vi.sourceforge.net/
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1442533805
+
+%INSTALLDATE%
+1454655315
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu8@archlinuxarm.org>
+
+%SIZE%
+321536
+
+%GROUPS%
+base
+
+%LICENSE%
+custom:ex
+
+%VALIDATION%
+sha256
+
+%DEPENDS%
+ncurses
+
+%OPTDEPENDS%
+s-nail: used by the preserve command for notification
+

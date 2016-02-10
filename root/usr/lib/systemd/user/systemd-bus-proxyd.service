@@ -10,4 +10,5 @@ Description=Legacy D-Bus Protocol Compatibility Daemon
 
 [Service]
 ExecStart=/usr/lib/systemd/systemd-bus-proxyd --address=kernel:path=/sys/fs/kdbus/%U-user/bus
+ExecReload=/usr/bin/busctl --address=unix:path=/run/user/%U/bus call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus ReloadConfig
 NotifyAccess=main

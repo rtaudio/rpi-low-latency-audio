@@ -4,6 +4,9 @@ libsasl
 %VERSION%
 2.1.26-7
 
+%BASE%
+libsasl
+
 %DESC%
 Cyrus Simple Authentication Service Layer (SASL) Library
 
@@ -17,7 +20,7 @@ armv7h
 1391959809
 
 %INSTALLDATE%
-1435888530
+1454655293
 
 %PACKAGER%
 Arch Linux ARM Build System <builder+xu0@archlinuxarm.org>

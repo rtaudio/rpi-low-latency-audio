@@ -27,6 +27,6 @@ includedir=${prefix}/include
 Name: libseccomp
 Description: The enhanced seccomp library
 URL: https://github.com/seccomp/libseccomp
-Version: 2.2.0
+Version: 2.2.3
 Cflags: -I${includedir}
 Libs: -L${libdir} -lseccomp

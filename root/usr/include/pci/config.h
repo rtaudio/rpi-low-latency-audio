@@ -14,4 +14,4 @@
 #define PCI_ID_DOMAIN "pci.id.ucw.cz"
 #define PCI_USE_LIBKMOD
 #define PCI_SHARED_LIB
-#define PCILIB_VERSION "3.3.1"
+#define PCILIB_VERSION "3.4.0"

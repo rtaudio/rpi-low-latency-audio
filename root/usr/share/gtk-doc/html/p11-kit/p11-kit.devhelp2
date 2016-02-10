@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<!DOCTYPE book PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
 <book xmlns="http://www.devhelp.net/book" title="p11-kit" link="index.html" author="" name="p11-kit" version="2" language="c">
   <chapters>
     <sub name="PKCS#11 Configuration" link="config.html">
@@ -151,5 +150,27 @@
     <keyword type="function" name="p11_kit_load_initialize_module ()" link="p11-kit-Deprecated.html#p11-kit-load-initialize-module" deprecated="Since 0.19.0: Use p11_kit_module_load() instead."/>
     <keyword type="function" name="p11_kit_finalize_module ()" link="p11-kit-Deprecated.html#p11-kit-finalize-module" deprecated=""/>
     <keyword type="macro" name="P11_KIT_DEPRECATED_FOR()" link="p11-kit-Deprecated.html#P11-KIT-DEPRECATED-FOR:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_FOR_OBJECT" link="p11-kit-URIs.html#P11-KIT-URI-FOR-OBJECT:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_FOR_TOKEN" link="p11-kit-URIs.html#P11-KIT-URI-FOR-TOKEN:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_FOR_MODULE" link="p11-kit-URIs.html#P11-KIT-URI-FOR-MODULE:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_FOR_MODULE_WITH_VERSION" link="p11-kit-URIs.html#P11-KIT-URI-FOR-MODULE-WITH-VERSION:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_FOR_OBJECT_ON_TOKEN" link="p11-kit-URIs.html#P11-KIT-URI-FOR-OBJECT-ON-TOKEN:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_FOR_OBJECT_ON_TOKEN_AND_MODULE" link="p11-kit-URIs.html#P11-KIT-URI-FOR-OBJECT-ON-TOKEN-AND-MODULE:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_FOR_ANY" link="p11-kit-URIs.html#P11-KIT-URI-FOR-ANY:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_OK" link="p11-kit-URIs.html#P11-KIT-URI-OK:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_UNEXPECTED" link="p11-kit-URIs.html#P11-KIT-URI-UNEXPECTED:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_BAD_SCHEME" link="p11-kit-URIs.html#P11-KIT-URI-BAD-SCHEME:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_BAD_ENCODING" link="p11-kit-URIs.html#P11-KIT-URI-BAD-ENCODING:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_BAD_SYNTAX" link="p11-kit-URIs.html#P11-KIT-URI-BAD-SYNTAX:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_BAD_VERSION" link="p11-kit-URIs.html#P11-KIT-URI-BAD-VERSION:CAPS"/>
+    <keyword type="constant" name="P11_KIT_URI_NOT_FOUND" link="p11-kit-URIs.html#P11-KIT-URI-NOT-FOUND:CAPS"/>
+    <keyword type="constant" name="P11_KIT_PIN_FLAGS_USER_LOGIN" link="p11-kit-PIN-Callbacks.html#P11-KIT-PIN-FLAGS-USER-LOGIN:CAPS"/>
+    <keyword type="constant" name="P11_KIT_PIN_FLAGS_SO_LOGIN" link="p11-kit-PIN-Callbacks.html#P11-KIT-PIN-FLAGS-SO-LOGIN:CAPS"/>
+    <keyword type="constant" name="P11_KIT_PIN_FLAGS_CONTEXT_LOGIN" link="p11-kit-PIN-Callbacks.html#P11-KIT-PIN-FLAGS-CONTEXT-LOGIN:CAPS"/>
+    <keyword type="constant" name="P11_KIT_PIN_FLAGS_RETRY" link="p11-kit-PIN-Callbacks.html#P11-KIT-PIN-FLAGS-RETRY:CAPS"/>
+    <keyword type="constant" name="P11_KIT_PIN_FLAGS_MANY_TRIES" link="p11-kit-PIN-Callbacks.html#P11-KIT-PIN-FLAGS-MANY-TRIES:CAPS"/>
+    <keyword type="constant" name="P11_KIT_PIN_FLAGS_FINAL_TRY" link="p11-kit-PIN-Callbacks.html#P11-KIT-PIN-FLAGS-FINAL-TRY:CAPS"/>
+    <keyword type="constant" name="P11_KIT_ITER_BUSY_SESSIONS" link="p11-kit-Future.html#P11-KIT-ITER-BUSY-SESSIONS:CAPS"/>
+    <keyword type="constant" name="P11_KIT_ITER_WANT_WRITABLE" link="p11-kit-Future.html#P11-KIT-ITER-WANT-WRITABLE:CAPS"/>
   </functions>
 </book>

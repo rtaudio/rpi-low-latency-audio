@@ -73,11 +73,6 @@ struct authgss_private_data {
 	u_int		pd_seq_win;	/* Sequence window */
 };
 
-#define g_OID_equal(o1, o2) \
-   (((o1)->length == (o2)->length) && \
-    ((o1)->elements != 0) && ((o2)->elements != 0) && \
-    (memcmp((o1)->elements, (o2)->elements, (int) (o1)->length) == 0))
-
 /* from kerberos source, gssapi_krb5.c */
 extern gss_OID_desc krb5oid;
 extern gss_OID_desc spkm3oid;

@@ -1,8 +1,8 @@
 #!/usr/bin/bash
-#   pacdiff : a simple pacnew/pacorig/pacsave updater
+#   pacdiff : a simple pacnew/pacsave updater
 #
 #   Copyright (c) 2007 Aaron Griffin <aaronmgriffin@gmail.com>
-#   Copyright (c) 2013-2014 Pacman Development Team <pacman-dev@archlinux.org>
+#   Copyright (c) 2013-2016 Pacman Development Team <pacman-dev@archlinux.org>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 shopt -s extglob
 
 declare -r myname='pacdiff'
-declare -r myver='4.2.1'
+declare -r myver='5.0.0'
 
 diffprog=${DIFFPROG:-'vim -d'}
 diffsearchpath=${DIFFSEARCHPATH:-/etc}
@@ -67,7 +67,7 @@ usage() {
 	cat <<EOF
 ${myname} (pacman) v${myver}
 
-A simple program to merge or remove pacnew/pacorig/pacsave files.
+A simple program to merge or remove pacnew/pacsave files.
 
 Usage: $myname [-l | -f | -p] [--nocolor]
 
@@ -94,7 +94,7 @@ EOF
 version() {
 	printf "%s %s\n" "$myname" "$myver"
 	echo 'Copyright (C) 2007 Aaron Griffin <aaronmgriffin@gmail.com>'
-	echo 'Copyright (C) 2013-2014 Pacman Development Team <pacman-dev@archlinux.org>'
+	echo 'Copyright (C) 2013-2016 Pacman Development Team <pacman-dev@archlinux.org>'
 }
 
 print_existing() {
@@ -171,7 +171,7 @@ fi
 readonly ALL_OFF BOLD BLUE GREEN RED YELLOW
 
 
-if ! type -p ${diffprog%% *} >/dev/null; then
+if ! type -p ${diffprog%% *} >/dev/null && (( ! OUTPUTONLY )); then
 	error "Cannot find the $diffprog binary required for viewing differences."
 	exit 1
 fi

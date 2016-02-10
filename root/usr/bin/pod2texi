@@ -1,7 +1,7 @@
 #! /usr/bin/perl
-# $Id: pod2texi.pl 5292 2013-08-10 10:58:05Z pertusus $
+# $Id: pod2texi.pl 6014 2015-01-01 19:32:00Z karl $
 # pod2texi -- convert Pod to Texinfo.
-# Copyright 2012, 2013 Free Software Foundation, Inc.
+# Copyright 2012, 2013, 2014, 2015 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -120,6 +120,7 @@ C<\@include>s is generated, intended to be C<\@include>d in turn within
 a hand-written top-level file.
 
 Options:
+  --appendix-sections     use appendix-like sections.
   --base-level=NUM|NAME   level of the head1 commands; default 0.
   --debug=NUM             set debugging level.
   --help                  display this help and exit.
@@ -140,6 +141,7 @@ Texinfo home page: http://www.gnu.org/software/texinfo/\n");
 
 my $base_level = 0;
 my $unnumbered_sections = 0;
+my $appendix_sections = 0;
 my $output = '-';
 my $top = 'top';
 my $preamble = undef;
@@ -154,7 +156,7 @@ my $result_options = Getopt::Long::GetOptions (
     printf __("Copyright (C) %s Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.\n"), "2013";
+There is NO WARRANTY, to the extent permitted by law.\n"), "2015";
       exit 0;},
   'base-level=s' => sub {
      if ($_[1] =~ /^[0-4]$/) {
@@ -167,6 +169,7 @@ There is NO WARRANTY, to the extent permitted by law.\n"), "2013";
      }
    },
   'unnumbered-sections!' => \$unnumbered_sections,
+  'appendix-sections!' => \$appendix_sections,
   'output|o=s' => \$output,
   'preamble=s' => \$preamble,
   'subdir=s' => \$subdir,
@@ -370,6 +373,8 @@ foreach my $file (@processed_files) {
   }
   if ($unnumbered_sections) {
     $new->texinfo_sectioning_style('unnumbered');
+  } elsif ($appendix_sections) {
+    $new->texinfo_sectioning_style('appendix');
   }
   if ($base_level > 0 and @manuals) {
     $new->texinfo_internal_pod_manuals(\@manuals);
@@ -512,6 +517,12 @@ hand-written top-level file.
 
 =over
 
+=item B<--appendix-sections>
+
+Use appendix sectioning commands (C<@appendix>, ...) instead of the
+default numbered sectioning Texinfo @-commands (C<@chapter>,
+C<@section>, ...).
+
 =item B<--base-level>=I<NUM|NAME>
 
 Sets the level of the C<head1> commands.  It may be an integer or a
@@ -586,7 +597,7 @@ Texinfo home page: L<http://www.gnu.org/software/texinfo/>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2013 Free Software Foundation, Inc.
+Copyright 2015 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

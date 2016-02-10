@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.22.0
+perl5220delta - what is new for perl v5.22.0
 
 =head1 DESCRIPTION
 
@@ -1614,7 +1614,8 @@ interpreted as Unicode has been updated.
 
 C<$]> is no longer listed as being deprecated.  Instead, discussion has
 been added on the advantages and disadvantages of using it versus
-C<$^V>.
+C<$^V>.  C<$OLD_PERL_VERSION> was re-added to the documentation as the long
+form of C<$]>.
 
 =item *
 
@@ -2356,10 +2357,10 @@ threaded perl.
 
 =item *
 
-For long doubles (to get more precision and range for floating point numbers)
-one can now use the GCC quadmath library which implements the quadruple
-precision floating point numbers on x86 and IA-64 platforms.  See
-F<INSTALL> for details.
+To get more precision and range for floating point numbers one can now
+use the GCC quadmath library which implements the quadruple precision
+floating point numbers on x86 and IA-64 platforms.  See F<INSTALL> for
+details.
 
 =item *
 
@@ -2448,7 +2449,7 @@ L<[perl #123977]|https://rt.perl.org/Ticket/Display.html?id=123977>
 and L<[perl #125298]|https://rt.perl.org/Ticket/Display.html?id=125298>
 for IRIX; L<[perl #124212]|https://rt.perl.org/Ticket/Display.html?id=124212>,
 L<[cpan #99605]|https://rt.cpan.org/Public/Bug/Display.html?id=99605>, and
-L<[cpan #104836|https://rt.cpan.org/Ticket/Display.html?id=104836> for Tru64.
+L<[cpan #104836]|https://rt.cpan.org/Ticket/Display.html?id=104836> for Tru64.
 
 =item z/OS running EBCDIC Code Page 1047
 

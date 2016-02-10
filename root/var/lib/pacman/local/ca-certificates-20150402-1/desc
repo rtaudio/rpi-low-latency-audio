@@ -4,6 +4,9 @@ ca-certificates
 %VERSION%
 20150402-1
 
+%BASE%
+ca-certificates
+
 %DESC%
 Common CA certificates (default providers)
 
@@ -17,7 +20,7 @@ any
 1428685324
 
 %INSTALLDATE%
-1435888552
+1454655313
 
 %PACKAGER%
 Arch Linux ARM Build System <builder+xu3@archlinuxarm.org>

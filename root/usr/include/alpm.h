@@ -1,7 +1,7 @@
 /*
  * alpm.h
  *
- *  Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2006-2016 Pacman Development Team <pacman-dev@archlinux.org>
  *  Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
  *  Copyright (c) 2005 by Aurelien Foret <orelien@chez.com>
  *  Copyright (c) 2005 by Christian Hamar <krics@linuxforum.hu>
@@ -87,6 +87,7 @@ typedef enum _alpm_errno_t {
 	ALPM_ERR_TRANS_ABORT,
 	ALPM_ERR_TRANS_TYPE,
 	ALPM_ERR_TRANS_NOT_LOCKED,
+	ALPM_ERR_TRANS_HOOK_FAILED,
 	/* Packages */
 	ALPM_ERR_PKG_NOT_FOUND,
 	ALPM_ERR_PKG_IGNORED,
@@ -201,9 +202,6 @@ typedef enum _alpm_siglevel_t {
 	ALPM_SIG_DATABASE_OPTIONAL = (1 << 11),
 	ALPM_SIG_DATABASE_MARGINAL_OK = (1 << 12),
 	ALPM_SIG_DATABASE_UNKNOWN_OK = (1 << 13),
-
-	ALPM_SIG_PACKAGE_SET = (1 << 27),
-	ALPM_SIG_PACKAGE_TRUST_SET = (1 << 28),
 
 	ALPM_SIG_USE_DEFAULT = (1 << 31)
 } alpm_siglevel_t;
@@ -339,6 +337,16 @@ typedef struct _alpm_siglist_t {
 	alpm_sigresult_t *results;
 } alpm_siglist_t;
 
+
+/*
+ * Hooks
+ */
+
+typedef enum _alpm_hook_when_t {
+	ALPM_HOOK_PRE_TRANSACTION = 1,
+	ALPM_HOOK_POST_TRANSACTION
+} alpm_hook_when_t;
+
 /*
  * Logging facilities
  */
@@ -376,6 +384,10 @@ typedef enum _alpm_event_type_t {
 	ALPM_EVENT_INTERCONFLICTS_START,
 	/** Inter-conflicts were checked for target package. */
 	ALPM_EVENT_INTERCONFLICTS_DONE,
+	/** Processing the package transaction is starting. */
+	ALPM_EVENT_TRANSACTION_START,
+	/** Processing the package transaction is finished. */
+	ALPM_EVENT_TRANSACTION_DONE,
 	/** Package will be installed/upgraded/downgraded/re-installed/removed; See
 	 * alpm_event_package_operation_t for arguments. */
 	ALPM_EVENT_PACKAGE_OPERATION_START,
@@ -446,9 +458,14 @@ typedef enum _alpm_event_type_t {
 	/** A .pacsave file was created; See alpm_event_pacsave_created_t for
 	 * arguments */
 	ALPM_EVENT_PACSAVE_CREATED,
-	/** A .pacorig file was created; See alpm_event_pacorig_created_t for
-	 * arguments */
-	ALPM_EVENT_PACORIG_CREATED
+	/** Processing hooks will be started. */
+	ALPM_EVENT_HOOK_START,
+	/** Processing hooks is finished. */
+	ALPM_EVENT_HOOK_DONE,
+	/** A hook is starting */
+	ALPM_EVENT_HOOK_RUN_START,
+	/** A hook has finnished runnning */
+	ALPM_EVENT_HOOK_RUN_DONE
 } alpm_event_type_t;
 
 typedef struct _alpm_event_any_t {
@@ -539,14 +556,25 @@ typedef struct _alpm_event_pacsave_created_t {
 	const char *file;
 } alpm_event_pacsave_created_t;
 
-typedef struct _alpm_event_pacorig_created_t {
-	/** Type of event. */
+typedef struct _alpm_event_hook_t {
+	/** Type of event.*/
 	alpm_event_type_t type;
-	/** New package. */
-	alpm_pkg_t *newpkg;
-	/** Filename of the file without the .pacorig suffix. */
-	const char *file;
-} alpm_event_pacorig_created_t;
+	/** Type of hooks. */
+	alpm_hook_when_t when;
+} alpm_event_hook_t;
+
+typedef struct _alpm_event_hook_run_t {
+	/** Type of event.*/
+	alpm_event_type_t type;
+	/** Name of hook */
+	const char *name;
+	/** Description of hook to be outputted */
+	const char *desc;
+	/** position of hook being run */
+	size_t position;
+	/** total hooks being run */
+	size_t total;
+} alpm_event_hook_run_t;
 
 /** Events.
  * This is an union passed to the callback, that allows the frontend to know
@@ -564,7 +592,8 @@ typedef union _alpm_event_t {
 	alpm_event_pkgdownload_t pkgdownload;
 	alpm_event_pacnew_created_t pacnew_created;
 	alpm_event_pacsave_created_t pacsave_created;
-	alpm_event_pacorig_created_t pacorig_created;
+	alpm_event_hook_t hook;
+	alpm_event_hook_run_t hook_run;
 } alpm_event_t;
 
 /** Event callback. */
@@ -791,6 +820,15 @@ int alpm_option_add_cachedir(alpm_handle_t *handle, const char *cachedir);
 int alpm_option_remove_cachedir(alpm_handle_t *handle, const char *cachedir);
 /** @} */
 
+/** @name Accessors to the list of package hook directories.
+ * @{
+ */
+alpm_list_t *alpm_option_get_hookdirs(alpm_handle_t *handle);
+int alpm_option_set_hookdirs(alpm_handle_t *handle, alpm_list_t *hookdirs);
+int alpm_option_add_hookdir(alpm_handle_t *handle, const char *hookdir);
+int alpm_option_remove_hookdir(alpm_handle_t *handle, const char *hookdir);
+/** @} */
+
 /** Returns the logfile name. */
 const char *alpm_option_get_logfile(alpm_handle_t *handle);
 /** Sets the logfile name. */
@@ -874,6 +912,9 @@ int alpm_option_set_deltaratio(alpm_handle_t *handle, double ratio);
 
 int alpm_option_get_checkspace(alpm_handle_t *handle);
 int alpm_option_set_checkspace(alpm_handle_t *handle, int checkspace);
+
+const char *alpm_option_get_dbext(alpm_handle_t *handle);
+int alpm_option_set_dbext(alpm_handle_t *handle, const char *dbext);
 
 alpm_siglevel_t alpm_option_get_default_siglevel(alpm_handle_t *handle);
 int alpm_option_set_default_siglevel(alpm_handle_t *handle, alpm_siglevel_t level);
@@ -1100,6 +1141,12 @@ int alpm_pkg_should_ignore(alpm_handle_t *handle, alpm_pkg_t *pkg);
  * @return a reference to an internal string
  */
 const char *alpm_pkg_get_filename(alpm_pkg_t *pkg);
+
+/** Returns the package base name.
+ * @param pkg a pointer to package
+ * @return a reference to an internal string
+ */
+const char *alpm_pkg_get_base(alpm_pkg_t *pkg);
 
 /** Returns the package name.
  * @param pkg a pointer to package
@@ -1556,6 +1603,7 @@ char *alpm_compute_sha256sum(const char *filename);
 alpm_handle_t *alpm_initialize(const char *root, const char *dbpath,
 		alpm_errno_t *err);
 int alpm_release(alpm_handle_t *handle);
+int alpm_unlock(alpm_handle_t *handle);
 
 enum alpm_caps {
 	ALPM_CAPABILITY_NLS = (1 << 0),

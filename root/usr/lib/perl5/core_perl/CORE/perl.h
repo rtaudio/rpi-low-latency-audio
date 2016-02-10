@@ -1874,6 +1874,9 @@ typedef NVTYPE NV;
 /* Also Tru64 cc has broken NaN comparisons. */
 #  define NAN_COMPARE_BROKEN
 #endif
+#if defined(__sgi)
+#  define NAN_COMPARE_BROKEN
+#endif
 
 #ifdef USE_LONG_DOUBLE
 #   ifdef I_SUNMATH
@@ -4363,7 +4366,7 @@ static const union { unsigned int __i; float __f; } __PL_inf_u =
 #if !defined(NV_NAN) && defined(QNAN)
 #  define NV_NAN (NV)QNAN
 #endif
-#if !defined(NV_NAN) && defined(I_SUNMATH)
+#if !defined(NV_NAN) && defined(USE_LONG_DOUBLE) && defined(I_SUNMATH)
 #  define NV_NAN (NV)quiet_nan()
 #endif
 #if !defined(NV_NAN)

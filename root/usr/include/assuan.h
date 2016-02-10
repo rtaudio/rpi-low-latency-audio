@@ -1,6 +1,6 @@
 /* assuan.h - Definitions for the Assuan IPC library             -*- c -*-
    Copyright (C) 2001-2013 Free Software Foundation, Inc.
-   Copyright (C) 2001-2014 g10 Code GmbH
+   Copyright (C) 2001-2015 g10 Code GmbH
 
    This file is part of Assuan.
 
@@ -54,11 +54,11 @@ extern "C"
 /* The version of this header should match the one of the library.  Do
    not use this symbol in your application; use assuan_check_version
    instead.  */
-#define ASSUAN_VERSION "2.2.0"
+#define ASSUAN_VERSION "2.4.2"
 
 /* The version number of this header.  It may be used to handle minor
    API incompatibilities.  */
-#define ASSUAN_VERSION_NUMBER 0x020200
+#define ASSUAN_VERSION_NUMBER 0x020402
 
 
 /* Check for compiler features.  */
@@ -479,14 +479,28 @@ gpg_error_t assuan_set_error (assuan_context_t ctx, gpg_error_t err,
 
 /*-- assuan-socket.c --*/
 
+/* This flag is used with assuan_sock_connect_byname to
+   connect via SOCKS.  */
+#define ASSUAN_SOCK_SOCKS   1
+/* This flag is used with assuan_sock_connect_byname to force a
+   connection via Tor even if the socket subsystem has not been
+   swicthed into Tor mode.  This flags overrides ASSUAN_SOCK_SOCKS. */
+#define ASSUAN_SOCK_TOR     2
+
 /* These are socket wrapper functions to support an emulation of Unix
    domain sockets on Windows W32.  */
 gpg_error_t assuan_sock_init (void);
 void assuan_sock_deinit (void);
 int assuan_sock_close (assuan_fd_t fd);
 assuan_fd_t assuan_sock_new (int domain, int type, int proto);
+int assuan_sock_set_flag (assuan_fd_t sockfd, const char *name, int value);
+int assuan_sock_get_flag (assuan_fd_t sockfd, const char *name, int *r_value);
 int assuan_sock_connect (assuan_fd_t sockfd,
                          struct sockaddr *addr, int addrlen);
+assuan_fd_t assuan_sock_connect_byname (const char *host, unsigned short port,
+                                        int reserved,
+                                        const char *credentials,
+                                        unsigned int flags);
 int assuan_sock_bind (assuan_fd_t sockfd, struct sockaddr *addr, int addrlen);
 int assuan_sock_set_sockaddr_un (const char *fname, struct sockaddr *addr,
                                  int *r_redirected);
@@ -636,13 +650,18 @@ extern struct assuan_system_hooks _assuan_system_pth;
   { pid_t res; (void) ctx; npth_unprotect();				\
     res = __assuan_waitpid (ctx, pid, nowait, status, options);		\
     npth_protect(); return res; }					\
+  static int _assuan_npth_connect (assuan_context_t ctx, int sock,      \
+                                   struct sockaddr *addr, socklen_t len)\
+  { int res; npth_unprotect();                                          \
+    res = __assuan_connect (ctx, sock, addr, len);                      \
+    npth_protect(); return res; }                                       \
 									\
   struct assuan_system_hooks _assuan_system_npth =			\
     { ASSUAN_SYSTEM_HOOKS_VERSION, _assuan_npth_usleep, __assuan_pipe,	\
       __assuan_close, _assuan_npth_read, _assuan_npth_write,		\
       _assuan_npth_recvmsg, _assuan_npth_sendmsg,			\
       __assuan_spawn, _assuan_npth_waitpid, __assuan_socketpair,	\
-      __assuan_socket, __assuan_connect }
+      __assuan_socket, _assuan_npth_connect }
 
 extern struct assuan_system_hooks _assuan_system_npth;
 #define ASSUAN_SYSTEM_NPTH &_assuan_system_npth

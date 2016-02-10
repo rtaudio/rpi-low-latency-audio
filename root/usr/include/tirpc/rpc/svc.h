@@ -88,6 +88,7 @@ enum xprt_stat {
  */
 typedef struct __rpc_svcxprt {
 	int		xp_fd;
+#define	xp_sock		xp_fd
 	u_short		xp_port;	 /* associated port number */
 	const struct xp_ops {
 	    /* receive incoming requests */
@@ -118,7 +119,6 @@ typedef struct __rpc_svcxprt {
 	struct netbuf	xp_ltaddr;	 /* local transport address */
 	struct netbuf	xp_rtaddr;	 /* remote transport address */
 	struct opaque_auth xp_verf;	 /* raw response verifier */
-	SVCAUTH		*xp_auth;	 /* auth handle of current req */
 	void		*xp_p1;		 /* private: for use by svc ops */
 	void		*xp_p2;		 /* private: for use by svc ops */
 	void		*xp_p3;		 /* private: for use by svc lib */
@@ -314,12 +314,10 @@ extern int	rpc_reg(rpcprog_t, rpcvers_t, rpcproc_t,
  * dynamic; must be inspected before each call to select
  */
 extern int svc_maxfd;
-#ifdef FD_SETSIZE
 extern fd_set svc_fdset;
 #define svc_fds svc_fdset.fds_bits[0]	/* compatibility */
-#else
-extern int svc_fds;
-#endif /* def FD_SETSIZE */
+extern struct pollfd *svc_pollfd;
+extern int svc_max_pollfd;
 
 /*
  * a small program implemented by the svc_rpc implementation itself;

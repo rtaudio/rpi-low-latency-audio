@@ -1,8 +1,8 @@
 # htmlxref.cnf - reference file for free Texinfo manuals on the web.
 
-htmlxrefversion=2013-08-03.16; # UTC
+htmlxrefversion=2015-04-04.16; # UTC
 
-# Copyright 2010, 2011, 2012, 2013 Free Software Foundation, Inc.
+# Copyright 2010, 2011, 2012, 2013, 2014, 2015 Free Software Foundation, Inc.
 # 
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -16,9 +16,9 @@ htmlxrefversion=2013-08-03.16; # UTC
 #
 # To be included in this list, a manual must:
 #
-# - have a generic url, i.e., no version numbers;
-# - have a unique file name (identifier), i.e., be related to the
-#   package name, something like "refman" or "tutorial" doesn't work.
+# - have a generic url, e.g., no version numbers;
+# - have a unique file name (e.g., manual identifier), i.e., be related to the
+#   package name.  Things like "refman" or "tutorial" don't work.
 # - follow the naming convention for nodes described at
 # http://www.gnu.org/software/texinfo/manual/texinfo/html_node/HTML-Xref.html
 #   This is what makeinfo and texi2html implement.
@@ -48,6 +48,9 @@ alive		node	${GS}/alive/manual/html_node/
 anubis		chapter	${GS}/anubis/manual/html_chapter/
 anubis		section	${GS}/anubis/manual/html_section/
 anubis		node	${GS}/anubis/manual/html_node/
+
+artanis		mono	${GS}/artanis/manual/artanis.html
+artanis		node	${GS}/artanis/manual/html_node/
 
 aspell		section	http://aspell.net/man-html/index.html
 
@@ -81,7 +84,10 @@ bison		node	${GS}/bison/manual/html_node/
 
 bpel2owfn	mono	${GS}/bpel2owfn/manual/2.0.x/bpel2owfn.html
 
-cflow		mono	${GS}/cflow/manual/cflow
+ccd2cue		mono	${GS}/ccd2cue/manual/ccd2cue.html
+ccd2cue		node	${GS}/ccd2cue/manual/html_node/
+
+cflow		mono	${GS}/cflow/manual/cflow.html
 cflow		node	${GS}/cflow/manual/html_node/
 
 chess		mono	${GS}/chess/manual/gnuchess.html
@@ -117,6 +123,9 @@ dico		node	${DICO}/html_node/
 
 diffutils	mono	${GS}/diffutils/manual/diffutils
 diffutils	node	${GS}/diffutils/manual/html_node/
+
+dmd		mono	${GS}/dmd/manual/dmd
+dmd		node	${GS}/dmd/manual/html_node/
 
 ed		mono	${GS}/ed/manual/ed_manual.html
 
@@ -209,6 +218,9 @@ emacs		node	${EMACS}/html_node/emacs/
  woman		node	${EMACS}/html_node/woman/
  # (end emacs manuals)
 
+easejs		mono	${GS}/easejs/manual/easejs.html
+easejs		node	${GS}/easejs/manual/
+
 emacs-muse	node	${GS}/emacs-muse/manual/muse.html
 emacs-muse	node	${GS}/emacs-muse/manual/html_node/
 
@@ -247,7 +259,6 @@ gcc		node	${GCC}/gcc/
 
 GDB = http://sourceware.org/gdb/current/onlinedocs
 gdb		node	${GDB}/gdb/
- gdbint		node	${GDB}/gdbint/
  stabs		node	${GDB}/stabs/
 
 GDBM = http://www.gnu.org.ua/software/gdbm/manual
@@ -319,8 +330,12 @@ grep		node	${GS}/grep/manual/html_node/
 
 groff		node	${GS}/groff/manual/html_node/
 
-grub		mono	${GS}/grub/manual/grub.html
-grub		node	${GS}/grub/manual/html_node/
+GRUB = ${GS}/grub/manual
+  grub		mono	${GRUB}/grub.html
+  grub		node	${GRUB}/html_node/
+  #
+  multiboot	mono	${GRUB}/multiboot/multiboot.html
+  multiboot	node	${GRUB}/multiboot/html_node/
 
 gsasl		mono	${GS}/gsasl/manual/gsasl.html
 gsasl		node	${GS}/gsasl/manual/html_node/
@@ -360,6 +375,9 @@ guile-gtk	node	${GS}/guile-gtk/docs/guile-gtk/
 
 guile-rpc	mono	${GS}/guile-rpc/manual/guile-rpc.html
 guile-rpc	node	${GS}/guile-rpc/manual/html_node/
+
+guix		mono	${GS}/guix/manual/guix.html
+guix		node	${GS}/guix/manual/html_node/
 
 gv		mono	${GS}/gv/manual/gv.html
 gv		node	${GS}/gv/manual/html_node/
@@ -430,6 +448,9 @@ liquidwar6	node	${GS}/liquidwar6/manual/html_node/
 lispintro	mono	${GS}/emacs/emacs-lisp-intro/html_mono/emacs-lisp-intro.html
 lispintro	node	${GS}/emacs/emacs-lisp-intro/html_node/index.html
 
+LSH = http://www.lysator.liu.se/~nisse/lsh
+  lsh		mono	${LSH}/lsh.html
+
 m4		mono	${GS}/m4/manual/m4.html
 m4		node	${GS}/m4/manual/html_node/
 
@@ -478,6 +499,8 @@ parted		node	${GS}/parted/manual/html_node/
 pascal		mono	http://www.gnu-pascal.de/gpc/
 
 # can't use pcb since url's contain dates --30nov10
+
+perl		mono	${GS}/perl/manual/perldoc-all.html
 
 PIES = http://www.gnu.org.ua/software/pies/manual
 pies		mono	${PIES}/pies.html
@@ -577,6 +600,8 @@ texinfo		node	${TEXINFO}/texinfo/html_node/
  info-stnd	mono	${TEXINFO}/info-stnd/info-stnd.html
  info-stnd	node	${TEXINFO}/info-stnd/html_node/
 
+thales		node	${GS}/thales/manual/
+
 units		mono	${GS}/units/manual/units.html
 units		node	${GS}/units/manual/html_node/
 
@@ -594,6 +619,20 @@ wget		node	${GS}/wget/manual/html_node/
 
 xboard		mono	${GS}/xboard/manual/xboard.html
 xboard		node	${GS}/xboard/manual/html_node/
+
+# emacs-page
+# Free TeX-related Texinfo manuals on tug.org.
+
+T = http://tug.org/texinfohtml
+
+dvipng		mono	${T}/dvipng.html
+dvips		mono	${T}/dvips.html
+eplain		mono	${T}/eplain.html
+kpathsea	mono	${T}/kpathsea.html
+latex2e		mono	${T}/latex2e.html
+tlbuild		mono	${T}/tlbuild.html
+web2c		mono	${T}/web2c.html
+
 
 # Local Variables:
 # eval: (add-hook 'write-file-hooks 'time-stamp)

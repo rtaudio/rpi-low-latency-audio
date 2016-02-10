@@ -5,7 +5,7 @@ includedir=/usr/include
 
 Name: blkid
 Description: Block device id library
-Version: 2.26.0
+Version: 2.27.0
 Requires.private: uuid
 Cflags: -I${includedir}/blkid
 Libs: -L${libdir} -lblkid
