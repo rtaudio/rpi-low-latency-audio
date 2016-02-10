@@ -1,1 +1,0 @@
-g++ ./JackReceiver.cpp VistaThreadEventARM.cpp ./ir.cpp -ljack -lasound -lpthread -lrt -O3 -ffast-math -funroll-all-loops -o udp2jack

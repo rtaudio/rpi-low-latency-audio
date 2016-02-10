@@ -1,0 +1,4 @@
+pacman -Syu --noconfirm
+pacman -S hostapd --noconfirm
+
+

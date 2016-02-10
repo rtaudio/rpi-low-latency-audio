@@ -10,6 +10,8 @@ HOST=$1
 USER=root
 REMOTE_FOLDER=/
 
+sshfs --version || apt-get install sshfs
+
 #echo realpath $0
 #LOCAL_BASE_DIR="`dirname \`realpath $0\``/mnt"
 LOCAL_BASE_DIR="./mnt"
