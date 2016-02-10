@@ -5,7 +5,7 @@
 * Enabled SSH root access (PW root)
 
 # Create a bootable SD-Card
-* Clone this repo on a linux host
+* Clone this repo on a linux host (required packages on host: ```bsdtar sshfs qemu binfmt-support qemu-user-static``` )
 * Get root permissions ```su root```
 * Run ```./fix-permissions.sh``` to setup attributes and create empty directories in ```./root``` (requires an automatic download of the latest arch linux release)
 * Create SD card partition with ```./init-sd-card.sh```
