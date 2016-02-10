@@ -1,0 +1,9 @@
+#!/bin/bash
+
+
+echo "rtaudio-wifi: DOWN" > /dev/tty0
+
+CNF="`cat /tmp/create_ap.conf`"
+echo "$CNF " > /dev/tty0
+[[ -z "$CNF" ]] || /usr/bin/create_ap $CNF
+#-n -g 10.0.0.1 wlan0 AccessPointSSID

@@ -1,0 +1,37 @@
+%NAME%
+hostapd
+
+%VERSION%
+2.5-1
+
+%DESC%
+IEEE 802.11 AP, IEEE 802.1X/WPA/WPA2/EAP/RADIUS Authenticator
+
+%URL%
+http://w1.fi/hostapd/
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1443712005
+
+%INSTALLDATE%
+1455084241
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu2@archlinuxarm.org>
+
+%SIZE%
+877568
+
+%LICENSE%
+custom
+
+%VALIDATION%
+sha256
+
+%DEPENDS%
+openssl
+libnl
+

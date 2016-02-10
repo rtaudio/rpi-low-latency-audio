@@ -1,0 +1,3 @@
+#!/bin/sh
+ExecUpPost="/home/rtaudio/wifi/netctl-up.sh"
+ExecDownPre="/home/rtaudio/wifi/netctl-down.sh"

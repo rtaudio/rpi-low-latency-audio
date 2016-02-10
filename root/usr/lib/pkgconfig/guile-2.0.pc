@@ -1,0 +1,22 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+datarootdir=${prefix}/share
+datadir=${datarootdir}
+pkgdatadir=${datarootdir}/guile
+pkgincludedir=${prefix}/include/guile
+
+sitedir=${datarootdir}/guile/site/2.0
+extensiondir=${exec_prefix}/lib/guile/2.0/extensions
+libguileinterface=29:2:7
+
+Name: GNU Guile
+Description: GNU's Ubiquitous Intelligent Language for Extension
+Version: 2.0.11
+Libs: -L${libdir} -lguile-2.0 -lgc 
+Libs.private:  /usr/lib/libgmp.so /usr/lib/libltdl.so -lffi 	\
+  /usr/lib/libunistring.so -Wl,-O1,--sort-common,--as-needed,-z,relro  -lcrypt -lm    		\
+     		\
+  
+Cflags: -I${pkgincludedir}/2.0  -pthread 

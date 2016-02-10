@@ -1,0 +1,13 @@
+[Unit]
+Description=RT-Audio first boot
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/rtaudio/on-first-boot.sh &
+KillSignal=SIGINT
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,42 @@
+%NAME%
+wpa_supplicant
+
+%VERSION%
+1:2.5-2
+
+%DESC%
+A utility providing key negotiation for WPA wireless networks
+
+%URL%
+http://hostap.epitest.fi/wpa_supplicant
+
+%ARCH%
+armv7h
+
+%BUILDDATE%
+1451347068
+
+%INSTALLDATE%
+1455092806
+
+%PACKAGER%
+Arch Linux ARM Build System <builder+xu8@archlinuxarm.org>
+
+%SIZE%
+1690624
+
+%LICENSE%
+GPL
+
+%VALIDATION%
+sha256
+
+%DEPENDS%
+openssl
+libdbus
+readline
+libnl
+
+%OPTDEPENDS%
+wpa_supplicant_gui: wpa_gui program
+

@@ -1,0 +1,23 @@
+%FILES%
+etc/
+etc/dbus-1/
+etc/dbus-1/system.d/
+etc/dbus-1/system.d/dnsmasq.conf
+etc/dnsmasq.conf
+usr/
+usr/bin/
+usr/bin/dnsmasq
+usr/lib/
+usr/lib/systemd/
+usr/lib/systemd/system/
+usr/lib/systemd/system/dnsmasq.service
+usr/share/
+usr/share/dnsmasq/
+usr/share/dnsmasq/trust-anchors.conf
+usr/share/man/
+usr/share/man/man8/
+usr/share/man/man8/dnsmasq.8.gz
+
+%BACKUP%
+etc/dnsmasq.conf	4b7ad4d68bfc2006e3f7f3293ec070ea
+

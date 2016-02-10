@@ -1,0 +1,13 @@
+[Unit]
+Description=RT-Audio update config
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/home/rtaudio/update-config.sh
+KillSignal=SIGINT
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=sysinit.target
