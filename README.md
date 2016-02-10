@@ -1,8 +1,11 @@
 # rpi-low-latency-audio
+This is a toolset to create headless embedded systems with a ligheight Arch Linux that boots within seconds and performs real-time tasks. It is currently tested with the Raspberry PI 2, but due to its generality it should run on other ARM SoCs too.
 
-* Arch linux for RPI2
-* root file system located in ```root/```
-* Enabled SSH root access (PW root)
+It's initial focus is on real-time audio processing.
+
+* easy Wi-Fi adapter management that automatically creates a hotspot if no wireless network is available. The SoC will always be accessible, even without any network infrastructure or cable (only a WI-Fi USB dongle is needed)
+* It can boot into a RAM disk so the SD-Card module can be disabled. This increases real-time reliability
+
 
 # Create a bootable SD-Card
 * Clone this repo on a linux host (required packages on host: ```bsdtar sshfs qemu binfmt-support qemu-user-static``` )
